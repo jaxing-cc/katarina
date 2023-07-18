@@ -1,6 +1,5 @@
 package com.github.jaxing;
 
-import com.github.jaxing.dao.UserDao;
 import com.github.jaxing.utils.ConfigUtils;
 import com.github.jaxing.utils.HttpRegister;
 import io.vertx.core.AbstractVerticle;

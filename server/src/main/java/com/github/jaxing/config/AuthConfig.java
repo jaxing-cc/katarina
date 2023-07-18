@@ -23,6 +23,6 @@ public class AuthConfig {
 
     @Bean
     public JWTAuthorization jwtAuthorization() {
-        return JWTAuthorization.create("role");
+        return JWTAuthorization.create("roles");
     }
 }

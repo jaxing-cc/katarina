@@ -33,16 +33,18 @@ public class UsernameAndPasswordProvider implements AuthenticationProvider {
             resultHandler.handle(Future.failedFuture("用户名或者密码错误"));
             return;
         }
-        mongoClient.findOne(CollectionEnum.user.name(), new JsonObject(), null)
+        mongoClient.findOne(CollectionEnum.user.name(), new JsonObject().put("username", username), null)
                 .onSuccess(u -> {
-                    UserInfo user = u.mapTo(UserInfo.class);
-                    if (SecurityUtils.match(password, user.getPassword())) {
-                        UserDetail userDetail = new UserDetail();
-                        userDetail.setUserInfo(user);
-                        resultHandler.handle(Future.succeededFuture(userDetail));
-                    } else {
+                    UserInfo user = null;
+                    if (ObjectUtils.isEmpty(u)
+                            || ObjectUtils.isEmpty(user = u.mapTo(UserInfo.class))
+                            || !SecurityUtils.match(password, user.getPassword())) {
                         resultHandler.handle(Future.failedFuture("用户名或者密码错误"));
-                    }})
+                        return;
+                    }
+                    user.setPassword(null);
+                    resultHandler.handle(Future.succeededFuture(new UserDetail(user)));
+                })
                 .onFailure(err -> resultHandler.handle(Future.failedFuture("查找用户失败")));
     }
 }

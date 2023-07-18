@@ -1,25 +1,19 @@
 package com.github.jaxing.controller;
 
 import com.github.jaxing.auth.UsernameAndPasswordProvider;
-import com.github.jaxing.common.Constant;
 import com.github.jaxing.common.domain.R;
+import com.github.jaxing.common.dto.RegisterRequestDTO;
+import com.github.jaxing.service.UserService;
 import com.github.jaxing.utils.ConfigUtils;
 import com.github.jaxing.utils.HttpRegister;
-import io.netty.handler.codec.http.HttpResponseStatus;
-import io.vertx.core.http.HttpHeaders;
-import io.vertx.core.http.HttpServerRequest;
 import io.vertx.core.http.HttpServerResponse;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.JWTOptions;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
-import io.vertx.ext.auth.authorization.Authorizations;
 import io.vertx.ext.auth.jwt.JWTAuth;
-import io.vertx.ext.auth.jwt.authorization.JWTAuthorization;
 import io.vertx.ext.web.Router;
-import io.vertx.ext.web.handler.BodyHandler;
 import io.vertx.ext.web.handler.JWTAuthHandler;
-import io.vertx.ext.web.validation.builder.ValidationHandlerBuilder;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 
@@ -40,7 +34,7 @@ public class AuthController extends HttpRegister {
     private JWTAuth jwtAuth;
 
     @Resource
-    private JWTAuthorization jwtAuthorization;
+    private UserService userService;
 
     @Override
     public void start(Router router) {
@@ -69,6 +63,22 @@ public class AuthController extends HttpRegister {
                             response.end(R.ok(jwtAuth.generateToken(user.attributes(), new JWTOptions().setExpiresInSeconds(ConfigUtils.getAsInteger("jwt.timeout")))));
                         } else {
                             response.end(R.fail(authResp.cause()));
+                        }
+                    });
+        });
+
+        /**
+         * 注册
+         */
+        router.post("/auth/register").handler(http -> {
+            HttpServerResponse response = http.response();
+            JsonObject body = http.body().asJsonObject();
+            userService.register(body.mapTo(RegisterRequestDTO.class))
+                    .onComplete(asyncResult -> {
+                        if (asyncResult.succeeded()) {
+                            response.end(R.ok(null));
+                        } else {
+                            response.end(R.fail(asyncResult.cause()));
                         }
                     });
         });
