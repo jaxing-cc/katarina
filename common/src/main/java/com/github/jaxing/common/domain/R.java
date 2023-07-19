@@ -16,12 +16,12 @@ public class R<T> {
 
     private T data;
 
-    public static <T> String ok(T data) {
-        return resp(true, "ok", data).toJsonString();
+    public static <T> R<T> ok(T data) {
+        return resp(true, "ok", data);
     }
 
-    public static String fail(Throwable throwable) {
-        return resp(false, throwable.getMessage(), null).toJsonString();
+    public static R<Void> fail(Throwable throwable) {
+        return resp(false, throwable.getMessage(), null);
     }
 
     public static <T> R<T> resp(boolean success, String msg, T data) {

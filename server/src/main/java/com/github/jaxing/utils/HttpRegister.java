@@ -32,22 +32,20 @@ public abstract class HttpRegister {
     private static final HttpRegister COMMON_HTTP_REGISTER = new HttpRegister() {
         @Override
         protected void start(Router r) {
+            r.errorHandler(400, ctx -> ctx.json(R.resp(false, "服务器拒绝请求", null)));
             r.route("/*").order(0)
                     .handler(
                             CorsHandler.create().addOrigin("http://localhost").allowedMethods(new HashSet<>(Arrays.asList(
-                                            HttpMethod.GET,
-                                            HttpMethod.POST,
-                                            HttpMethod.OPTIONS,
-                                            HttpMethod.DELETE,
-                                            HttpMethod.PATCH,
-                                            HttpMethod.PUT
-                                    ))))
+                                    HttpMethod.GET,
+                                    HttpMethod.POST,
+                                    HttpMethod.OPTIONS,
+                                    HttpMethod.DELETE,
+                                    HttpMethod.PATCH,
+                                    HttpMethod.PUT
+                            ))))
                     .handler(BodyHandler.create())//参数处理
                     .handler(http -> {
-                        http.response().setChunked(true)
-                                .putHeader(HttpHeaders.CONTENT_TYPE, "application/json")
-//                                .putHeader(HttpHeaders.ACCESS_CONTROL_ALLOW_ORIGIN,"*")
-                        ;
+                        http.response().setChunked(true);
                         http.next();
                     });
         }
