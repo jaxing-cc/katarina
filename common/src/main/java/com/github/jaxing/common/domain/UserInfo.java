@@ -29,4 +29,6 @@ public class UserInfo implements Serializable {
     private Integer gender;
 
     private List<String> roles;
+
+    private Boolean disable = Boolean.FALSE;
 }

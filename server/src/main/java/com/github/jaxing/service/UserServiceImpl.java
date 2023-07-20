@@ -5,8 +5,10 @@ import com.github.jaxing.common.domain.UserRole;
 import com.github.jaxing.common.dto.RegisterRequestDTO;
 import com.github.jaxing.common.enums.CollectionEnum;
 import com.github.jaxing.common.utils.SecurityUtils;
+import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.mongo.MongoClient;
 import lombok.extern.slf4j.Slf4j;
@@ -16,6 +18,7 @@ import org.springframework.util.ObjectUtils;
 
 import javax.annotation.Resource;
 import java.util.Arrays;
+import java.util.Collections;
 
 /**
  * @author cjxin
@@ -49,23 +52,26 @@ public class UserServiceImpl implements UserService {
     @Override
     public Future<Void> register(RegisterRequestDTO requestDTO) {
         Promise<Void> promise = Promise.promise();
-        mongoClient.findOne(CollectionEnum.user.name(), new JsonObject().put("username", requestDTO.getUsername()), null)
-                .onSuccess(user -> {
-                    if (ObjectUtils.isEmpty(user)) {
-                        UserInfo userInfo = new UserInfo();
-                        userInfo.setId(ObjectId.get().toHexString());
-                        userInfo.setUsername(requestDTO.getUsername());
-                        userInfo.setPassword(SecurityUtils.encode(requestDTO.getPassword()));
-                        userInfo.setName(requestDTO.getName());
-                        userInfo.setGender(requestDTO.getGender());
-                        mongoClient.insert(CollectionEnum.user.name(), JsonObject.mapFrom(userInfo))
-                                .onSuccess(id -> promise.complete())
-                                .onFailure(promise::fail);
-                    } else {
-                        promise.fail("用户已存在");
-                    }
-                })
-                .onFailure(promise::fail);
+        JsonObject query = JsonObject.of("$or", JsonArray.of(
+                        JsonObject.of("username", requestDTO.getUsername()),
+                        JsonObject.of("name", requestDTO.getName())
+                ));
+        mongoClient.count(CollectionEnum.user.name(), query).onSuccess(num -> {
+            if (num == 0) {
+                UserInfo userInfo = new UserInfo();
+                userInfo.setId(ObjectId.get().toHexString());
+                userInfo.setUsername(requestDTO.getUsername());
+                userInfo.setPassword(SecurityUtils.encode(requestDTO.getPassword()));
+                userInfo.setName(requestDTO.getName());
+                userInfo.setGender(requestDTO.getGender());
+                userInfo.setRoles(Collections.singletonList("normal"));
+                mongoClient.insert(CollectionEnum.user.name(), JsonObject.mapFrom(userInfo))
+                        .onSuccess(id -> promise.complete())
+                        .onFailure(promise::fail);
+            } else {
+                promise.fail("username或昵称重复");
+            }
+        }).onFailure(promise::fail);
         return promise.future();
     }
 }
