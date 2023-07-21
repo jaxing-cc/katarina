@@ -5,13 +5,12 @@ import lombok.Getter;
 
 /**
  * @author cjxin
- * @date 2023/06/13
+ * @date 2023/07/20
  */
 @Getter
 @AllArgsConstructor
-public enum GenderEnum implements EnumCode<Integer> {
-    other(0),
-    M(1),
-    W(2);
-    private final Integer code;
+public enum RoleEnum implements EnumCode<String> {
+    ROOT("root"),
+    NORMAL("normal");
+    private final String code;
 }

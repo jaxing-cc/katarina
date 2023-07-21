@@ -18,10 +18,10 @@ public class UserDetail extends UserImpl implements Serializable, User {
     private UserInfo userInfo;
 
     public UserDetail(UserInfo userInfo) {
-        super(JsonObject.mapFrom(userInfo), new JsonObject().put("accessToken", new JsonObject()
-                        .put("uid", userInfo.getId())
-                        .put("username", userInfo.getUsername())
-                        .put("roles", userInfo.getRoles())));
+        super(JsonObject.mapFrom(userInfo), JsonObject.of(
+                "uid", userInfo.getId(),
+                "username", userInfo.getUsername(),
+                "roles", userInfo.getRoles()));
         this.userInfo = userInfo;
     }
 }

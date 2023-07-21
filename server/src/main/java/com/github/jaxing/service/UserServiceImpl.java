@@ -4,6 +4,7 @@ import com.github.jaxing.common.domain.UserInfo;
 import com.github.jaxing.common.domain.UserRole;
 import com.github.jaxing.common.dto.RegisterRequestDTO;
 import com.github.jaxing.common.enums.CollectionEnum;
+import com.github.jaxing.common.enums.RoleEnum;
 import com.github.jaxing.common.utils.SecurityUtils;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
@@ -32,8 +33,8 @@ public class UserServiceImpl implements UserService {
     private MongoClient mongoClient;
 
     public void init() {
-        UserRole root = new UserRole(ObjectId.get().toHexString(), "root", "管理员", "管理员");
-        UserRole normal = new UserRole(ObjectId.get().toHexString(), "normal", "普通用户", "普通用户");
+        UserRole root = new UserRole(ObjectId.get().toHexString(), RoleEnum.ROOT.getCode(), "管理员", "管理员");
+        UserRole normal = new UserRole(ObjectId.get().toHexString(), RoleEnum.NORMAL.getCode(), "普通用户", "普通用户");
         UserInfo userInfo = new UserInfo();
         userInfo.setId(ObjectId.get().toHexString());
         userInfo.setName("张三");
@@ -64,7 +65,7 @@ public class UserServiceImpl implements UserService {
                 userInfo.setPassword(SecurityUtils.encode(requestDTO.getPassword()));
                 userInfo.setName(requestDTO.getName());
                 userInfo.setGender(requestDTO.getGender());
-                userInfo.setRoles(Collections.singletonList("normal"));
+                userInfo.setRoles(Collections.singletonList(RoleEnum.NORMAL.getCode()));
                 mongoClient.insert(CollectionEnum.user.name(), JsonObject.mapFrom(userInfo))
                         .onSuccess(id -> promise.complete())
                         .onFailure(promise::fail);

@@ -64,8 +64,8 @@ public class AuthController extends HttpRegister {
                     .onComplete(authResp -> {
                         if (authResp.succeeded()) {
                             User user = authResp.result();
-                            http.json(jwtAuth.generateToken(user.attributes(),
-                                    new JWTOptions().setExpiresInSeconds(ConfigUtils.getAsInteger("jwt.timeout"))));
+                            http.json(R.ok(jwtAuth.generateToken(user.attributes(),
+                                    new JWTOptions().setExpiresInSeconds(ConfigUtils.getAsInteger("jwt.timeout")))));
                         } else {
                             http.json(R.fail(authResp.cause()));
                         }

@@ -35,14 +35,16 @@ public abstract class HttpRegister {
             r.errorHandler(400, ctx -> ctx.json(R.resp(false, "服务器拒绝请求", null)));
             r.route("/*").order(0)
                     .handler(
-                            CorsHandler.create().addOrigin("http://localhost").allowedMethods(new HashSet<>(Arrays.asList(
-                                    HttpMethod.GET,
-                                    HttpMethod.POST,
-                                    HttpMethod.OPTIONS,
-                                    HttpMethod.DELETE,
-                                    HttpMethod.PATCH,
-                                    HttpMethod.PUT
-                            ))))
+                            CorsHandler.create()
+                                    .addOrigin("http://localhost")
+                                    .allowedMethods(new HashSet<>(Arrays.asList(
+                                            HttpMethod.GET,
+                                            HttpMethod.POST,
+                                            HttpMethod.OPTIONS,
+                                            HttpMethod.DELETE,
+                                            HttpMethod.PATCH,
+                                            HttpMethod.PUT
+                                    ))))
                     .handler(BodyHandler.create())//参数处理
                     .handler(http -> {
                         http.response().setChunked(true);
