@@ -1,7 +1,7 @@
 <template>
     <van-row class="wrapper">
         <van-nav-bar title="我"></van-nav-bar>
-        <user-info :uid="jwtObj.uid"></user-info>
+<!--        <user-info :uid="jwtObj.uid"></user-info>-->
     </van-row>
 </template>
 
@@ -29,7 +29,6 @@ export default {
 
     created(){
         this.jwtObj = decodeToken();
-        console.log(this.jwtObj)
     }
 };
 </script>
