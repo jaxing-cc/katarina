@@ -17,13 +17,20 @@ import java.util.Date;
 public enum MessageTypeEnum implements EnumCode<Integer> {
     FAIL(0, String.class, true),
 
-    CHAT_MESSAGE(1, ChatMessage.class, true),
+    HEARTBEAT_OK(1000, String.class, true),
+
+    CHAT_MESSAGE(1001, ChatMessage.class, true),
+
+    /*** 输入指令 ****/
+
+    HEARTBEAT(10000, String.class, false),
+
     ;
     private final Integer code;
 
     private final Class<?> dataClass;
 
-    public boolean publish;
+    public boolean output;
 
     /**
      * 获取消息实体
@@ -35,7 +42,16 @@ public enum MessageTypeEnum implements EnumCode<Integer> {
         if (!this.dataClass.equals(data.getClass())) {
             throw new RuntimeException("Message Type Mismatch");
         }
-        return new Message(this.code, new JsonObject(), new Date());
+        if (data instanceof String ||
+                data instanceof Integer ||
+                data instanceof Double ||
+                data instanceof Date ||
+                data instanceof Long ||
+                data instanceof Boolean
+        ) {
+            return new Message(this.code, data, new Date());
+        }
+        return new Message(this.code, JsonObject.mapFrom(data), new Date());
     }
 
 }

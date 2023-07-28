@@ -24,7 +24,7 @@ public class Message implements Serializable {
     /**
      * 消息内容
      */
-    private JsonObject data;
+    private Object data;
 
     /**
      * 创建时间

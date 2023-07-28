@@ -1,6 +1,5 @@
 package com.github.jaxing.common.domain;
 
-import io.vertx.core.Vertx;
 import io.vertx.core.eventbus.EventBus;
 import lombok.Builder;
 import lombok.Data;

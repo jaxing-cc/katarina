@@ -4,6 +4,7 @@ import com.github.jaxing.common.domain.Client;
 import com.github.jaxing.common.domain.Message;
 import com.github.jaxing.common.enums.MessageTypeEnum;
 import com.github.jaxing.common.utils.CommonUtils;
+import io.vertx.core.json.JsonObject;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
@@ -11,6 +12,7 @@ import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -31,7 +33,20 @@ public class WsHandler implements ApplicationContextAware {
             return;
         }
         MessageHandler messageHandler = MAP.get(messageType);
-        messageHandler.handle(message, client, message.getData().mapTo(messageType.getDataClass()));
+        if (ObjectUtils.isEmpty(messageHandler)) {
+            return;
+        }
+        Class<?> dataClass = messageType.getDataClass();
+        Object data = message.getData();
+        if (dataClass.equals(Void.class)) {
+            messageHandler.handle(message, client, null);
+        } else if (dataClass.equals(String.class) || dataClass.equals(Integer.class) ||
+                dataClass.equals(Double.class) || dataClass.equals(Date.class) ||
+                dataClass.equals(Long.class) || dataClass.equals(Boolean.class)) {
+            messageHandler.handle(message, client, data);
+        }else{
+            messageHandler.handle(message, client, ((JsonObject) data).mapTo(messageType.getDataClass()));
+        }
     }
 
     @Override
