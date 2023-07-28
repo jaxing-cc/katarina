@@ -1,5 +1,6 @@
 package com.github.jaxing.config;
 
+import com.github.jaxing.common.domain.VertxHolder;
 import com.github.jaxing.utils.ConfigUtils;
 import io.vertx.json.schema.SchemaParser;
 import io.vertx.json.schema.SchemaRouter;
@@ -12,7 +13,7 @@ public class CommonConfig {
 
     @Bean
     public SchemaParser schemaParser() {
-        return SchemaParser.createDraft7SchemaParser(SchemaRouter.create(ConfigUtils.getVertx(),
+        return SchemaParser.createDraft7SchemaParser(SchemaRouter.create(VertxHolder.getVertx(),
                 new SchemaRouterOptions()));
     }
 }

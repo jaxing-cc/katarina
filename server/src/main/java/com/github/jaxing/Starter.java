@@ -1,5 +1,6 @@
 package com.github.jaxing;
 
+import com.github.jaxing.common.domain.VertxHolder;
 import com.github.jaxing.utils.ConfigUtils;
 import io.vertx.core.Vertx;
 import lombok.extern.slf4j.Slf4j;
@@ -21,7 +22,7 @@ public class Starter {
             log.error("初始化配置失败");
             return;
         }
-        Vertx vertx = ConfigUtils.getVertx();
+        Vertx vertx = VertxHolder.getVertx();
         AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext("com.github.jaxing.**");
         vertx.deployVerticle(applicationContext.getBean(ServerVerticle.class), asyncResult -> {
             if (asyncResult.failed()) {
@@ -30,5 +31,6 @@ public class Starter {
                 vertx.close();
             }
         });
+        System.out.println(System.currentTimeMillis());
     }
 }

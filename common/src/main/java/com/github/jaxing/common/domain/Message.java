@@ -1,5 +1,6 @@
 package com.github.jaxing.common.domain;
 
+import io.vertx.core.json.JsonObject;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -14,7 +15,7 @@ import java.util.Date;
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
-public class Message<T> implements Serializable {
+public class Message implements Serializable {
     /**
      * 类型
      */
@@ -23,10 +24,15 @@ public class Message<T> implements Serializable {
     /**
      * 消息内容
      */
-    private T content;
+    private JsonObject data;
 
     /**
      * 创建时间
      */
     private Date createTime;
+
+    @Override
+    public String toString() {
+        return JsonObject.mapFrom(this).toString();
+    }
 }

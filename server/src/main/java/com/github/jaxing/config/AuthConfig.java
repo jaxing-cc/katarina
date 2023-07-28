@@ -1,6 +1,7 @@
 package com.github.jaxing.config;
 
 import com.github.jaxing.auth.CustomJWTAuthProviderImpl;
+import com.github.jaxing.common.domain.VertxHolder;
 import com.github.jaxing.utils.ConfigUtils;
 import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.jwt.JWTAuth;
@@ -18,7 +19,7 @@ public class AuthConfig {
 
     @Bean
     public JWTAuth jwtAuth() {
-        return new CustomJWTAuthProviderImpl(ConfigUtils.getVertx(), new JWTAuthOptions().addPubSecKey(new PubSecKeyOptions().setAlgorithm("HS256").setBuffer(ConfigUtils.get("jwt.key"))));
+        return new CustomJWTAuthProviderImpl(VertxHolder.getVertx(), new JWTAuthOptions().addPubSecKey(new PubSecKeyOptions().setAlgorithm("HS256").setBuffer(ConfigUtils.get("jwt.key"))));
     }
 
     @Bean

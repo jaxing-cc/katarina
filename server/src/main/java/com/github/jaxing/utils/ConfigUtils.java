@@ -14,13 +14,7 @@ import java.util.Properties;
  */
 public class ConfigUtils {
 
-    private static final Vertx vertx = Vertx.vertx();
-
     public static Properties properties;
-
-    public static Vertx getVertx() {
-        return vertx;
-    }
 
     public static void init() throws IOException {
         Resource resource = new ClassPathResource("config.properties");

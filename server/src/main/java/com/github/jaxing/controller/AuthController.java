@@ -7,6 +7,7 @@ import com.github.jaxing.service.UserService;
 import com.github.jaxing.utils.ConfigUtils;
 import com.github.jaxing.utils.HttpRegister;
 import com.github.jaxing.utils.ValidationUtils;
+import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.JWTOptions;
 import io.vertx.ext.auth.User;
@@ -44,7 +45,7 @@ public class AuthController extends HttpRegister {
     private ValidationUtils validationUtils;
 
     @Override
-    public void start(Router router) {
+    public void start(Router router, Vertx vertx) {
         //最先进行的拦截请求
         router.route("/api/*")
                 .handler(JWTAuthHandler.create(jwtAuth)).failureHandler(context -> {

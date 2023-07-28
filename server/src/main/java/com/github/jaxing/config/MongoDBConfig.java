@@ -1,5 +1,6 @@
 package com.github.jaxing.config;
 
+import com.github.jaxing.common.domain.VertxHolder;
 import com.github.jaxing.utils.ConfigUtils;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
@@ -16,7 +17,7 @@ public class MongoDBConfig {
 
     @Bean
     public MongoClient mongoClient() {
-        Vertx vertx = ConfigUtils.getVertx();
+        Vertx vertx = VertxHolder.getVertx();
         JsonObject config = new JsonObject();
         config.put("connection_string", ConfigUtils.get("mongodb.url"));
         config.put("db_name", ConfigUtils.get("mongodb.db", "katarina"));

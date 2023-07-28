@@ -5,6 +5,7 @@ import com.github.jaxing.utils.HttpRegister;
 import io.vertx.core.AbstractVerticle;
 import io.vertx.core.Promise;
 import io.vertx.core.http.HttpServer;
+import io.vertx.core.http.HttpServerOptions;
 import io.vertx.ext.web.Router;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
@@ -25,9 +26,9 @@ public class ServerVerticle extends AbstractVerticle implements ApplicationConte
 
     @Override
     public void start(Promise<Void> startPromise) {
-        HttpServer server = vertx.createHttpServer();
+        HttpServer server = vertx.createHttpServer(new HttpServerOptions().setRegisterWebSocketWriteHandlers(true));
         Router router = Router.router(vertx);
-        HttpRegister.registerHttp(applicationContext, router);
+        HttpRegister.registerHttp(applicationContext, router, vertx);
         server.requestHandler(router).listen(ConfigUtils.getAsInteger("server.port")).onComplete(httpServerAsyncResult -> {
             if (httpServerAsyncResult.succeeded()) {
                 startPromise.complete();
