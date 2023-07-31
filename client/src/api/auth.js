@@ -9,5 +9,5 @@ export function register(params) {
 }
 
 export function getByUid(uid) {
-    return request.get("user/" + uid);
+    return request.get("api/user/" + uid);
 }

@@ -19,7 +19,6 @@ public class HeartbeatHandler implements MessageHandler {
 
     @Override
     public void handle(Message message, Client client, Object data) {
-        String requestId = (String) data;
-        client.sendText(MessageTypeEnum.HEARTBEAT_OK.message(requestId).toString());
+        client.sendText(MessageTypeEnum.HEARTBEAT_OK.message(data).toString());
     }
 }

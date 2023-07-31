@@ -13,11 +13,9 @@
 
 <script>
 import Chat from './pages/ChatList.vue'
-import Friends from './pages/Friends.vue'
+import Friends from './pages/Discover.vue'
 import MainPage from './pages/Main.vue'
-import { sendWSPush } from '@/utils/ws'
-import { decodeToken,getToken,removeToken } from '@/utils/token'
-import { Toast } from 'vant'
+
 export default {
   components: { Chat, Friends, MainPage },
   name: 'Home',

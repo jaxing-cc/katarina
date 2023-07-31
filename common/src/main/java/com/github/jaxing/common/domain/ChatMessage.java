@@ -12,16 +12,18 @@ import java.util.Date;
 @Data
 public class ChatMessage implements Serializable {
 
-    private String fromUid;
+    private String from;
 
-    private String toUid;
+    private String to;
+
+    private Boolean groupMessage;
 
     private String content;
 
     /**
      * 0文本 1md文本 2图片 3其他文件
      */
-    private Integer type;
+    private Integer contentType;
 
     private Boolean read;
 

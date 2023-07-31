@@ -30,5 +30,7 @@ public class UserInfo implements Serializable {
 
     private List<String> roles;
 
+    private boolean online;
+
     private Boolean disable = Boolean.FALSE;
 }

@@ -1,5 +1,6 @@
 package com.github.jaxing.service;
 
+import com.github.jaxing.common.domain.Client;
 import com.github.jaxing.common.domain.UserInfo;
 import com.github.jaxing.common.domain.UserRole;
 import com.github.jaxing.common.dto.RegisterRequestDTO;
@@ -54,9 +55,9 @@ public class UserServiceImpl implements UserService {
     public Future<Void> register(RegisterRequestDTO requestDTO) {
         Promise<Void> promise = Promise.promise();
         JsonObject query = JsonObject.of("$or", JsonArray.of(
-                        JsonObject.of("username", requestDTO.getUsername()),
-                        JsonObject.of("name", requestDTO.getName())
-                ));
+                JsonObject.of("username", requestDTO.getUsername()),
+                JsonObject.of("name", requestDTO.getName())
+        ));
         mongoClient.count(CollectionEnum.user.name(), query).onSuccess(num -> {
             if (num == 0) {
                 UserInfo userInfo = new UserInfo();
@@ -74,5 +75,24 @@ public class UserServiceImpl implements UserService {
             }
         }).onFailure(promise::fail);
         return promise.future();
+    }
+
+    /**
+     * 查询用户信息
+     *
+     * @param uid 用户id
+     * @return 用户信息
+     */
+    @Override
+    public Future<UserInfo> findById(String uid) {
+        return mongoClient.findOne(CollectionEnum.user.name(), JsonObject.of("_id", uid), JsonObject.of("password", 0))
+                .map(json -> {
+                    if (ObjectUtils.isEmpty(json)) {
+                        return null;
+                    }
+                    UserInfo userInfo = json.mapTo(UserInfo.class);
+                    userInfo.setOnline(Client.CLIENT_POOL.containsKey(userInfo.getId()));
+                    return userInfo;
+                });
     }
 }
