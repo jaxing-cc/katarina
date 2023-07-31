@@ -31,7 +31,6 @@ public class ChatServiceImpl implements ChatService {
             return Future.failedFuture("目标不在线");
         }
         chatMessage.setFrom(currentUser.subject());
-        System.out.println(currentUser.subject());
         client.sendText(MessageTypeEnum.CHAT_MESSAGE.message(chatMessage).toString());
         return Future.succeededFuture();
     }

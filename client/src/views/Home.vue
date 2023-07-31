@@ -15,6 +15,7 @@
 import Chat from './pages/ChatList.vue'
 import Friends from './pages/Discover.vue'
 import MainPage from './pages/Main.vue'
+import { createSocket } from '@/utils/ws'
 
 export default {
   components: { Chat, Friends, MainPage },
@@ -30,6 +31,7 @@ export default {
   mounted(){
   },
   created() {
+    createSocket()
   },
   destroyed() {
   }

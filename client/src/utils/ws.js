@@ -1,44 +1,52 @@
+import URL from '@/utils/common'
+import {getToken} from "@/utils/token";
+import {Toast} from 'vant'
+
 let Socket = ''
-let wsURL = "ws://localhost:7259/chat"
+let setIntervalWesocketPush = null
 /**
  * 建立websocket连接
  */
 export const createSocket = () => {
-  Socket && Socket.close()
-  if (!Socket) {
-    console.log('开始建立websocket连接')
-    Socket = new WebSocket(wsURL)
-    Socket.onopen = onopenWS
-    Socket.onmessage = onmessageWS
-    Socket.onerror = onerrorWS
-    Socket.onclose = oncloseWS
-  } else {
-    console.log('websocket连接已存在')
-  }
+    if (Socket && Socket.readyState !== 1) {
+        Socket.close()
+    }
+    if (!Socket) {
+        console.log('建立websocket连接')
+        const token = getToken();
+        Socket = new WebSocket(URL.wsURL + "?Authorization=" + token)
+        Socket.onopen = onopen
+        Socket.onmessage = onmessage
+        Socket.onerror = onerror
+        Socket.onclose = onclose
+    } else {
+        console.log('websocket已连接')
+    }
 }
 
 /**打开WS之后发送心跳 */
-const onopenWS = () => {
-  console.log('websocket已连接')
+const onopen = () => {
+    sendPing()
 }
 
 /**连接失败重连 */
-const onerrorWS = () => {
-  Socket.close()
-  console.log('连接失败重连中')
-  if (Socket.readyState !== 3) {
-    Socket = null
-    createSocket()
-  }
+const onerror = () => {
+    Socket.close()
+    clearInterval(setIntervalWesocketPush)
+    console.log('连接失败重连中')
+    if (Socket.readyState !== 3) {
+        Socket = null
+        createSocket()
+    }
 }
 
 /**WS数据接收统一处理 */
-const onmessageWS = e => {
-  window.dispatchEvent(new CustomEvent('onmessageWS', {
-    detail: {
-      data: e.data
-    }
-  }))
+const onmessage = e => {
+    window.dispatchEvent(new CustomEvent('onmessage', {
+        detail: {
+            data: e.data
+        }
+    }))
 }
 
 /**
@@ -46,39 +54,50 @@ const onmessageWS = e => {
  * @param {any} message 需要发送的数据
  */
 const connecting = message => {
-  setTimeout(() => {
-    if (Socket.readyState === 0) {
-      connecting(message)
-    } else {
-      Socket.send(JSON.stringify(message))
-    }
-  }, 1000)
+    setTimeout(() => {
+        if (Socket.readyState === 0) {
+            connecting(message)
+        } else {
+            Socket.send(JSON.stringify(message))
+        }
+    }, 1000)
 }
 
 /**
  * 发送数据
  * @param {any} message 需要发送的数据
  */
-export const sendWSPush = message => {
-  if (Socket !== null && Socket.readyState === 3) {
-    Socket.close()
-    createSocket()
-  } else if (Socket.readyState === 1) {
-    Socket.send(JSON.stringify(message))
-  } else if (Socket.readyState === 0) {
-    connecting(message)
-  }
+export const send = message => {
+    if (Socket.readyState === 1) {
+        Socket.send(JSON.stringify(message))
+    } else if (Socket.readyState === 0) {
+        connecting(message)
+    } else {
+        Toast('网络异常，请重试');
+    }
 }
 
 /**断开重连 */
-const oncloseWS = () => {
-  console.log('websocket已断开....正在尝试重连')
-  if (Socket.readyState !== 2) {
-    Socket = null
-    createSocket()
-  }
+const onclose = () => {
+    clearInterval(setIntervalWesocketPush)
+    console.log('websocket已断开....正在尝试重连')
+    if (Socket.readyState !== 2) {
+        Socket = null
+        createSocket()
+    }
 }
-
-
-
-
+/**发送心跳
+ * @param {number} time 心跳间隔毫秒 默认5000
+ * @param {string} ping 心跳名称 默认字符串ping
+ */
+export const sendPing = (time = 5000, ping = JSON.stringify({
+    type: 10000,
+    data: 'ping',
+    createTime: new Date().getTime()
+})) => {
+    clearInterval(setIntervalWesocketPush)
+    Socket.send(ping)
+    setIntervalWesocketPush = setInterval(() => {
+        Socket.send(ping)
+    }, time)
+}

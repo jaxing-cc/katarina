@@ -45,7 +45,7 @@ public class ChatController extends HttpRegister {
     @Override
     protected void start(Router router, Vertx vertx) {
         router.route("/ws").handler(context -> {
-            jwtAuth.authenticate(new TokenCredentials(context.request().getHeader(Constant.AUTHORIZATION))).onSuccess(user ->
+            jwtAuth.authenticate(new TokenCredentials(context.request().getParam(Constant.AUTHORIZATION))).onSuccess(user ->
                     context.request()
                             .toWebSocket()
                             .onFailure(t -> context.json(R.fail(t)))

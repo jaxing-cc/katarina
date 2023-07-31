@@ -4,8 +4,6 @@ import router from './router'
 import store from './store'
 import './assets/css/global.css'
 import './plugins/vant'
-// import { createSocket } from '@/utils/ws'
-// createSocket()
 
 Vue.config.productionTip = false
 
