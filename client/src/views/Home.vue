@@ -5,6 +5,8 @@
       <van-tabbar-item name="friends" icon="friends-o">发现</van-tabbar-item>
       <van-tabbar-item name="main" icon="home-o">我</van-tabbar-item>
     </van-tabbar>
+    <van-button @click="close">asdad</van-button>
+
     <chat v-if="active === 'chat'"></chat>
     <friends v-if="active === 'friends'"></friends>
     <main-page v-if="active === 'main'"></main-page>
@@ -15,30 +17,38 @@
 import Chat from './pages/ChatList.vue'
 import Friends from './pages/Discover.vue'
 import MainPage from './pages/Main.vue'
-import { createSocket } from '@/utils/ws'
 
 export default {
-  components: { Chat, Friends, MainPage },
+  components: {Chat, Friends, MainPage},
   name: 'Home',
-  data(){
-    return{
-      active:'chat',
-      webSocket:{}
+  data() {
+    return {
+      active: 'chat',
+      webSocket: {}
     }
   },
-  methods:{
+  methods: {
+    eventListen(evt) {
+      console.log(evt.detail)
+    },
+    close(){
+      window.removeEventListener('onmessage', this.eventListen)
+    }
   },
-  mounted(){
+
+  mounted() {
+    window.addEventListener("onmessage", this.eventListen)
   },
   created() {
-    createSocket()
+    this.$socket.connect()
   },
   destroyed() {
+    window.removeEventListener("onmessage", this.eventListen)
   }
 }
 </script>
 <style scoped>
-.home{
+.home {
   height: 100%;
 }
 </style>
