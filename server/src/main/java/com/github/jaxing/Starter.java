@@ -26,11 +26,9 @@ public class Starter {
         AnnotationConfigApplicationContext applicationContext = new AnnotationConfigApplicationContext("com.github.jaxing.**");
         vertx.deployVerticle(applicationContext.getBean(ServerVerticle.class), asyncResult -> {
             if (asyncResult.failed()) {
-                asyncResult.cause().printStackTrace();
                 log.error("start server fail:" + asyncResult.cause());
                 vertx.close();
             }
         });
-        System.out.println(System.currentTimeMillis());
     }
 }

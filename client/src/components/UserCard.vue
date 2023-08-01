@@ -2,7 +2,8 @@
   <div>
     <van-cell center is-link value="">
       <template #title>
-        <van-image class="userImg" width="40" height="40" round position="left" :src="user.avatar"/>
+        <van-image class="userImg" width="40" height="40" round position="left"
+                   :src="avatar"/>
         <span class="usernameFont">{{ user.name }}</span>
         <van-tag v-if="showStatus" :type="user.online? 'success':'warning'" class="userTag">
           {{ user.online ? "on" : "off" }}
@@ -17,16 +18,27 @@ export default {
   name: 'UserCard',
 
   data() {
-    return {};
+    return {
+      avatar: ''
+    };
+  },
+  
+
+  updated() {
+    this.loadAvatar()
   },
 
-  mounted() {
-
+  created() {
+    this.loadAvatar()
   },
-
   props: ['user', 'showStatus'],
 
-  methods: {},
+  methods: {
+    loadAvatar(){
+      this.avatar = this.user.avatar ?
+          this.user.avatar : 'avatar-' + (this.user.gender === 1 ? '1' : '2') + ".jpg";
+    }
+  },
 };
 </script>
 

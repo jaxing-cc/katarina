@@ -1,6 +1,7 @@
 <template>
   <div id="chatWrapper">
     <UserCard :user="loginUser" :show-status="true"></UserCard>
+    <UserCard :user="targetUser" :show-status="true"></UserCard>
   </div>
 </template>
 
