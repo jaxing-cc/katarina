@@ -21,14 +21,14 @@ export default class SocketService {
 
     connect() {
         if (!this.connected) {
-            console.log('建立websocket连接')
+            console.log('build websocket connection')
             this.socket = new WebSocket(URL.wsURL + "?Authorization=" + getToken())
             this.socket.onopen = this.onopen
             this.socket.onmessage = this.onmessage
             this.socket.onerror = this.onerror
             this.socket.onclose = this.onclose
         } else {
-            console.log('websocket已连接')
+            console.log('websocket keep alive')
         }
     }
 
@@ -66,14 +66,14 @@ export default class SocketService {
         }
         service.connected = false;
         clearInterval(service.setIntervalRes)
-        console.log('连接失败')
+        console.log('websocket connection error')
     }
 
     onclose() {
         let service = SocketService.Instance;
         service.connected = false;
         clearInterval(service.setIntervalRes)
-        console.log('websocket已断开，正在尝试重连')
+        console.log('websocket connection is closed, retrying connection')
         setTimeout(() => {
             service.connect();
         }, 1000);

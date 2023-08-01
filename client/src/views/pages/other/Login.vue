@@ -113,11 +113,12 @@ export default {
                   if (res.data) {
                     setToken(res.data)
                   }
+                  this.$socket.connect()
                   this.$router.push('/')
                 }
             })
         },
-        registerSubmit(values){
+        registerSubmit(){
             if (this.register.password !== this.register.passwordACK){
                 Toast('两次密码不一致')
                 return;

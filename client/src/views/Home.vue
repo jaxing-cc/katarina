@@ -5,7 +5,7 @@
       <van-tabbar-item name="friends" icon="friends-o">发现</van-tabbar-item>
       <van-tabbar-item name="main" icon="home-o">我</van-tabbar-item>
     </van-tabbar>
-    <van-button @click="close">asdad</van-button>
+    <van-button @click="go">asdad</van-button>
 
     <chat v-if="active === 'chat'"></chat>
     <friends v-if="active === 'friends'"></friends>
@@ -28,22 +28,19 @@ export default {
     }
   },
   methods: {
-    eventListen(evt) {
-      console.log(evt.detail)
-    },
-    close(){
-      window.removeEventListener('onmessage', this.eventListen)
+    go(){
+      this.$router.push('/chato/64882d8cb11b5f4c1827460b')
     }
   },
 
   mounted() {
-    window.addEventListener("onmessage", this.eventListen)
+
   },
   created() {
-    this.$socket.connect()
+
   },
   destroyed() {
-    window.removeEventListener("onmessage", this.eventListen)
+
   }
 }
 </script>

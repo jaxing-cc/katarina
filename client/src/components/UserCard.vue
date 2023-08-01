@@ -1,16 +1,20 @@
 <template>
-  <div>
-    <van-cell center is-link value="">
-      <template #title>
-        <van-image class="userImg" width="40" height="40" round position="left"
-                   :src="avatar"/>
-        <span class="usernameFont">{{ user.name }}</span>
-        <van-tag v-if="showStatus" :type="user.online? 'success':'warning'" class="userTag">
-          {{ user.online ? "on" : "off" }}
-        </van-tag>
-      </template>
-    </van-cell>
-  </div>
+  <van-cell is-link to="/">
+    <template #title>
+      <van-row type="flex">
+        <van-col span="4">
+          <van-badge dot :color="color">
+            <van-image error-icon="smile-o" class="userImg" width="40" height="40" round position="left" :src="avatar"/>
+          </van-badge>
+        </van-col>
+        <van-col offset="1" span="19" style="height: 100%;">
+          <van-row type="flex" class="usernameFont">
+            {{ user.name }}
+          </van-row>
+        </van-col>
+      </van-row>
+    </template>
+  </van-cell>
 </template>
 
 <script>
@@ -19,24 +23,30 @@ export default {
 
   data() {
     return {
-      avatar: ''
+      avatar: '',
+      color: "red"
     };
   },
-  
+
 
   updated() {
     this.loadAvatar()
+    this.loadBadge()
   },
 
   created() {
     this.loadAvatar()
+    this.loadBadge()
   },
   props: ['user', 'showStatus'],
 
   methods: {
-    loadAvatar(){
+    loadAvatar() {
       this.avatar = this.user.avatar ?
           this.user.avatar : 'avatar-' + (this.user.gender === 1 ? '1' : '2') + ".jpg";
+    },
+    loadBadge() {
+      this.color = this.user.online ? "#1989fa" : "red";
     }
   },
 };
@@ -44,13 +54,12 @@ export default {
 
 <style lang="scss" scoped>
 .usernameFont {
-  margin-left: 13px;
+  height: 100%;
   font-weight: bolder;
-  vertical-align: middle;
+  margin-top: 7px
 }
 
 .userImg {
-  vertical-align: middle;
 }
 
 .userTag {

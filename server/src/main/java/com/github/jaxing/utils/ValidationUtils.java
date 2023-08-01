@@ -33,7 +33,7 @@ public class ValidationUtils {
         //用户相关
         SCHEMA_BUILDER_MAP.put("username", stringSchema().with(minLength(3)).with(maxLength(10)));
         SCHEMA_BUILDER_MAP.put("password", stringSchema().with(minLength(6)).with(maxLength(20)));
-        SCHEMA_BUILDER_MAP.put("name", stringSchema().with(minLength(1)).with(maxLength(10)));
+        SCHEMA_BUILDER_MAP.put("name", stringSchema().with(minLength(1)).with(maxLength(8)));
         SCHEMA_BUILDER_MAP.put("gender", numberSchema().with(maximum(2)).with(minimum(0)));
 
         SCHEMA_BUILDER_MAP.put("chatContent", stringSchema().with(maxLength(500)).with(minLength(1)));

@@ -1,7 +1,21 @@
 <template>
   <div id="chatWrapper">
-    <UserCard :user="loginUser" :show-status="true"></UserCard>
     <UserCard :user="targetUser" :show-status="true"></UserCard>
+
+    <van-row class="chatInput">
+      <van-field
+          v-model="inputMessage"
+          rows="1"
+          :autosize="{ maxHeight: 100, minHeight: 50 }"
+          type="textarea"
+          maxlength="350"
+          clickable="true"
+          show-word-limit>
+        <template #button>
+          <van-button size="small" color="#814f56" icon="guide-o"></van-button>
+        </template>
+      </van-field>
+    </van-row>
   </div>
 </template>
 
@@ -18,7 +32,8 @@ export default {
   data() {
     return {
       targetUser: "",
-      loginUser: ""
+      loginUser: "",
+      inputMessage: "",
     };
   },
 
@@ -28,6 +43,7 @@ export default {
 
   },
   created() {
+    this.$socket.connect()
     const jwtObj = decodeToken();
     getByUid(this.$route.params.uid).then(res => {
       if (res.success) {
@@ -50,7 +66,6 @@ export default {
   },
 
   destroyed() {
-
   },
 };
 </script>

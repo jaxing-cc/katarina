@@ -21,8 +21,8 @@ import {
     NavBar,
     List,
     Tab, Tabs,
-    RadioGroup, Radio,
     Form,
+    Badge
 } from 'vant';
 Vue.use(Button);
 Vue.use(Col);
@@ -47,6 +47,4 @@ Vue.use(List);
 Vue.use(Tab);
 Vue.use(Tabs);
 Vue.use(Form);
-Vue.use(RadioGroup);
-Vue.use(Radio);
-
+Vue.use(Badge);

@@ -55,7 +55,10 @@ public class ChatController extends HttpRegister {
                                         .uid(principal.getString("uid")).username(principal.getString("username"))
                                         .roles(principal.getJsonArray("roles").stream().map(r -> (String) r).collect(Collectors.toSet()))
                                         .build().addSelf();
-                                log.debug(Client.CLIENT_POOL.toString());
+                                log.info("size:{}, uid:{}",
+                                        Client.CLIENT_POOL.size(),
+                                        Client.CLIENT_POOL.values().stream().map(Client::getUid).collect(Collectors.joining())
+                                );
                                 serverWebSocket.handler(buffer -> {
                                     Message message = null;
                                     try {
