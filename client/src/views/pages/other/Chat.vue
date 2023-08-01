@@ -9,10 +9,9 @@
           :autosize="{ maxHeight: 100, minHeight: 50 }"
           type="textarea"
           maxlength="350"
-          clickable="true"
           show-word-limit>
         <template #button>
-          <van-button size="small" color="#814f56" icon="guide-o"></van-button>
+          <van-button size="small" color="#814f56" icon="guide-o" @click="send(0)"></van-button>
         </template>
       </van-field>
     </van-row>
@@ -25,6 +24,7 @@ import {getByUid} from "@/api/auth";
 import {Toast} from "vant";
 import {decodeToken} from "@/utils/token";
 import UserCard from "@/components/UserCard";
+import {sendMessage} from "@/api/chat";
 
 export default {
   name: 'Chat',
@@ -37,11 +37,23 @@ export default {
     };
   },
 
-  methods: {},
-
-  mounted() {
-
+  methods: {
+    messageListen(e) {
+      e = e.detail
+      if (e.type === 1001){
+        console.log(e)
+      }
+    },
+    send(type) {
+      sendMessage({
+        groupMessage: false,
+        content: this.inputMessage,
+        contentType: type,
+        to: this.targetUser._id
+      })
+    }
   },
+
   created() {
     this.$socket.connect()
     const jwtObj = decodeToken();
@@ -63,9 +75,11 @@ export default {
         }
       }
     })
+    window.addEventListener("onmessage",this.messageListen)
   },
 
   destroyed() {
+    window.removeEventListener("onmessage",this.messageListen)
   },
 };
 </script>
