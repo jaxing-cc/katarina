@@ -8,8 +8,6 @@
     </van-row>
 
 
-
-
     <van-popup
         v-model="chat.openSwitch" closeable round
         :close-on-click-overlay="false"

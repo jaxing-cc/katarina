@@ -12,6 +12,8 @@ import java.util.Date;
 @Data
 public class ChatMessage implements Serializable {
 
+    private String messageId;
+
     private String from;
 
     private String to;
@@ -25,11 +27,7 @@ public class ChatMessage implements Serializable {
      */
     private Integer contentType;
 
-    private Boolean read;
+    private Boolean offlineMessage;
 
-    private Date createTime;
-
-    public ChatMessage() {
-        this.read = false;
-    }
+    private Long createTime;
 }

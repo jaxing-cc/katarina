@@ -42,12 +42,13 @@ export default {
         groupMessage: false,
         content: this.inputMessage,
         contentType: type,
-        to: this.targetUser._id
+        to: this.targetUser._id,
+        createTime: new Date().getTime()
       })
     }
   },
 
-  props: ["targetUid","loginUser"],
+  props: ["targetUid", "loginUser"],
 
   updated() {
   },

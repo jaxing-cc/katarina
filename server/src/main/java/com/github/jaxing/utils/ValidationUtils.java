@@ -41,6 +41,7 @@ public class ValidationUtils {
         //通用
         SCHEMA_BUILDER_MAP.put("oid", stringSchema().with(maxLength(24)).with(minLength(24)));
         SCHEMA_BUILDER_MAP.put("boolean", booleanSchema());
+        SCHEMA_BUILDER_MAP.put("number", numberSchema());
     }
 
     @Resource

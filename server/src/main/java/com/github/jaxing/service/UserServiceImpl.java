@@ -110,14 +110,13 @@ public class UserServiceImpl implements UserService {
         Promise<List<UserInfo>> promise = Promise.promise();
         JsonObject $regex = JsonObject.of("$regex", key);
         JsonObject query = JsonObject.of("$or", JsonArray.of(JsonObject.of("username", $regex), JsonObject.of("name", $regex)));
-        System.out.println(query.toString());
         mongoClient.find(CollectionEnum.user.name(), query, async -> {
                     if (async.succeeded()) {
                         promise.complete(async.result().stream().map(json -> {
                             UserInfo userInfo = json.mapTo(UserInfo.class);
                             userInfo.setPassword(null);
-                            userInfo.setOnline(Client.CLIENT_POOL.containsKey(userInfo.getId()));
                             userInfo.setRoles(null);
+                            userInfo.setOnline(Client.CLIENT_POOL.containsKey(userInfo.getId()));
                             return userInfo;
                         }).collect(Collectors.toList()));
                     } else {

@@ -12,4 +12,7 @@ public enum CollectionEnum {
     //角色
     role,
 
+    //消息桶
+    message_bucket
+
 }

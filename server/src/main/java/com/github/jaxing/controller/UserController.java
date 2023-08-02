@@ -49,7 +49,7 @@ public class UserController extends HttpRegister {
     @Override
     public void start(Router router, Vertx vertx) {
         //最先进行的拦截请求
-        router.route("/api/*")
+        router.route("/api/*").order(1)
                 .handler(JWTAuthHandler.create(jwtAuth)).failureHandler(context -> {
             context.json(R.fail(context.failure()));
         });

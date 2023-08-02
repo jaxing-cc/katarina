@@ -88,6 +88,7 @@ public class ChatController extends HttpRegister {
                 .property("groupMessage", validationUtils.get("boolean"))
                 .property("content", validationUtils.get("chatContent"))
                 .property("contentType", validationUtils.get("chatContentType"))
+                .property("createTime", validationUtils.get("number"))
         )).handler(context -> chatService.sendChatMessage(context.user(),
                 context.body().asJsonObject().mapTo(ChatMessage.class))
                 .onSuccess(r -> context.json(R.ok(null)))
