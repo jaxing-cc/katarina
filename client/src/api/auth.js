@@ -11,3 +11,7 @@ export function register(params) {
 export function getByUid(uid) {
     return request.get("api/user/" + uid);
 }
+
+export function getByKey(key) {
+    return request.get("api/user/search/" + key);
+}

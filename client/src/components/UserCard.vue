@@ -1,20 +1,28 @@
 <template>
-  <van-cell is-link to="/">
-    <template #title>
-      <van-row type="flex">
-        <van-col span="4">
-          <van-badge dot :color="color">
-            <van-image error-icon="smile-o" class="userImg" width="40" height="40" round position="left" :src="avatar"/>
-          </van-badge>
-        </van-col>
-        <van-col offset="1" span="19" style="height: 100%;">
-          <van-row type="flex" class="usernameFont">
-            {{ user.name }}
-          </van-row>
-        </van-col>
+  <van-row type="flex" @click="click" class="wrapper">
+
+    <van-col span="4" class="marginTop">
+      <van-badge dot :color="color">
+        <van-image error-icon="smile-o" class="userImg" width="40" height="40" round position="left" :src="avatar"/>
+      </van-badge>
+    </van-col>
+
+    <van-col v-if="!showUsername" offset="1" span="19" class="marginTop">
+      <van-row type="flex" class="usernameFont">
+        {{ user.name }}
       </van-row>
-    </template>
-  </van-cell>
+    </van-col>
+
+    <van-col v-if="showUsername" offset="1" span="14" class="marginTop">
+      <van-row type="flex" style="font-weight: bolder; font-size: 13px">{{ user.name }}</van-row>
+      <van-row type="flex" style="font-size: 10px;">{{ user.username }}</van-row>
+    </van-col>
+
+    <van-col v-if="showUsername && follow" span="4" class="marginTop">
+      <van-button size="mini">关注</van-button>
+    </van-col>
+
+  </van-row>
 </template>
 
 <script>
@@ -38,9 +46,12 @@ export default {
     this.loadAvatar()
     this.loadBadge()
   },
-  props: ['user', 'showStatus'],
+  props: ['user', 'showUsername', 'follow'],
 
   methods: {
+    click() {
+      this.$emit("click", this.user)
+    },
     loadAvatar() {
       this.avatar = this.user.avatar ?
           this.user.avatar : 'avatar-' + (this.user.gender === 1 ? '1' : '2') + ".jpg";
@@ -56,13 +67,20 @@ export default {
 .usernameFont {
   height: 100%;
   font-weight: bolder;
-  margin-top: 7px
+}
+
+.marginTop {
+  margin-top: 10px;
 }
 
 .userImg {
 }
 
-.userTag {
-  margin-left: 5px;
+.wrapper {
+}
+
+.wrapper:hover {
+  border-radius: 10px;
+  background-color: #f7f8f6;
 }
 </style>

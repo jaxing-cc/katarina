@@ -32,7 +32,7 @@ import javax.annotation.Resource;
  */
 @Controller
 @Slf4j
-public class AuthController extends HttpRegister {
+public class UserController extends HttpRegister {
 
     @Resource
     private UsernameAndPasswordProvider passwordProvider;
@@ -97,10 +97,13 @@ public class AuthController extends HttpRegister {
 
         router.get("/api/user/:uid").handler(context -> {
             userService.findById(context.pathParam("uid"))
-                    .onFailure(t -> {
-                        t.printStackTrace();
-                        context.json(R.fail(t));
-                    })
+                    .onFailure(t -> context.json(R.fail(t)))
+                    .onSuccess(u -> context.json(R.ok(u)));
+        });
+
+        router.get("/api/user/search/:key").handler(context -> {
+            userService.searchUser(context.pathParam("key"))
+                    .onFailure(t -> context.json(R.fail(t)))
                     .onSuccess(u -> context.json(R.ok(u)));
         });
     }

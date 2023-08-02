@@ -5,8 +5,6 @@ import {
     Row,
     Tabbar,
     TabbarItem,
-    DropdownMenu,
-    DropdownItem,
     Tag,
     Search,
     NoticeBar,
@@ -22,15 +20,15 @@ import {
     List,
     Tab, Tabs,
     Form,
-    Badge
+    Badge,
+    Popup,
+    Divider
 } from 'vant';
 Vue.use(Button);
 Vue.use(Col);
 Vue.use(Row);
 Vue.use(Tabbar);
 Vue.use(TabbarItem);
-Vue.use(DropdownMenu);
-Vue.use(DropdownItem);
 Vue.use(Tag);
 Vue.use(Search);
 Vue.use(NoticeBar);
@@ -48,3 +46,5 @@ Vue.use(Tab);
 Vue.use(Tabs);
 Vue.use(Form);
 Vue.use(Badge);
+Vue.use(Popup);
+Vue.use(Divider)

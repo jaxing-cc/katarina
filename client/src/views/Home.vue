@@ -5,7 +5,6 @@
       <van-tabbar-item name="friends" icon="friends-o">发现</van-tabbar-item>
       <van-tabbar-item name="main" icon="home-o">我</van-tabbar-item>
     </van-tabbar>
-    <van-button @click="go">asdad</van-button>
 
     <chat v-if="active === 'chat'"></chat>
     <friends v-if="active === 'friends'"></friends>

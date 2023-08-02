@@ -21,6 +21,9 @@ import org.springframework.util.ObjectUtils;
 import javax.annotation.Resource;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * @author cjxin
@@ -94,5 +97,34 @@ public class UserServiceImpl implements UserService {
                     userInfo.setOnline(Client.CLIENT_POOL.containsKey(userInfo.getId()));
                     return userInfo;
                 });
+    }
+
+    /**
+     * 搜索用户
+     *
+     * @param key 用户名/名字
+     * @return 用户信息
+     */
+    @Override
+    public Future<List<UserInfo>> searchUser(String key) {
+        Promise<List<UserInfo>> promise = Promise.promise();
+        JsonObject $regex = JsonObject.of("$regex", key);
+        JsonObject query = JsonObject.of("$or", JsonArray.of(JsonObject.of("username", $regex), JsonObject.of("name", $regex)));
+        System.out.println(query.toString());
+        mongoClient.find(CollectionEnum.user.name(), query, async -> {
+                    if (async.succeeded()) {
+                        promise.complete(async.result().stream().map(json -> {
+                            UserInfo userInfo = json.mapTo(UserInfo.class);
+                            userInfo.setPassword(null);
+                            userInfo.setOnline(Client.CLIENT_POOL.containsKey(userInfo.getId()));
+                            userInfo.setRoles(null);
+                            return userInfo;
+                        }).collect(Collectors.toList()));
+                    } else {
+                        promise.fail(async.cause());
+                    }
+                }
+        );
+        return promise.future();
     }
 }

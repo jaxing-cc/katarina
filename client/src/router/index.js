@@ -21,10 +21,6 @@ const routes = [
   {
     path: '/error/page',
     component: ErrorPage
-  },
-  {
-    path: '/chato/:uid',
-    component: Chat
   }
 ]
 

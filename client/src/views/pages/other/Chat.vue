@@ -1,6 +1,6 @@
 <template>
   <div id="chatWrapper">
-    <UserCard :user="targetUser" :show-status="true"></UserCard>
+    <UserCard :user="targetUser" :show-username="true"></UserCard>
 
     <van-row class="chatInput">
       <van-field
@@ -8,7 +8,7 @@
           rows="1"
           :autosize="{ maxHeight: 100, minHeight: 50 }"
           type="textarea"
-          maxlength="350"
+          maxlength="200"
           show-word-limit>
         <template #button>
           <van-button size="small" color="#814f56" icon="guide-o" @click="send(0)"></van-button>
@@ -31,19 +31,12 @@ export default {
   components: {UserCard},
   data() {
     return {
-      targetUser: "",
-      loginUser: "",
+      targetUser: {},
       inputMessage: "",
     };
   },
 
   methods: {
-    messageListen(e) {
-      e = e.detail
-      if (e.type === 1001){
-        console.log(e)
-      }
-    },
     send(type) {
       sendMessage({
         groupMessage: false,
@@ -54,10 +47,15 @@ export default {
     }
   },
 
+  props: ["targetUid","loginUser"],
+
+  updated() {
+  },
+  mounted() {
+  },
+
   created() {
-    this.$socket.connect()
-    const jwtObj = decodeToken();
-    getByUid(this.$route.params.uid).then(res => {
+    getByUid(this.targetUid).then(res => {
       if (res.success) {
         if (!res.data) {
           Toast("用户不存在")
@@ -66,20 +64,9 @@ export default {
         }
       }
     })
-    getByUid(jwtObj.uid).then(res => {
-      if (res.success) {
-        if (!res.data) {
-          Toast("用户不存在")
-        } else {
-          this.loginUser = res.data;
-        }
-      }
-    })
-    window.addEventListener("onmessage",this.messageListen)
   },
 
   destroyed() {
-    window.removeEventListener("onmessage",this.messageListen)
   },
 };
 </script>
