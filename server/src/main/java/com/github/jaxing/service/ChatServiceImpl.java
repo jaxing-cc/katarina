@@ -53,13 +53,14 @@ public class ChatServiceImpl implements ChatService {
             chatMessage.setOfflineMessage(false);
             client.sendText(MessageTypeEnum.CHAT_MESSAGE.message(chatMessage).toString());
         }
-        mongoClient.insert(CollectionEnum.message_bucket.name(), JsonObject.mapFrom(chatMessage), res -> {
-            if (res.succeeded()) {
-                promise.complete(null);
-            } else {
-                promise.fail(res.cause());
-            }
-        });
+        // mongoClient.insert(CollectionEnum.message_bucket.name(), JsonObject.mapFrom(chatMessage), res -> {
+        //     if (res.succeeded()) {
+        //         promise.complete(null);
+        //     } else {
+        //         promise.fail(res.cause());
+        //     }
+        // });
+        promise.complete(null);
         return promise.future();
     }
 

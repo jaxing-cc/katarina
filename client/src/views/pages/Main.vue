@@ -1,15 +1,13 @@
 <template>
     <van-row class="wrapper">
         <van-nav-bar title="我"></van-nav-bar>
-
     </van-row>
 </template>
 
 <script>
-import UserInfo from '../../components/UserInfo.vue';
 import {decodeToken} from '@/utils/token'
 export default {
-  components: { UserInfo },
+  components: { },
     name: 'Main',
 
     data() {

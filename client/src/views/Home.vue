@@ -27,16 +27,14 @@ export default {
     }
   },
   methods: {
-    go(){
-      this.$router.push('/chato/64882d8cb11b5f4c1827460b')
-    }
+
   },
 
   mounted() {
 
   },
   created() {
-
+    this.$socket.connect()
   },
   destroyed() {
 

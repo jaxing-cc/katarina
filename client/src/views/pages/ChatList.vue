@@ -55,7 +55,6 @@ export default {
         }
       }
     })
-    this.$socket.connect()
     window.addEventListener("onmessage", this.messageListen)
   },
 
@@ -71,7 +70,7 @@ export default {
     messageListen(e) {
       e = e.detail
       if (e.type === 1001) {
-        console.log(e)
+        console.log(JSON.stringify(e.data))
       }
     },
   },

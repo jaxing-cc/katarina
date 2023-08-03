@@ -77,6 +77,7 @@ export default {
 }
 
 .wrapper {
+  height: 55px;
 }
 
 .wrapper:hover {

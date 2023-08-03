@@ -1,12 +1,14 @@
 <template>
   <div id="chatWrapper">
-    <UserCard :user="targetUser" :show-username="true"></UserCard>
-
+    <user-card class="chatHeader" :user="targetUser" :show-username="true"></user-card>
+    <van-row class="chatBody">
+      <chat-context :data="mock" :targetUser="targetUser" :loginUser="loginUser"></chat-context>
+    </van-row>
     <van-row class="chatInput">
       <van-field
           v-model="inputMessage"
           rows="1"
-          :autosize="{ maxHeight: 100, minHeight: 50 }"
+          :autosize="{ maxHeight: 50, minHeight: 50 }"
           type="textarea"
           maxlength="200"
           show-word-limit>
@@ -22,17 +24,39 @@
 <script>
 import {getByUid} from "@/api/auth";
 import {Toast} from "vant";
-import {decodeToken} from "@/utils/token";
 import UserCard from "@/components/UserCard";
 import {sendMessage} from "@/api/chat";
+import ChatContext from "@/components/ChatContext";
 
 export default {
   name: 'Chat',
-  components: {UserCard},
+  components: {ChatContext, UserCard},
   data() {
     return {
       targetUser: {},
       inputMessage: "",
+      mock: [
+        {
+          messageId: "64cb1846d35ecf725e05a65f",
+          from: "64882d8cb11b5f4c1827460b",
+          to: "64b7af62f6c5071f233c6352",
+          groupMessage: false,
+          content: "hi",
+          contentType: 0,
+          offlineMessage: false,
+          createTime: 1691031622553
+        },
+        {
+          messageId: "64cb1846d35ecf725e05a66f",
+          from: "64b7af62f6c5071f233c6352",
+          to: "64882d8cb11b5f4c1827460b",
+          groupMessage: false,
+          content: "hi",
+          contentType: 0,
+          offlineMessage: false,
+          createTime: 1691031622153
+        },
+      ]
     };
   },
 
@@ -78,9 +102,23 @@ export default {
   height: 100%;
 }
 
+.chatHeader {
+  width: 100%;
+  position: absolute;
+  top: 0;
+}
+
+.chatBody {
+  overflow: scroll;
+  width: 100%;
+  top: 55px;
+  position: absolute;
+  bottom: 90px;
+}
+
 .chatInput {
   width: 100%;
   position: absolute;
-  bottom: 10px;
+  bottom: 0;
 }
 </style>
