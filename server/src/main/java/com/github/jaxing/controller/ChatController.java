@@ -13,17 +13,19 @@ import com.github.jaxing.utils.HttpRegister;
 import com.github.jaxing.utils.ValidationUtils;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
-import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authentication.TokenCredentials;
 import io.vertx.ext.auth.jwt.JWTAuth;
-import io.vertx.ext.auth.jwt.authorization.JWTAuthorization;
 import io.vertx.ext.web.Router;
+import io.vertx.ext.web.validation.builder.Parameters;
+import io.vertx.json.schema.common.dsl.Schemas;
+import io.vertx.json.schema.draft7.dsl.Keywords;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.util.stream.Collectors;
 
+import static io.vertx.json.schema.common.dsl.Schemas.numberSchema;
 import static io.vertx.json.schema.common.dsl.Schemas.objectSchema;
 
 @Component
@@ -83,7 +85,7 @@ public class ChatController extends HttpRegister {
                     .onFailure(event -> context.json(R.resp(false, "没有权限", null)));
         });
 
-        router.post("/api/send").handler(validationUtils.validationJson(objectSchema()
+        router.post("/api/msg/send").handler(validationUtils.validationJson(objectSchema()
                 .property("to", validationUtils.get("oid"))
                 .property("groupMessage", validationUtils.get("boolean"))
                 .property("content", validationUtils.get("chatContent"))
@@ -93,6 +95,36 @@ public class ChatController extends HttpRegister {
                 context.body().asJsonObject().mapTo(ChatMessage.class))
                 .onSuccess(r -> context.json(R.ok(null)))
                 .onFailure(t -> context.json(R.fail(t)))
+        );
+
+        /** chatList相关功能 **/
+
+        router.get("/api/chat-list/:page")
+                .handler(validationUtils.builder()
+                        .pathParameter(Parameters.param("page", numberSchema().with(Keywords.minimum(1)).defaultValue(1)))
+                        .build())
+                .handler(
+                        context -> chatService.chatList(context.user().principal().getString("uid"),
+                                Integer.parseInt(context.pathParam("page")))
+                                .onSuccess(list -> context.json(R.ok(list)))
+                                .onFailure(t -> {
+                                    t.printStackTrace();
+                                    context.json(R.fail(t));
+                                })
+                );
+
+        router.post("/api/chat-list/:uid").handler(
+                context -> chatService.addChatListItem(context.user().principal().getString("uid"),
+                        context.pathParam("uid"))
+                        .onSuccess(r -> context.json(R.ok(null)))
+                        .onFailure(t -> context.json(R.fail(t)))
+        );
+
+        router.delete("/api/chat-list/:uid").handler(
+                context -> chatService.deleteChatListItem(context.user().principal().getString("uid"),
+                        context.pathParam("uid"))
+                        .onSuccess(r -> context.json(R.ok(null)))
+                        .onFailure(t -> context.json(R.fail(t)))
         );
     }
 }

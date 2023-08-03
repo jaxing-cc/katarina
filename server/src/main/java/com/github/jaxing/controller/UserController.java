@@ -95,12 +95,18 @@ public class UserController extends HttpRegister {
                     });
         });
 
+        /**
+         * id查用户
+         */
         router.get("/api/user/:uid").handler(context -> {
             userService.findById(context.pathParam("uid"))
                     .onFailure(t -> context.json(R.fail(t)))
                     .onSuccess(u -> context.json(R.ok(u)));
         });
 
+        /**
+         * 名字用户名模糊搜索
+         */
         router.get("/api/user/search/:key").handler(context -> {
             userService.searchUser(context.pathParam("key"))
                     .onFailure(t -> context.json(R.fail(t)))

@@ -1,6 +1,6 @@
 package com.github.jaxing;
 
-import com.github.jaxing.common.domain.VertxHolder;
+import com.github.jaxing.common.utils.VertxHolder;
 import com.github.jaxing.utils.ConfigUtils;
 import io.vertx.core.Vertx;
 import lombok.extern.slf4j.Slf4j;

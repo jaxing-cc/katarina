@@ -1,7 +1,6 @@
 package com.github.jaxing.config;
 
-import com.github.jaxing.common.domain.VertxHolder;
-import com.github.jaxing.utils.ConfigUtils;
+import com.github.jaxing.common.utils.VertxHolder;
 import io.vertx.json.schema.SchemaParser;
 import io.vertx.json.schema.SchemaRouter;
 import io.vertx.json.schema.SchemaRouterOptions;

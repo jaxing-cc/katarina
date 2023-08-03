@@ -1,6 +1,6 @@
 package com.github.jaxing.config;
 
-import com.github.jaxing.common.domain.VertxHolder;
+import com.github.jaxing.common.utils.VertxHolder;
 import com.github.jaxing.utils.ConfigUtils;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;

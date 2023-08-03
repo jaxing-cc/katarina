@@ -53,6 +53,10 @@ public class ValidationUtils {
                 .build();
     }
 
+    public ValidationHandlerBuilder builder() {
+        return ValidationHandlerBuilder.create(schemaParser);
+    }
+
     public SchemaBuilder get(String key) {
         return SCHEMA_BUILDER_MAP.get(key);
     }

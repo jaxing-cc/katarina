@@ -1,7 +1,7 @@
 package com.github.jaxing.config;
 
 import com.github.jaxing.auth.CustomJWTAuthProviderImpl;
-import com.github.jaxing.common.domain.VertxHolder;
+import com.github.jaxing.common.utils.VertxHolder;
 import com.github.jaxing.utils.ConfigUtils;
 import io.vertx.ext.auth.PubSecKeyOptions;
 import io.vertx.ext.auth.jwt.JWTAuth;

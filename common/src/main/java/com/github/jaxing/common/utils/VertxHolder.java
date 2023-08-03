@@ -1,4 +1,4 @@
-package com.github.jaxing.common.domain;
+package com.github.jaxing.common.utils;
 
 import io.vertx.core.Vertx;
 
