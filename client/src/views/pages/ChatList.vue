@@ -10,20 +10,27 @@
       聊天列表
     </van-row>
 
-    <van-swipe-cell v-for="item in chatList.data" :key="item.item.chatTargetUid">
-      <van-row>
-        <van-col :span="1"/>
-        <user-card :user="item"
-                   :show-text="item.lastMessage? item.lastMessage : new Date(item.item.createTime).toLocaleString()"
-                   @click="startChat(item.item.chatTargetUid)"
-                   :img-size="30"
-                   class="resultItem">
-        </user-card>
-      </van-row>
-      <template #right>
-        <van-button square type="danger" text="删除" @click="deleteChatListItem(item.item)"/>
-      </template>
-    </van-swipe-cell>
+
+    <van-list :v-model="chatList.loading"
+              @load="loadChatList"
+              :finished="chatList.finished"
+              finished-text="没有更多了">
+      <van-swipe-cell v-for="item in chatList.data" :key="item.info.chatTargetUid">
+        <van-row>
+          <van-col :span="1"/>
+          <user-card :user="item.user"
+                     :show-text="item.lastMessage? item.lastMessage : new Date(item.info.createTime).toLocaleString()"
+                     @click="startChat(item.info.chatTargetUid)"
+                     :img-size="30"
+                     class="resultItem">
+          </user-card>
+        </van-row>
+        <template #right>
+          <van-button square type="danger" text="删除" @click="deleteChatListItem(item.info)"/>
+        </template>
+      </van-swipe-cell>
+    </van-list>
+
 
     <van-popup
         v-model="chat.switch" closeable round
@@ -56,8 +63,11 @@ export default {
       },
       loginUser: {},
       chatList: {
+        loading: false,
+        finished: false,
         data: [],
-        page: 1
+        page: 1,
+        size: 10,
       }
     };
   },
@@ -67,8 +77,8 @@ export default {
   },
 
   created() {
-    window.addEventListener("msg@1001", this.messageListen)
-    this.loadChatList();
+    window.addEventListener("msg@1001", this.msgHandler)
+    // this.reloadChatList()
     const jwtObj = decodeToken();
     getByUid(jwtObj.uid).then(res => {
       if (res.success) {
@@ -82,7 +92,7 @@ export default {
   },
 
   destroyed() {
-    window.removeEventListener("msg@1001", this.messageListen)
+    window.removeEventListener("msg@1001", this.msgHandler)
   },
 
   methods: {
@@ -90,19 +100,37 @@ export default {
       let that = this;
       deleteChatListItem(data.chatTargetUid).then(res => {
         if (res.success) {
-          that.loadChatList();
+          that.reloadChatList()
         } else {
           Toast("删除失败，请重试")
         }
       })
     },
+    reloadChatList() {
+      this.chatList.page = 1
+      this.chatList.loading = false
+      this.chatList.finished = false
+      this.chatList.data = []
+      this.loadChatList();
+    },
     loadChatList() {
-      loadChatList(this.chatList.page).then(res => {
+      let that = this;
+      this.chatList.loading = this;
+      console.log(this.chatList.page, this.chatList.finished,'loadstart')
+      loadChatList(this.chatList.page, this.chatList.size).then(res => {
         if (res.success) {
-          this.chatList.data = res.data
+          if (res.data && res.data.length > 0) {
+            this.chatList.data = res.data
+            this.chatList.page++;
+          } else {
+            this.chatList.finished = true
+            Toast("已经到底了...")
+          }
         } else {
           Toast("网络异常，请重试")
         }
+        console.log(this.chatList.page, this.chatList.finished,'loadend')
+        that.chatList.loading = false;
       })
     }
     ,
@@ -110,7 +138,7 @@ export default {
       let that = this;
       addChatListItem(uid).then(res => {
         if (res.success) {
-          that.loadChatList()
+          that.reloadChatList()
           that.startChat(uid)
         } else {
           Toast("网络异常，请重试")
@@ -121,10 +149,13 @@ export default {
       this.chat.targetId = uid
       this.chat.switch = true
     },
-    messageListen(e) {
+    msgHandler(e) {
       e = e.detail
-    }
-    ,
+      let list = this.chatList.data;
+      for (let i = 0; i < list.length; i++) {
+        console.log(list[i])
+      }
+    },
   },
 }
 ;

@@ -10,8 +10,8 @@ export function sendMessage(params) {
 /**
  * 获取聊天列表
  */
-export function loadChatList(page) {
-    return request.get("api/chat-list/" + page);
+export function loadChatList(page, size) {
+    return request.get("api/chat-list/" + page + "/" + size);
 }
 
 /**
@@ -20,6 +20,7 @@ export function loadChatList(page) {
 export function addChatListItem(uid) {
     return request.post("api/chat-list/" + uid);
 }
+
 /**
  * 聊天列表remove
  */

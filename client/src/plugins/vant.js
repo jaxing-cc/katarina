@@ -20,7 +20,8 @@ import {
     Badge,
     Popup,
     Divider,
-    SwipeCell
+    SwipeCell,
+    List
 } from 'vant';
 Vue.use(Button);
 Vue.use(Col);
@@ -44,3 +45,4 @@ Vue.use(Badge);
 Vue.use(Popup);
 Vue.use(Divider)
 Vue.use(SwipeCell);
+Vue.use(List);

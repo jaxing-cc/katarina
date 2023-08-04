@@ -1,6 +1,7 @@
 package com.github.jaxing.common.dto;
 
 import com.github.jaxing.common.domain.ChatListItem;
+import com.github.jaxing.common.domain.UserInfo;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -12,17 +13,9 @@ import java.io.Serializable;
 @Data
 public class ChatListItemVO implements Serializable {
 
-    private ChatListItem item;
+    private ChatListItem info;
 
-    private String uid;
-
-    private String avatar;
-
-    private String name;
-
-    private Integer gender;
+    private UserInfo user;
 
     private String lastMessage;
-
-    private String lastMessageUserId;
 }

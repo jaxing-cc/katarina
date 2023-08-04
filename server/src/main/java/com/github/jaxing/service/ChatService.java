@@ -43,5 +43,5 @@ public interface ChatService {
      *
      * @param uid 当前用户
      */
-    Future<List<ChatListItemVO>> chatList(String uid, Integer page);
+    Future<List<ChatListItemVO>> chatList(String uid, Integer page, Integer size);
 }

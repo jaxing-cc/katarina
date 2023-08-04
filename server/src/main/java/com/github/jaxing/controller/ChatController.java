@@ -17,7 +17,6 @@ import io.vertx.ext.auth.authentication.TokenCredentials;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.validation.builder.Parameters;
-import io.vertx.json.schema.common.dsl.Schemas;
 import io.vertx.json.schema.draft7.dsl.Keywords;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -99,13 +98,14 @@ public class ChatController extends HttpRegister {
 
         /** chatList相关功能 **/
 
-        router.get("/api/chat-list/:page")
+        router.get("/api/chat-list/:page/:size")
                 .handler(validationUtils.builder()
                         .pathParameter(Parameters.param("page", numberSchema().with(Keywords.minimum(1)).defaultValue(1)))
+                        .pathParameter(Parameters.param("size", numberSchema().defaultValue(10)))
                         .build())
                 .handler(
                         context -> chatService.chatList(context.user().principal().getString("uid"),
-                                Integer.parseInt(context.pathParam("page")))
+                                Integer.parseInt(context.pathParam("page")), Integer.parseInt(context.pathParam("size")))
                                 .onSuccess(list -> context.json(R.ok(list)))
                                 .onFailure(t -> {
                                     t.printStackTrace();

@@ -1,14 +1,13 @@
 package com.github.jaxing.service;
 
-import com.github.jaxing.common.Constant;
 import com.github.jaxing.common.domain.ChatListItem;
 import com.github.jaxing.common.domain.ChatMessage;
 import com.github.jaxing.common.domain.Client;
+import com.github.jaxing.common.domain.UserInfo;
 import com.github.jaxing.common.dto.ChatListItemVO;
 import com.github.jaxing.common.enums.CollectionEnum;
 import com.github.jaxing.common.enums.MessageTypeEnum;
 import com.github.jaxing.common.utils.PageUtils;
-import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonArray;
@@ -25,7 +24,6 @@ import javax.annotation.Resource;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -132,17 +130,18 @@ public class ChatServiceImpl implements ChatService {
      * 查询用户的聊天列表,分页一次加载20页
      *
      * @param uid 当前用户
+     * @param size
      */
     @Override
-    public Future<List<ChatListItemVO>> chatList(String uid, Integer page) {
+    public Future<List<ChatListItemVO>> chatList(String uid, Integer page, Integer size) {
         Promise<List<ChatListItemVO>> promise = Promise.promise();
         mongoClient.findWithOptions(
                 CollectionEnum.chat_list.name(),
                 JsonObject.of("uid", uid),
                 new FindOptions()
                         .setFields(JsonObject.of("_id", 0))
-                        .setSkip(PageUtils.getSkip(page, 3))
-                        .setLimit(3)
+                        .setSkip(PageUtils.getSkip(page, size))
+                        .setLimit(size)
                         .setSort(JsonObject.of("createTime", -1)))
                 .onFailure(promise::fail)
                 .onSuccess(res -> {
@@ -160,12 +159,10 @@ public class ChatServiceImpl implements ChatService {
                         Map<String, JsonObject> userInfo = usersResp.stream().collect(Collectors.toMap(u -> u.getString("_id"), u -> u));
                         promise.complete(itemList.stream().map(i -> {
                             ChatListItemVO chatListItemVO = new ChatListItemVO();
-                            chatListItemVO.setItem(i);
                             JsonObject entries = userInfo.get(i.getChatTargetUid());
+                            chatListItemVO.setInfo(i);
                             if (!ObjectUtils.isEmpty(entries)) {
-                                chatListItemVO.setName(entries.getString("name"));
-                                chatListItemVO.setAvatar(entries.getString("avatar"));
-                                chatListItemVO.setGender(entries.getInteger("gender"));
+                                chatListItemVO.setUser(entries.mapTo(UserInfo.class));
                             }
                             return chatListItemVO;
                         }).collect(Collectors.toList()));

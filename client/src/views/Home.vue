@@ -31,7 +31,6 @@ export default {
   methods: {
     msgHandler(e) {
       e = e.detail
-      console.log(e)
       if (this.active !== 'chat') {
         this.newChatMessageCount = this.newChatMessageCount ? this.newChatMessageCount + 1 : 1
       }
