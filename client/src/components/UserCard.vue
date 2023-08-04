@@ -15,8 +15,8 @@
     </van-col>
 
     <van-col v-if="showText" offset="1" span="14" class="marginTop">
-      <van-row type="flex" style="font-weight: bolder; font-size: 13px">{{ user.name }}</van-row>
-      <van-row type="flex" style="font-size: 9px;">{{ showText }}</van-row>
+      <van-row type="flex" style="font-weight: bolder; font-size: 13px" class="van-ellipsis">{{ user.name }}</van-row>
+      <van-row type="flex" style="font-size: 9px;" class="van-ellipsis">{{ showText }}</van-row>
     </van-col>
 
     <van-col v-if="showText && follow" span="4" class="marginTop">

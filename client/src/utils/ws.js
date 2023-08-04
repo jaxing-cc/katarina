@@ -54,8 +54,9 @@ export default class SocketService {
     }
 
     onmessage(e) {
-        window.dispatchEvent(new CustomEvent('onmessage', {
-            detail: JSON.parse(e.data)
+        let message = JSON.parse(e.data)
+        window.dispatchEvent(new CustomEvent('msg@' + message.type, {
+            detail: message.data
         }))
     }
 

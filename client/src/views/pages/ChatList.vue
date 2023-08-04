@@ -14,7 +14,7 @@
       <van-row>
         <van-col :span="1"/>
         <user-card :user="item"
-                   :show-text="new Date(item.item.createTime).toLocaleString()"
+                   :show-text="item.lastMessage? item.lastMessage : new Date(item.item.createTime).toLocaleString()"
                    @click="startChat(item.item.chatTargetUid)"
                    :img-size="30"
                    class="resultItem">
@@ -67,7 +67,7 @@ export default {
   },
 
   created() {
-    window.addEventListener("onmessage", this.messageListen)
+    window.addEventListener("msg@1001", this.messageListen)
     this.loadChatList();
     const jwtObj = decodeToken();
     getByUid(jwtObj.uid).then(res => {
@@ -82,7 +82,7 @@ export default {
   },
 
   destroyed() {
-    window.removeEventListener("onmessage", this.messageListen)
+    window.removeEventListener("msg@1001", this.messageListen)
   },
 
   methods: {
@@ -123,9 +123,6 @@ export default {
     },
     messageListen(e) {
       e = e.detail
-      if (e.type === 1001) {
-        console.log(JSON.stringify(e.data))
-      }
     }
     ,
   },
