@@ -25,15 +25,6 @@
       </template>
     </van-swipe-cell>
 
-
-    <!--    <van-swipe-cell v-for="item in chatList.data">-->
-    <!--      <user-card :user="item" :show-text="new Date(item.item.createTime).toLocaleString()"-->
-    <!--                 @click="selectUser(item.item.chatTargetUid)" class="resultItem"></user-card>-->
-    <!--      <template #right>-->
-    <!--        <van-button square type="danger" text="删除"/>-->
-    <!--      </template>-->
-    <!--    </van-swipe-cell>-->
-
     <van-popup
         v-model="chat.switch" closeable round
         :close-on-click-overlay="false"

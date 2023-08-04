@@ -10,7 +10,8 @@
             round
             position="left" :src="loadAvatar(d.from)"/>
       </van-col>
-      <van-col :span="16" :style="d.from === targetUser._id? 'text-align: left;':'text-align: right;'">
+
+      <van-col :span="16" :style="myMessage(d.from)? 'text-align: right;':'text-align: left;'">
         <div class="messageContentHeader">
           {{ getUserById(d.from).name + " " + new Date(d.createTime).toLocaleString() }}
         </div>
