@@ -16,12 +16,9 @@ import java.io.Serializable;
 @NoArgsConstructor
 public class ChatListItem implements Serializable {
 
-    @JsonProperty("_id")
-    private String id;
-
     private String uid;
 
     private String chatTargetUid;
 
-    private Long creatTime;
+    private Long createTime;
 }

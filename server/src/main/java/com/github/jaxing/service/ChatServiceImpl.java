@@ -93,8 +93,8 @@ public class ChatServiceImpl implements ChatService {
         mongoClient.findOneAndReplaceWithOptions(
                 CollectionEnum.chat_list.name(),
                 JsonObject.of("$and", JsonArray.of(JsonObject.of("uid", cUid), JsonObject.of("chatTargetUid", tUid))),
-                JsonObject.mapFrom(new ChatListItem(ObjectId.get().toHexString(), cUid, tUid, creatTime)),
-                new FindOptions(),
+                JsonObject.mapFrom(new ChatListItem(cUid, tUid, creatTime)),
+                new FindOptions().setFields(JsonObject.of("_id", 0)),
                 new UpdateOptions().setUpsert(true),
                 res -> {
                     if (res.succeeded()) {
@@ -139,7 +139,11 @@ public class ChatServiceImpl implements ChatService {
         mongoClient.findWithOptions(
                 CollectionEnum.chat_list.name(),
                 JsonObject.of("uid", uid),
-                new FindOptions().setSkip(PageUtils.getSkip(page, 3)).setLimit(3).setSort(JsonObject.of("createTime", 1)))
+                new FindOptions()
+                        .setFields(JsonObject.of("_id", 0))
+                        .setSkip(PageUtils.getSkip(page, 3))
+                        .setLimit(3)
+                        .setSort(JsonObject.of("createTime", -1)))
                 .onFailure(promise::fail)
                 .onSuccess(res -> {
                     List<ChatListItem> itemList = res.stream().map(j -> j.mapTo(ChatListItem.class)).collect(Collectors.toList());
@@ -147,25 +151,22 @@ public class ChatServiceImpl implements ChatService {
                         promise.complete(Collections.emptyList());
                         return;
                     }
-                    Set<String> targetIdSet = itemList.stream().map(ChatListItem::getChatTargetUid).collect(Collectors.toSet());
-
-                    CompositeFuture.all(
-                            mongoClient.findWithOptions(
-                                    CollectionEnum.user.name(),
-                                    JsonObject.of("_id", JsonObject.of("$in", JsonArray.of(targetIdSet.toArray(new String[0])))),
-                                    new FindOptions().setFields(JsonObject.of("_id", 1, "name", 1, "avatar", 1))),
-                            Future.succeededFuture(Collections.emptyList())
-                    ).onFailure(promise::fail).onSuccess(compositeFuture -> {
-                        int index = 0;
-                        List<JsonObject> usersResp = compositeFuture.resultAt(index++);
-                        List<JsonObject> chatMessagesResp = compositeFuture.resultAt(index++);
+                    Object[] $oids = itemList.stream().map(ChatListItem::getChatTargetUid).distinct().map(id -> JsonObject.of("$oid", id)).toArray();
+                    mongoClient.findWithOptions(
+                            CollectionEnum.user.name(),
+                            JsonObject.of("_id", JsonObject.of("$in", JsonArray.of($oids))),
+                            new FindOptions().setFields(JsonObject.of("_id", 1, "name", 1, "avatar", 1, "gender", 1))
+                    ).onFailure(promise::fail).onSuccess(usersResp -> {
                         Map<String, JsonObject> userInfo = usersResp.stream().collect(Collectors.toMap(u -> u.getString("_id"), u -> u));
-                        Map<String, JsonObject> chatInfo = chatMessagesResp.stream().collect(Collectors.toMap(u -> u.getString("messageId"), u -> u));
-                        System.out.println(usersResp);
-                        System.out.println(chatMessagesResp);
                         promise.complete(itemList.stream().map(i -> {
                             ChatListItemVO chatListItemVO = new ChatListItemVO();
                             chatListItemVO.setItem(i);
+                            JsonObject entries = userInfo.get(i.getChatTargetUid());
+                            if (!ObjectUtils.isEmpty(entries)) {
+                                chatListItemVO.setName(entries.getString("name"));
+                                chatListItemVO.setAvatar(entries.getString("avatar"));
+                                chatListItemVO.setGender(entries.getInteger("gender"));
+                            }
                             return chatListItemVO;
                         }).collect(Collectors.toList()));
                     });

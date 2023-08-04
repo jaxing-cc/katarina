@@ -14,9 +14,15 @@ public class ChatListItemVO implements Serializable {
 
     private ChatListItem item;
 
+    private String uid;
+
     private String avatar;
 
     private String name;
 
+    private Integer gender;
+
     private String lastMessage;
+
+    private String lastMessageUserId;
 }

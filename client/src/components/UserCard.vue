@@ -3,22 +3,23 @@
 
     <van-col span="4" class="marginTop">
       <van-badge dot :color="color">
-        <van-image error-icon="smile-o" class="userImg" width="40" height="40" round position="left" :src="avatar"/>
+        <van-image error-icon="smile-o" class="userImg" :width="imgSize ? imgSize : 40" :height="imgSize ? imgSize : 40"
+                   round position="left" :src="avatar"/>
       </van-badge>
     </van-col>
 
-    <van-col v-if="!showUsername" offset="1" span="19" class="marginTop">
+    <van-col v-if="!showText" offset="1" span="19" class="marginTop">
       <van-row type="flex" class="usernameFont">
         {{ user.name }}
       </van-row>
     </van-col>
 
-    <van-col v-if="showUsername" offset="1" span="14" class="marginTop">
+    <van-col v-if="showText" offset="1" span="14" class="marginTop">
       <van-row type="flex" style="font-weight: bolder; font-size: 13px">{{ user.name }}</van-row>
-      <van-row type="flex" style="font-size: 10px;">{{ user.username }}</van-row>
+      <van-row type="flex" style="font-size: 9px;">{{ showText }}</van-row>
     </van-col>
 
-    <van-col v-if="showUsername && follow" span="4" class="marginTop">
+    <van-col v-if="showText && follow" span="4" class="marginTop">
       <van-button size="mini">关注</van-button>
     </van-col>
 
@@ -46,7 +47,12 @@ export default {
     this.loadAvatar()
     this.loadBadge()
   },
-  props: ['user', 'showUsername', 'follow'],
+  props: [
+    'user',
+    'showText',
+    'follow',
+    'imgSize'
+  ],
 
   methods: {
     click() {

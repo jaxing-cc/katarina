@@ -1,18 +1,44 @@
 <template>
   <van-row>
-    <user-card :user="loginUser"/>
-    <search-user @click="selectUser"/>
+    <van-row>
+      <van-col :span="1"/>
+      <user-card :user="loginUser"/>
+    </van-row>
+    <search-user @click="selectSearchedUser"/>
     <van-row type="flex" class="title">
       <van-col span="1"/>
       聊天列表
     </van-row>
 
+    <van-swipe-cell v-for="item in chatList.data" :key="item.item.chatTargetUid">
+      <van-row>
+        <van-col :span="1"/>
+        <user-card :user="item"
+                   :show-text="new Date(item.item.createTime).toLocaleString()"
+                   @click="startChat(item.item.chatTargetUid)"
+                   :img-size="30"
+                   class="resultItem">
+        </user-card>
+      </van-row>
+      <template #right>
+        <van-button square type="danger" text="删除" @click="deleteChatListItem(item.item)"/>
+      </template>
+    </van-swipe-cell>
+
+
+    <!--    <van-swipe-cell v-for="item in chatList.data">-->
+    <!--      <user-card :user="item" :show-text="new Date(item.item.createTime).toLocaleString()"-->
+    <!--                 @click="selectUser(item.item.chatTargetUid)" class="resultItem"></user-card>-->
+    <!--      <template #right>-->
+    <!--        <van-button square type="danger" text="删除"/>-->
+    <!--      </template>-->
+    <!--    </van-swipe-cell>-->
 
     <van-popup
-        v-model="chat.openSwitch" closeable round
+        v-model="chat.switch" closeable round
         :close-on-click-overlay="false"
         position="bottom" :style="{ height: '95%' }">
-      <chat v-if="chat.openSwitch" :login-user="loginUser" :target-uid="chat.targetId"></chat>
+      <chat v-if="chat.switch" :login-user="loginUser" :target-uid="chat.targetId"></chat>
     </van-popup>
   </van-row>
 
@@ -26,6 +52,7 @@ import {decodeToken} from "@/utils/token";
 import {getByUid} from "@/api/auth";
 import {Toast} from "vant";
 import UserCard from "@/components/UserCard";
+import {addChatListItem, deleteChatListItem, loadChatList} from "@/api/chat";
 
 export default {
   name: 'ChatList',
@@ -33,10 +60,14 @@ export default {
   data() {
     return {
       chat: {
-        openSwitch: false,
+        switch: false,
         targetId: '64b7af62f6c5071f233c6352'
       },
-      loginUser:{}
+      loginUser: {},
+      chatList: {
+        data: [],
+        page: 1
+      }
     };
   },
 
@@ -45,6 +76,8 @@ export default {
   },
 
   created() {
+    window.addEventListener("onmessage", this.messageListen)
+    this.loadChatList();
     const jwtObj = decodeToken();
     getByUid(jwtObj.uid).then(res => {
       if (res.success) {
@@ -55,7 +88,6 @@ export default {
         }
       }
     })
-    window.addEventListener("onmessage", this.messageListen)
   },
 
   destroyed() {
@@ -63,18 +95,51 @@ export default {
   },
 
   methods: {
-    selectUser(user){
-      this.chat.targetId = user._id
-      this.chat.openSwitch = true
+    deleteChatListItem(data) {
+      let that = this;
+      deleteChatListItem(data.chatTargetUid).then(res => {
+        if (res.success) {
+          that.loadChatList();
+        } else {
+          Toast("删除失败，请重试")
+        }
+      })
+    },
+    loadChatList() {
+      loadChatList(this.chatList.page).then(res => {
+        if (res.success) {
+          this.chatList.data = res.data
+        } else {
+          Toast("网络异常，请重试")
+        }
+      })
+    }
+    ,
+    selectSearchedUser(uid) {
+      let that = this;
+      addChatListItem(uid).then(res => {
+        if (res.success) {
+          that.loadChatList()
+          that.startChat(uid)
+        } else {
+          Toast("网络异常，请重试")
+        }
+      })
+    },
+    startChat(uid) {
+      this.chat.targetId = uid
+      this.chat.switch = true
     },
     messageListen(e) {
       e = e.detail
       if (e.type === 1001) {
         console.log(JSON.stringify(e.data))
       }
-    },
+    }
+    ,
   },
-};
+}
+;
 </script>
 
 <style lang="scss" scoped>

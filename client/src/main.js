@@ -5,6 +5,7 @@ import store from './store'
 import './assets/css/global.css'
 import './plugins/vant'
 import ws from '@/utils/ws'
+import '@vant/touch-emulator';
 
 Vue.prototype.$socket = ws.Instance;
 Vue.config.productionTip = false

@@ -4,7 +4,7 @@ import {getToken} from '@/utils/token'
 import Home from '@/views/Home.vue'
 import ErrorPage from '../views/ErrorPage.vue'
 import Login from '../views/pages/other/Login.vue'
-import Chat from '../views/pages/other/Chat.vue'
+
 Vue.use(VueRouter)
 
 const routes = [
