@@ -6,7 +6,9 @@
         :clearable="false"
         placeholder="请输入搜索关键词"
         @search="onSearch"
-        @cancel="onCancel"/>
+        @cancel="onCancel"
+        @focus="onfocus"
+    />
     <van-row v-if="showResult">
       <van-row type="flex" class="title">
         <van-col span="1"/>
@@ -55,9 +57,13 @@ export default {
     onCancel() {
       this.showResult = false
       this.searchKey = null
+      this.$emit("cancel")
     },
     selectUser(user) {
       this.$emit("click", user._id)
+    },
+    onfocus(){
+      this.$emit("focus")
     }
   },
 };

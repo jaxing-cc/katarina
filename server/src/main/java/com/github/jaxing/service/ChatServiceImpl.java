@@ -5,9 +5,11 @@ import com.github.jaxing.common.domain.ChatMessage;
 import com.github.jaxing.common.domain.Client;
 import com.github.jaxing.common.domain.UserInfo;
 import com.github.jaxing.common.dto.ChatListItemVO;
+import com.github.jaxing.common.dto.OfflineMessageCountVO;
 import com.github.jaxing.common.enums.CollectionEnum;
 import com.github.jaxing.common.enums.MessageTypeEnum;
 import com.github.jaxing.common.utils.PageUtils;
+import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonArray;
@@ -21,9 +23,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
 import javax.annotation.Resource;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -67,14 +67,13 @@ public class ChatServiceImpl implements ChatService {
             chatMessage.setOfflineMessage(false);
             client.sendText(MessageTypeEnum.CHAT_MESSAGE.message(chatMessage).toString());
         }
-        // mongoClient.insert(CollectionEnum.message_bucket.name(), JsonObject.mapFrom(chatMessage), res -> {
-        //     if (res.succeeded()) {
-        //         promise.complete(null);
-        //     } else {
-        //         promise.fail(res.cause());
-        //     }
-        // });
-        promise.complete(null);
+        mongoClient.insert(CollectionEnum.message_bucket.name(), JsonObject.mapFrom(chatMessage), res -> {
+            if (res.succeeded()) {
+                promise.complete(null);
+            } else {
+                promise.fail(res.cause());
+            }
+        });
         return promise.future();
     }
 
@@ -123,13 +122,14 @@ public class ChatServiceImpl implements ChatService {
                         promise.fail(res.cause());
                     }
                 });
+
         return promise.future();
     }
 
     /**
      * 查询用户的聊天列表,分页一次加载20页
      *
-     * @param uid 当前用户
+     * @param uid  当前用户
      * @param size
      */
     @Override
@@ -168,6 +168,29 @@ public class ChatServiceImpl implements ChatService {
                         }).collect(Collectors.toList()));
                     });
                 });
+        return promise.future();
+    }
+
+    /**
+     * 加载用户离线消息数量
+     *
+     * @param uid 用户
+     */
+    @Override
+    public Future<List<OfflineMessageCountVO>> offlineMessageCount(String uid) {
+        Promise<List<OfflineMessageCountVO>> promise = Promise.promise();
+        mongoClient.findWithOptions(
+                CollectionEnum.message_bucket.name(),
+                JsonObject.of("$and", JsonArray.of(JsonObject.of("to", uid), JsonObject.of("offlineMessage", true))),
+                new FindOptions().setFields(JsonObject.of("from", 1, "_id", 1))
+        ).onFailure(promise::fail).onSuccess(res -> {
+            Map<String, Integer> map = new HashMap<>();
+            for (JsonObject msgSender : res) {
+                String fromId = msgSender.getString("from");
+                map.put(fromId, map.getOrDefault(fromId, 0) + 1);
+            }
+            promise.complete(map.entrySet().stream().map(e -> new OfflineMessageCountVO(e.getKey(), e.getValue())).collect(Collectors.toList()));
+        });
         return promise.future();
     }
 

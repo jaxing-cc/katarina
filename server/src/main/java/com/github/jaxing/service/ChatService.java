@@ -2,6 +2,7 @@ package com.github.jaxing.service;
 
 import com.github.jaxing.common.domain.ChatMessage;
 import com.github.jaxing.common.dto.ChatListItemVO;
+import com.github.jaxing.common.dto.OfflineMessageCountVO;
 import io.vertx.core.Future;
 import io.vertx.ext.auth.User;
 
@@ -44,4 +45,11 @@ public interface ChatService {
      * @param uid 当前用户
      */
     Future<List<ChatListItemVO>> chatList(String uid, Integer page, Integer size);
+
+    /**
+     * 加载用户离线消息数量
+     *
+     * @param uid 用户
+     */
+    Future<List<OfflineMessageCountVO>> offlineMessageCount(String uid);
 }

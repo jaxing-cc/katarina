@@ -1,22 +1,25 @@
 <template>
-  <van-row>
-    <van-row>
+  <van-row class="chatListWrapper">
+    <van-row class="chatListHeader" v-if="!searchStatus">
       <van-col :span="1"/>
       <user-card :user="loginUser"/>
     </van-row>
-    <search-user @click="selectSearchedUser"/>
-    <van-row type="flex" class="title">
-      <van-col span="1"/>
-      聊天列表
-    </van-row>
+    <search-user @click="selectSearchedUser" @focus="searchStatus = true" @cancel="searchFocusCancel"/>
 
-
-    <van-list :v-model="chatList.loading"
-              @load="loadChatList"
-              :finished="chatList.finished"
-              finished-text="没有更多了">
-      <van-swipe-cell v-for="item in chatList.data" :key="item.info.chatTargetUid">
-        <van-row>
+    <div class="chatListBody">
+      <van-row type="flex" class="title" v-if="!searchStatus">
+        <van-col span="1"/>
+        聊天列表
+      </van-row>
+      <van-list
+          class="custom_list"
+          v-if="!searchStatus"
+          v-model="chatList.loading"
+          @load="loadChatList"
+          offset="300"
+          :finished="chatList.finished"
+          finished-text="没有更多了">
+        <van-swipe-cell v-for="item in chatList.data" :key="item.info.chatTargetUid">
           <van-col :span="1"/>
           <user-card :user="item.user"
                      :show-text="item.lastMessage? item.lastMessage : new Date(item.info.createTime).toLocaleString()"
@@ -24,13 +27,13 @@
                      :img-size="30"
                      class="resultItem">
           </user-card>
-        </van-row>
-        <template #right>
-          <van-button square type="danger" text="删除" @click="deleteChatListItem(item.info)"/>
-        </template>
-      </van-swipe-cell>
-    </van-list>
+          <template #right>
+            <van-button square type="danger" text="删除" @click="deleteChatListItem(item.info)"/>
+          </template>
+        </van-swipe-cell>
 
+      </van-list>
+    </div>
 
     <van-popup
         v-model="chat.switch" closeable round
@@ -50,7 +53,7 @@ import {decodeToken} from "@/utils/token";
 import {getByUid} from "@/api/auth";
 import {Toast} from "vant";
 import UserCard from "@/components/UserCard";
-import {addChatListItem, deleteChatListItem, loadChatList} from "@/api/chat";
+import {addChatListItem, deleteChatListItem, loadChatList, loadOfflineMsgCount} from "@/api/chat";
 
 export default {
   name: 'ChatList',
@@ -62,6 +65,7 @@ export default {
         targetId: '64b7af62f6c5071f233c6352'
       },
       loginUser: {},
+      searchStatus: false,
       chatList: {
         loading: false,
         finished: false,
@@ -78,7 +82,6 @@ export default {
 
   created() {
     window.addEventListener("msg@1001", this.msgHandler)
-    // this.reloadChatList()
     const jwtObj = decodeToken();
     getByUid(jwtObj.uid).then(res => {
       if (res.success) {
@@ -106,6 +109,7 @@ export default {
         }
       })
     },
+
     reloadChatList() {
       this.chatList.page = 1
       this.chatList.loading = false
@@ -113,48 +117,74 @@ export default {
       this.chatList.data = []
       this.loadChatList();
     },
+
     loadChatList() {
       let that = this;
-      this.chatList.loading = this;
-      console.log(this.chatList.page, this.chatList.finished,'loadstart')
+      this.chatList.loading = true;
       loadChatList(this.chatList.page, this.chatList.size).then(res => {
         if (res.success) {
           if (res.data && res.data.length > 0) {
-            this.chatList.data = res.data
+            for (let i = 0; i < res.data.length; i++) {
+              this.chatList.data.push(res.data[i])
+            }
             this.chatList.page++;
           } else {
             this.chatList.finished = true
-            Toast("已经到底了...")
           }
         } else {
           Toast("网络异常，请重试")
         }
-        console.log(this.chatList.page, this.chatList.finished,'loadend')
         that.chatList.loading = false;
       })
-    }
-    ,
+    },
+
+    loadOfflineMsgCountAndChatList() {
+      let list = this.chatList.data;
+      let set = new Set();
+      for (const item of list) {
+        set.add(item.info.chatTargetUid);
+      }
+      console.log(set)
+      // loadOfflineMsgCount().then(res => {
+      //   if (res.success) {
+      //
+      //   } else {
+      //     Toast("加载离线消息失败")
+      //   }
+      // });
+    },
+
     selectSearchedUser(uid) {
-      let that = this;
+      this.addItemToChatList(uid);
+      this.startChat(uid)
+    },
+
+    addItemToChatList(uid, callback){
       addChatListItem(uid).then(res => {
         if (res.success) {
-          that.reloadChatList()
-          that.startChat(uid)
+          callback
         } else {
           Toast("网络异常，请重试")
         }
       })
     },
+
     startChat(uid) {
       this.chat.targetId = uid
       this.chat.switch = true
     },
+
     msgHandler(e) {
       e = e.detail
       let list = this.chatList.data;
       for (let i = 0; i < list.length; i++) {
         console.log(list[i])
       }
+    },
+
+    searchFocusCancel() {
+      this.searchStatus = false
+      this.reloadChatList()
     },
   },
 }
@@ -165,4 +195,22 @@ export default {
 .title {
   font-size: 12px;
 }
+
+.chatListWrapper {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.chatListHeader {
+
+}
+
+.chatListBody {
+  overflow: scroll;
+  //height: 100%;
+  flex: 1;
+}
+
 </style>

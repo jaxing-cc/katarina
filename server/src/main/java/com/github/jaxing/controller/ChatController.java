@@ -84,6 +84,15 @@ public class ChatController extends HttpRegister {
                     .onFailure(event -> context.json(R.resp(false, "没有权限", null)));
         });
 
+        /** 消息 **/
+
+        router.get("/api/msg/offline-count").handler(context ->
+                chatService.offlineMessageCount(context.user().principal().getString("uid"))
+                        .onSuccess(r -> context.json(R.ok(r)))
+                        .onFailure(t -> context.json(R.fail(t)))
+        );
+
+
         router.post("/api/msg/send").handler(validationUtils.validationJson(objectSchema()
                 .property("to", validationUtils.get("oid"))
                 .property("groupMessage", validationUtils.get("boolean"))
