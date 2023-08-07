@@ -4,6 +4,7 @@ import com.github.jaxing.service.ChatService;
 import com.github.jaxing.utils.ConfigUtils;
 import com.github.jaxing.utils.HttpRegister;
 import io.vertx.core.AbstractVerticle;
+import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;

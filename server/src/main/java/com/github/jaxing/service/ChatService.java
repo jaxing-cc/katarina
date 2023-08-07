@@ -1,5 +1,6 @@
 package com.github.jaxing.service;
 
+import com.github.jaxing.common.domain.ChatListItem;
 import com.github.jaxing.common.domain.ChatMessage;
 import com.github.jaxing.common.dto.ChatListItemVO;
 import com.github.jaxing.common.dto.OfflineMessageCountVO;
@@ -30,6 +31,13 @@ public interface ChatService {
      * @param tUid 目标用户
      */
     Future<Void> addChatListItem(String cUid, String tUid);
+
+    /**
+     * 批量增加聊天项
+     *
+     * @param items 项
+     */
+    Future<Void> batchAddChatListItem(List<ChatListItem> items);
 
     /**
      * 删除聊天列表

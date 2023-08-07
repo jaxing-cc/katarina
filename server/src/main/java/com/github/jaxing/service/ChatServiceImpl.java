@@ -104,6 +104,16 @@ public class ChatServiceImpl implements ChatService {
     }
 
     /**
+     * 批量增加聊天项
+     *
+     * @param items 项
+     */
+    @Override
+    public Future<Void> batchAddChatListItem(List<ChatListItem> items) {
+        return null;
+    }
+
+    /**
      * 删除聊天列表
      *
      * @param cUid 当前用户
@@ -179,17 +189,33 @@ public class ChatServiceImpl implements ChatService {
     @Override
     public Future<List<OfflineMessageCountVO>> offlineMessageCount(String uid) {
         Promise<List<OfflineMessageCountVO>> promise = Promise.promise();
-        mongoClient.findWithOptions(
-                CollectionEnum.message_bucket.name(),
-                JsonObject.of("$and", JsonArray.of(JsonObject.of("to", uid), JsonObject.of("offlineMessage", true))),
-                new FindOptions().setFields(JsonObject.of("from", 1, "_id", 1))
-        ).onFailure(promise::fail).onSuccess(res -> {
+        CompositeFuture.all(
+                mongoClient.find(CollectionEnum.chat_list.name(), JsonObject.of("uid", uid)),
+                mongoClient.findWithOptions(
+                        CollectionEnum.message_bucket.name(),
+                        JsonObject.of("$and", JsonArray.of(JsonObject.of("to", uid), JsonObject.of("offlineMessage", true))),
+                        new FindOptions().setFields(JsonObject.of("from", 1, "_id", 1))
+                )
+        ).onFailure(promise::fail).onSuccess(f -> {
+            Set<String> chatListUerIdSet = ((List<JsonObject>) f.resultAt(0))
+                    .stream()
+                    .map(j -> j.getString("chatTargetUid"))
+                    .collect(Collectors.toSet());
+            List<JsonObject> offlineMessageList = f.resultAt(1);
+            List<ChatListItem> toBeSavedChatItem = new ArrayList<>();
             Map<String, Integer> map = new HashMap<>();
-            for (JsonObject msgSender : res) {
+            for (JsonObject msgSender : offlineMessageList) {
                 String fromId = msgSender.getString("from");
+                if (!chatListUerIdSet.contains(fromId)) {
+                    toBeSavedChatItem.add(new ChatListItem(uid, fromId, System.currentTimeMillis()));
+                }
                 map.put(fromId, map.getOrDefault(fromId, 0) + 1);
             }
-            promise.complete(map.entrySet().stream().map(e -> new OfflineMessageCountVO(e.getKey(), e.getValue())).collect(Collectors.toList()));
+            batchAddChatListItem(toBeSavedChatItem)
+                    .onFailure(promise::fail)
+                    .onSuccess(v -> promise.complete(
+                            map.entrySet().stream().map(e -> new OfflineMessageCountVO(e.getKey(), e.getValue())).collect(Collectors.toList()))
+                    );
         });
         return promise.future();
     }
