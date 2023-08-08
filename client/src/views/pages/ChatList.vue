@@ -13,7 +13,7 @@
       </van-row>
       <van-list
           class="custom_list"
-          v-if="!searchStatus"
+          v-if="!searchStatus && offlineMsgInit"
           v-model="chatList.loading"
           @load="loadChatList"
           offset="300"
@@ -25,6 +25,8 @@
                      :show-text="item.lastMessage? item.lastMessage : new Date(item.info.createTime).toLocaleString()"
                      @click="startChat(item.info.chatTargetUid)"
                      :img-size="30"
+                     :other="true"
+                     :unread="chatList.unreadCount[item.info.chatTargetUid]"
                      class="resultItem">
           </user-card>
           <template #right>
@@ -66,9 +68,11 @@ export default {
       },
       loginUser: {},
       searchStatus: false,
+      offlineMsgInit: false,
       chatList: {
         loading: false,
         finished: false,
+        unreadCount: [],
         data: [],
         page: 1,
         size: 10,
@@ -81,7 +85,7 @@ export default {
   },
 
   created() {
-    window.addEventListener("msg@1001", this.msgHandler)
+    window.addEventListener("msg@1001", this.chatMsgHandler)
     const jwtObj = decodeToken();
     getByUid(jwtObj.uid).then(res => {
       if (res.success) {
@@ -92,10 +96,11 @@ export default {
         }
       }
     })
+    this.loadOfflineMsgCountAndChatList()
   },
 
   destroyed() {
-    window.removeEventListener("msg@1001", this.msgHandler)
+    window.removeEventListener("msg@1001", this.chatMsgHandler)
   },
 
   methods: {
@@ -139,19 +144,15 @@ export default {
     },
 
     loadOfflineMsgCountAndChatList() {
-      let list = this.chatList.data;
-      let set = new Set();
-      for (const item of list) {
-        set.add(item.info.chatTargetUid);
-      }
-      console.log(set)
-      // loadOfflineMsgCount().then(res => {
-      //   if (res.success) {
-      //
-      //   } else {
-      //     Toast("加载离线消息失败")
-      //   }
-      // });
+      this.offlineMsgInit = false
+      loadOfflineMsgCount().then(res => {
+        if (res.success) {
+          this.chatList.unreadCount = res.data
+          this.offlineMsgInit = true
+        } else {
+          Toast("消息加载失败，请重试")
+        }
+      });
     },
 
     selectSearchedUser(uid) {
@@ -159,7 +160,7 @@ export default {
       this.startChat(uid)
     },
 
-    addItemToChatList(uid, callback){
+    addItemToChatList(uid, callback) {
       addChatListItem(uid).then(res => {
         if (res.success) {
           callback
@@ -174,11 +175,34 @@ export default {
       this.chat.switch = true
     },
 
-    msgHandler(e) {
+    chatMsgHandler(e) {
       e = e.detail
-      let list = this.chatList.data;
-      for (let i = 0; i < list.length; i++) {
-        console.log(list[i])
+      console.log(e)
+      let unreadObj = this.chatList.unreadCount
+      unreadObj[e.from] = unreadObj[e.from] ? unreadObj[e.from] + 1 : 1
+      let data = this.chatList.data;
+      let hasFromUser = false;
+      for (let i = 0; i < data.length; i++) {
+        if (data[i].info.chatTargetUid === e.from) {
+          hasFromUser = true
+          break;
+        }
+      }
+      if (!hasFromUser) {
+        getByUid(e.from).then(res => {
+          if (res.success && res.data) {
+            data.unshift({
+              user: res.data,
+              lastMessage: null,
+              info: {
+                chatTargetUid: e.from,
+                uid: e.to,
+                createTime: new Date().getTime()
+              }
+            })
+            console.log(data)
+          }
+        })
       }
     },
 

@@ -3,12 +3,12 @@
 
     <van-col span="4" class="marginTop">
       <van-badge dot :color="color">
-        <van-image error-icon="smile-o" class="userImg" :width="imgSize ? imgSize : 40" :height="imgSize ? imgSize : 40"
+        <van-image error-icon="smile-o" class="userImg" :width="imgSize"
                    round position="left" :src="avatar"/>
       </van-badge>
     </van-col>
 
-    <van-col v-if="!showText" offset="1" span="19" class="marginTop">
+    <van-col v-if="!showText" offset="1" span="14" class="marginTop">
       <van-row type="flex" class="usernameFont">
         {{ user.name }}
       </van-row>
@@ -19,8 +19,8 @@
       <van-row type="flex" style="font-size: 9px;" class="van-ellipsis">{{ showText }}</van-row>
     </van-col>
 
-    <van-col v-if="showText && follow" span="4" class="marginTop">
-      <van-button size="mini">关注</van-button>
+    <van-col v-if="showText && other" span="4" class="marginTop">
+      <van-badge v-if="unread && unread !== 0" :content="unread"/>
     </van-col>
 
   </van-row>
@@ -47,12 +47,24 @@ export default {
     this.loadAvatar()
     this.loadBadge()
   },
-  props: [
-    'user',
-    'showText',
-    'follow',
-    'imgSize'
-  ],
+  props: {
+    user: {},
+    showText: {
+      type: String
+    },
+    imgSize: {
+      type: Number,
+      default: 40
+    },
+    other: {
+      type: Boolean,
+      default: false
+    },
+    unread: {
+      type: Number,
+      default: 0
+    }
+  },
 
   methods: {
     click() {

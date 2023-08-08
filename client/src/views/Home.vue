@@ -29,7 +29,7 @@ export default {
     }
   },
   methods: {
-    msgHandler(e) {
+    chatMsgHandler(e) {
       e = e.detail
       if (this.active !== 'chat') {
         this.newChatMessageCount = this.newChatMessageCount ? this.newChatMessageCount + 1 : 1
@@ -45,10 +45,10 @@ export default {
   },
   created() {
     this.$socket.connect()
-    window.addEventListener("msg@1001", this.msgHandler)
+    window.addEventListener("msg@1001", this.chatMsgHandler)
   },
   destroyed() {
-    window.removeEventListener("msg@1001", this.msgHandler)
+    window.removeEventListener("msg@1001", this.chatMsgHandler)
   }
 }
 </script>

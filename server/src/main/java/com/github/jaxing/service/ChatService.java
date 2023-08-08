@@ -8,6 +8,7 @@ import io.vertx.core.Future;
 import io.vertx.ext.auth.User;
 
 import java.util.List;
+import java.util.Map;
 
 
 /**
@@ -32,12 +33,6 @@ public interface ChatService {
      */
     Future<Void> addChatListItem(String cUid, String tUid);
 
-    /**
-     * 批量增加聊天项
-     *
-     * @param items 项
-     */
-    Future<Void> batchAddChatListItem(List<ChatListItem> items);
 
     /**
      * 删除聊天列表
@@ -60,4 +55,11 @@ public interface ChatService {
      * @param uid 用户
      */
     Future<List<OfflineMessageCountVO>> offlineMessageCount(String uid);
+
+    /**
+     * 加载用户离线消息数量
+     *
+     * @param uid 用户
+     */
+    Future<Map<String, Integer>> offlineMessageCountAndUpdateChatList(String uid);
 }

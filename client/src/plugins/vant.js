@@ -21,7 +21,8 @@ import {
     Popup,
     Divider,
     SwipeCell,
-    List
+    List,
+    RadioGroup, Radio,
 } from 'vant';
 Vue.use(Button);
 Vue.use(Col);
@@ -46,3 +47,5 @@ Vue.use(Popup);
 Vue.use(Divider)
 Vue.use(SwipeCell);
 Vue.use(List);
+Vue.use(Radio);
+Vue.use(RadioGroup);

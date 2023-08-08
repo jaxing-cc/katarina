@@ -87,7 +87,7 @@ public class ChatController extends HttpRegister {
         /** 消息 **/
 
         router.get("/api/msg/offline-count").handler(context ->
-                chatService.offlineMessageCount(context.user().principal().getString("uid"))
+                chatService.offlineMessageCountAndUpdateChatList(context.user().principal().getString("uid"))
                         .onSuccess(r -> context.json(R.ok(r)))
                         .onFailure(t -> context.json(R.fail(t)))
         );

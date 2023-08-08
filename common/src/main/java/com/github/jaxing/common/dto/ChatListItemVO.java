@@ -18,6 +18,4 @@ public class ChatListItemVO implements Serializable {
     private UserInfo user;
 
     private String lastMessage;
-
-    private Integer offlineMsgCount;
 }
