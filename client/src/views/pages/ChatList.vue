@@ -72,7 +72,7 @@ export default {
       chatList: {
         loading: false,
         finished: false,
-        unreadCount: [],
+        unreadCount: {},
         data: [],
         page: 1,
         size: 10,
@@ -177,9 +177,11 @@ export default {
 
     chatMsgHandler(e) {
       e = e.detail
-      console.log(e)
-      let unreadObj = this.chatList.unreadCount
-      unreadObj[e.from] = unreadObj[e.from] ? unreadObj[e.from] + 1 : 1
+      let obj = {}
+      const keys = Object.keys(this.chatList.unreadCount);
+      Object.values(this.chatList.unreadCount).forEach((item, index) => obj[keys[index]] = item);
+      obj[e.from] = obj[e.from] ? obj[e.from] + 1 : 1;
+      this.chatList.unreadCount = obj;
       let data = this.chatList.data;
       let hasFromUser = false;
       for (let i = 0; i < data.length; i++) {
