@@ -1,9 +1,7 @@
 package com.github.jaxing.service;
 
-import com.github.jaxing.common.domain.ChatListItem;
 import com.github.jaxing.common.domain.ChatMessage;
 import com.github.jaxing.common.dto.ChatListItemVO;
-import com.github.jaxing.common.dto.OfflineMessageCountVO;
 import io.vertx.core.Future;
 import io.vertx.ext.auth.User;
 
@@ -52,14 +50,38 @@ public interface ChatService {
     /**
      * 加载用户离线消息数量
      *
-     * @param uid 用户
+     * @param uid     用户
+     * @param isGroup 群消息/个人消息
      */
-    Future<List<OfflineMessageCountVO>> offlineMessageCount(String uid);
+    Future<Map<String, Integer>> offlineMessageCount(String uid, boolean isGroup);
 
     /**
      * 加载用户离线消息数量
      *
-     * @param uid 用户
+     * @param uid     用户
+     * @param isGroup 群消息/个人消息
      */
-    Future<Map<String, Integer>> offlineMessageCountAndUpdateChatList(String uid);
+    Future<Map<String, Integer>> offlineMessageCountAndUpdateChatList(String uid, boolean isGroup);
+
+    /**
+     * 查询聊天记录,分页
+     *
+     * @param uid      当前用户
+     * @param targetId 目标用户/群
+     * @param isGroup  是否是群
+     * @param page     页码
+     * @param size     页数量
+     * @return 聊天记录
+     */
+    Future<List<ChatMessage>> loadChatMessageRecord(String uid, String targetId, boolean isGroup, Integer page, Integer size);
+
+    /**
+     * 消除离线消息标记
+     *
+     * @param uid      当前用户
+     * @param targetId 目标用户/群
+     * @param isGroup  是否是群
+     * @return 是否成功
+     */
+    Future<Void> clearOfflineMessage(String uid, String targetId, boolean isGroup);
 }

@@ -5,7 +5,6 @@ import com.github.jaxing.common.domain.ChatMessage;
 import com.github.jaxing.common.domain.Client;
 import com.github.jaxing.common.domain.UserInfo;
 import com.github.jaxing.common.dto.ChatListItemVO;
-import com.github.jaxing.common.dto.OfflineMessageCountVO;
 import com.github.jaxing.common.enums.CollectionEnum;
 import com.github.jaxing.common.enums.MessageTypeEnum;
 import com.github.jaxing.common.utils.PageUtils;
@@ -56,6 +55,13 @@ public class ChatServiceImpl implements ChatService {
             promise.fail("暂不支持群组");
             return promise.future();
         }
+        String content = chatMessage.getContent();
+        System.out.println(content);
+        char[] chars = content.toCharArray();
+        for (char aChar : chars) {
+            System.out.println(aChar + "---" + ((int) aChar));
+        }
+        System.out.println(((int) '\n'));
         Client client = Client.CLIENT_POOL.get(chatMessage.getTo());
         chatMessage.setMessageId(ObjectId.get().toHexString());
         chatMessage.setCreateTime(System.currentTimeMillis());
@@ -169,14 +175,21 @@ public class ChatServiceImpl implements ChatService {
     /**
      * 加载用户离线消息数量
      *
-     * @param uid 用户
+     * @param uid     用户
+     * @param isGroup
      */
     @Override
-    public Future<List<OfflineMessageCountVO>> offlineMessageCount(String uid) {
-        Promise<List<OfflineMessageCountVO>> promise = Promise.promise();
+    public Future<Map<String, Integer>> offlineMessageCount(String uid, boolean isGroup) {
+        Promise<Map<String, Integer>> promise = Promise.promise();
         mongoClient.findWithOptions(
                 CollectionEnum.message_bucket.name(),
-                JsonObject.of("$and", JsonArray.of(JsonObject.of("to", uid), JsonObject.of("offlineMessage", true))),
+                JsonObject.of("$and",
+                        JsonArray.of(
+                                JsonObject.of("to", uid),
+                                JsonObject.of("offlineMessage", true),
+                                JsonObject.of("groupMessage", isGroup)
+                        )
+                ),
                 new FindOptions().setFields(JsonObject.of("from", 1, "_id", 1))
         ).onFailure(promise::fail).onSuccess(res -> {
             Map<String, Integer> map = new HashMap<>();
@@ -184,7 +197,7 @@ public class ChatServiceImpl implements ChatService {
                 String fromId = msgSender.getString("from");
                 map.put(fromId, map.getOrDefault(fromId, 0) + 1);
             }
-            promise.complete(map.entrySet().stream().map(e -> new OfflineMessageCountVO(e.getKey(), e.getValue())).collect(Collectors.toList()));
+            promise.complete(map);
         });
         return promise.future();
     }
@@ -192,16 +205,23 @@ public class ChatServiceImpl implements ChatService {
     /**
      * 加载用户离线消息数量
      *
-     * @param uid 用户
+     * @param uid     用户
+     * @param isGroup
      */
     @Override
-    public Future<Map<String, Integer>> offlineMessageCountAndUpdateChatList(String uid) {
+    public Future<Map<String, Integer>> offlineMessageCountAndUpdateChatList(String uid, boolean isGroup) {
         Promise<Map<String, Integer>> promise = Promise.promise();
         CompositeFuture.all(
                 mongoClient.find(CollectionEnum.chat_list.name(), JsonObject.of("uid", uid)),
                 mongoClient.findWithOptions(
                         CollectionEnum.message_bucket.name(),
-                        JsonObject.of("$and", JsonArray.of(JsonObject.of("to", uid), JsonObject.of("offlineMessage", true))),
+                        JsonObject.of("$and",
+                                JsonArray.of(
+                                        JsonObject.of("to", uid),
+                                        JsonObject.of("offlineMessage", true),
+                                        JsonObject.of("groupMessage", isGroup)
+                                )
+                        ),
                         new FindOptions().setFields(JsonObject.of("from", 1, "_id", 1))
                 )
         ).onFailure(promise::fail).onSuccess(f -> {
@@ -219,6 +239,46 @@ public class ChatServiceImpl implements ChatService {
                     .collect(Collectors.toList())
             ).onFailure(promise::fail).onSuccess(v -> promise.complete(map));
         });
+        return promise.future();
+    }
+
+    /**
+     * 查询聊天记录,分页
+     *
+     * @param uid      当前用户
+     * @param targetId 目标用户/群
+     * @param isGroup  是否是群
+     * @param page     页码
+     * @param size     页数量
+     * @return 聊天记录
+     */
+    @Override
+    public Future<List<ChatMessage>> loadChatMessageRecord(String uid, String targetId, boolean isGroup, Integer page, Integer size) {
+        Promise<List<ChatMessage>> promise = Promise.promise();
+        return promise.future();
+    }
+
+    /**
+     * 消除离线消息标记
+     *
+     * @param uid      当前用户
+     * @param targetId 目标用户/群
+     * @param isGroup  是否是群
+     * @return 是否成功
+     */
+    @Override
+    public Future<Void> clearOfflineMessage(String uid, String targetId, boolean isGroup) {
+        Promise<Void> promise = Promise.promise();
+        mongoClient.updateCollection(CollectionEnum.message_bucket.name(),
+                JsonObject.of("$and",
+                        JsonArray.of(
+                                JsonObject.of("from", targetId),
+                                JsonObject.of("to", uid),
+                                JsonObject.of("groupMessage", isGroup)
+                        )
+                ),
+                JsonObject.of("$set", JsonObject.of("offlineMessage", false))
+        ).onFailure(promise::fail).onSuccess(v -> promise.complete());
         return promise.future();
     }
 

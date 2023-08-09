@@ -58,14 +58,13 @@ public class ChatController extends HttpRegister {
                                         .build().addSelf();
                                 log.info("size:{}, uid:{}",
                                         Client.CLIENT_POOL.size(),
-                                        Client.CLIENT_POOL.values().stream().map(Client::getUid).collect(Collectors.joining())
+                                        Client.CLIENT_POOL.values().stream().map(Client::getUid).collect(Collectors.joining("-"))
                                 );
                                 serverWebSocket.handler(buffer -> {
                                     Message message = null;
                                     try {
                                         message = new JsonObject(buffer.toString()).mapTo(Message.class);
                                     } catch (Exception e) {
-                                        e.printStackTrace();
                                         log.error("parse message error:{}", e.getMessage());
                                         vertx.eventBus().send(client.getTextAddressId(), MessageTypeEnum.FAIL.message("消息格式错误"));
                                         return;
@@ -84,11 +83,17 @@ public class ChatController extends HttpRegister {
                     .onFailure(event -> context.json(R.resp(false, "没有权限", null)));
         });
 
-        /** 消息 **/
+        /** 离线消息 **/
 
-        router.get("/api/msg/offline-count").handler(context ->
-                chatService.offlineMessageCountAndUpdateChatList(context.user().principal().getString("uid"))
+        router.get("/api/offline-msg/count").handler(context ->
+                chatService.offlineMessageCountAndUpdateChatList(context.user().principal().getString("uid"), false)
                         .onSuccess(r -> context.json(R.ok(r)))
+                        .onFailure(t -> context.json(R.fail(t)))
+        );
+
+        router.put("/api/offline-msg/:targetId").handler(context ->
+                chatService.clearOfflineMessage(context.user().principal().getString("uid"), context.pathParam("targetId"), false)
+                        .onSuccess(r -> context.json(R.ok()))
                         .onFailure(t -> context.json(R.fail(t)))
         );
 

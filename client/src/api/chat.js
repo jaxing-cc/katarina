@@ -31,5 +31,5 @@ export function deleteChatListItem(uid) {
  * 未读消息count
  */
 export function loadOfflineMsgCount() {
-    return request.get("/api/msg/offline-count");
+    return request.get("/api/offline-msg/count");
 }

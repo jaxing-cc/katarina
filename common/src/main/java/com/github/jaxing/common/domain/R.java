@@ -20,6 +20,10 @@ public class R<T> {
         return resp(true, "ok", data);
     }
 
+    public static <T> R<T> ok() {
+        return resp(true, "ok", null);
+    }
+
     public static R<Void> fail(Throwable throwable) {
         return resp(false, throwable.getMessage(), null);
     }
