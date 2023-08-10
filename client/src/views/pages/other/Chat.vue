@@ -1,9 +1,9 @@
 <template>
   <div id="chatWrapper">
     <user-card class="chatHeader" :user="targetUser" :show-username="true"></user-card>
-    <van-row class="chatBody">
+    <div class="chatBody" id="body">
       <chat-context :data="messageRecordInfo.data" :targetUser="targetUser" :loginUser="loginUser"></chat-context>
-    </van-row>
+    </div>
     <van-row class="chatInput">
       <van-field
           v-model="inputMessage"
@@ -54,10 +54,16 @@ export default {
       }).then(res => {
         if (res.success) {
           this.messageRecordInfo.data.push(res.data)
+          this.moveToBottom()
         } else {
           Toast("网络异常，请重试")
         }
       })
+    },
+    moveToBottom() {
+      let body = document.getElementById("body")
+      body.scrollTop = body.scrollHeight
+      console.log(body)
     },
     loadHistoryMessage() {
       loadMessageRecord(this.targetUser._id, this.messageRecordInfo.page, this.messageRecordInfo.size).then(res => {
@@ -116,7 +122,7 @@ export default {
 }
 
 .chatBody {
-  overflow: scroll;
+  overflow-y: scroll;
   width: 100%;
   top: 55px;
   position: absolute;
