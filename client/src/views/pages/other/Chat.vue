@@ -45,16 +45,19 @@ export default {
 
   methods: {
     send(type) {
-      let message = {
-        _id: new Date().getTime(),
+      sendMessage({
         groupMessage: false,
         content: this.inputMessage,
         contentType: type,
         to: this.targetUser._id,
         createTime: new Date().getTime()
-      };
-      sendMessage(message)
-      this.messageRecordInfo.data.push(message)
+      }).then(res => {
+        if (res.success) {
+          this.messageRecordInfo.data.push(res.data)
+        } else {
+          Toast("网络异常，请重试")
+        }
+      })
     },
     loadHistoryMessage() {
       loadMessageRecord(this.targetUser._id, this.messageRecordInfo.page, this.messageRecordInfo.size).then(res => {
@@ -69,7 +72,6 @@ export default {
     },
     chatMsgHandler(e) {
       this.messageRecordInfo.data.push(e.detail)
-      console.log(this.messageRecordInfo.data)
     }
   },
 

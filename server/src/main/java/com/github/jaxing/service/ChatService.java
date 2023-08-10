@@ -21,7 +21,7 @@ public interface ChatService {
      * @param chatMessage 消息
      * @return 是否成功
      */
-    Future<Void> sendChatMessage(User currentUser, ChatMessage chatMessage);
+    Future<ChatMessage> sendChatMessage(User currentUser, ChatMessage chatMessage);
 
     /**
      * 增加聊天列表

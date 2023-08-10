@@ -33,9 +33,6 @@ import java.util.stream.Collectors;
 public class ChatServiceImpl implements ChatService {
 
     @Resource
-    private UserService userService;
-
-    @Resource
     private MongoClient mongoClient;
 
     /**
@@ -46,8 +43,8 @@ public class ChatServiceImpl implements ChatService {
      * @return 是否成功
      */
     @Override
-    public Future<Void> sendChatMessage(User currentUser, ChatMessage chatMessage) {
-        Promise<Void> promise = Promise.promise();
+    public Future<ChatMessage> sendChatMessage(User currentUser, ChatMessage chatMessage) {
+        Promise<ChatMessage> promise = Promise.promise();
         if (chatMessage.getGroupMessage()) {
             promise.fail("暂不支持群组");
             return promise.future();
@@ -62,7 +59,7 @@ public class ChatServiceImpl implements ChatService {
         }
         mongoClient.insert(CollectionEnum.message_bucket.name(), JsonObject.mapFrom(chatMessage), res -> {
             if (res.succeeded()) {
-                promise.complete(null);
+                promise.complete(chatMessage);
             } else {
                 promise.fail(res.cause());
             }
@@ -259,9 +256,7 @@ public class ChatServiceImpl implements ChatService {
                         ))
                 )
         );
-        System.out.println(query);
-        mongoClient.findWithOptions(CollectionEnum.message_bucket.name(),
-                query,
+        mongoClient.findWithOptions(CollectionEnum.message_bucket.name(), query,
                 new FindOptions().setSkip(PageUtils.getSkip(page, size)).setLimit(size).setSort(JsonObject.of("createTime", -1))
         ).onFailure(promise::fail).onSuccess(list -> {
             List<ChatMessage> resultList = list.stream().map(j -> j.mapTo(ChatMessage.class)).collect(Collectors.toList());
