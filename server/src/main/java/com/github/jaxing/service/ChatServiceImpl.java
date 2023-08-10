@@ -33,9 +33,6 @@ import java.util.stream.Collectors;
 public class ChatServiceImpl implements ChatService {
 
     @Resource
-    private ChatService chatService;
-
-    @Resource
     private UserService userService;
 
     @Resource
@@ -55,15 +52,8 @@ public class ChatServiceImpl implements ChatService {
             promise.fail("暂不支持群组");
             return promise.future();
         }
-        String content = chatMessage.getContent();
-        System.out.println(content);
-        char[] chars = content.toCharArray();
-        for (char aChar : chars) {
-            System.out.println(aChar + "---" + ((int) aChar));
-        }
-        System.out.println(((int) '\n'));
         Client client = Client.CLIENT_POOL.get(chatMessage.getTo());
-        chatMessage.setMessageId(ObjectId.get().toHexString());
+        chatMessage.setId(ObjectId.get().toHexString());
         chatMessage.setCreateTime(System.currentTimeMillis());
         chatMessage.setFrom(currentUser.principal().getString("uid"));
         chatMessage.setOfflineMessage(true);
@@ -253,8 +243,27 @@ public class ChatServiceImpl implements ChatService {
      * @return 聊天记录
      */
     @Override
-    public Future<List<ChatMessage>> loadChatMessageRecord(String uid, String targetId, boolean isGroup, Integer page, Integer size) {
+    public Future<List<ChatMessage>> getChatMessageRecord(String uid, String targetId, boolean isGroup, Integer page, Integer size) {
         Promise<List<ChatMessage>> promise = Promise.promise();
+        JsonObject query = JsonObject.of("$or",
+                JsonArray.of(
+                        JsonObject.of("$and", JsonArray.of(
+                                JsonObject.of("from", targetId),
+                                JsonObject.of("to", uid),
+                                JsonObject.of("groupMessage", isGroup)
+                        )),
+                        JsonObject.of("$and", JsonArray.of(
+                                JsonObject.of("from", uid),
+                                JsonObject.of("to", targetId),
+                                JsonObject.of("groupMessage", isGroup)
+                        ))
+                )
+        );
+        System.out.println(query);
+        mongoClient.findWithOptions(CollectionEnum.message_bucket.name(),
+                query,
+                new FindOptions().setSkip(PageUtils.getSkip(page, size)).setLimit(size).setSort(JsonObject.of("createTime", -1))
+        ).onFailure(promise::fail).onSuccess(list -> promise.complete(list.stream().map(j -> j.mapTo(ChatMessage.class)).collect(Collectors.toList())));
         return promise.future();
     }
 
@@ -269,7 +278,7 @@ public class ChatServiceImpl implements ChatService {
     @Override
     public Future<Void> clearOfflineMessage(String uid, String targetId, boolean isGroup) {
         Promise<Void> promise = Promise.promise();
-        mongoClient.updateCollection(CollectionEnum.message_bucket.name(),
+        mongoClient.updateCollectionWithOptions(CollectionEnum.message_bucket.name(),
                 JsonObject.of("$and",
                         JsonArray.of(
                                 JsonObject.of("from", targetId),
@@ -277,7 +286,8 @@ public class ChatServiceImpl implements ChatService {
                                 JsonObject.of("groupMessage", isGroup)
                         )
                 ),
-                JsonObject.of("$set", JsonObject.of("offlineMessage", false))
+                JsonObject.of("$set", JsonObject.of("offlineMessage", false)),
+                new UpdateOptions().setMulti(true)
         ).onFailure(promise::fail).onSuccess(v -> promise.complete());
         return promise.future();
     }

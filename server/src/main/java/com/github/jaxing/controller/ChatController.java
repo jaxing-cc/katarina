@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 
 import static io.vertx.json.schema.common.dsl.Schemas.numberSchema;
 import static io.vertx.json.schema.common.dsl.Schemas.objectSchema;
+import static io.vertx.json.schema.common.dsl.Schemas.stringSchema;
 
 @Component
 @Slf4j
@@ -97,6 +98,21 @@ public class ChatController extends HttpRegister {
                         .onFailure(t -> context.json(R.fail(t)))
         );
 
+        /** 聊天记录 **/
+
+        router.get("/api/msg/record/:targetId").handler(validationUtils.builder()
+                .queryParameter(Parameters.param("page", numberSchema().with(Keywords.minimum(1)).defaultValue(1)))
+                .queryParameter(Parameters.param("size", numberSchema().defaultValue(10))).build())
+                .handler(
+                        context -> chatService.getChatMessageRecord(
+                                context.user().principal().getString("uid"),
+                                context.pathParam("targetId"), false,
+                                Integer.parseInt(context.request().getParam("page")),
+                                Integer.parseInt(context.request().getParam("size"))
+                        ).onSuccess(r -> context.json(R.ok(r))).onFailure(t -> context.json(R.fail(t)))
+                );
+
+        /** 消息发送 **/
 
         router.post("/api/msg/send").handler(validationUtils.validationJson(objectSchema()
                 .property("to", validationUtils.get("oid"))

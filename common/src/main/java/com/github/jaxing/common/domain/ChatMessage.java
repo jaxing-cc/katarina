@@ -1,5 +1,6 @@
 package com.github.jaxing.common.domain;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 import java.io.Serializable;
@@ -12,7 +13,8 @@ import java.util.Date;
 @Data
 public class ChatMessage implements Serializable {
 
-    private String messageId;
+    @JsonProperty("_id")
+    private String id;
 
     private String from;
 

@@ -73,7 +73,7 @@ public interface ChatService {
      * @param size     页数量
      * @return 聊天记录
      */
-    Future<List<ChatMessage>> loadChatMessageRecord(String uid, String targetId, boolean isGroup, Integer page, Integer size);
+    Future<List<ChatMessage>> getChatMessageRecord(String uid, String targetId, boolean isGroup, Integer page, Integer size);
 
     /**
      * 消除离线消息标记
