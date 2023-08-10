@@ -263,7 +263,11 @@ public class ChatServiceImpl implements ChatService {
         mongoClient.findWithOptions(CollectionEnum.message_bucket.name(),
                 query,
                 new FindOptions().setSkip(PageUtils.getSkip(page, size)).setLimit(size).setSort(JsonObject.of("createTime", -1))
-        ).onFailure(promise::fail).onSuccess(list -> promise.complete(list.stream().map(j -> j.mapTo(ChatMessage.class)).collect(Collectors.toList())));
+        ).onFailure(promise::fail).onSuccess(list -> {
+            List<ChatMessage> resultList = list.stream().map(j -> j.mapTo(ChatMessage.class)).collect(Collectors.toList());
+            Collections.reverse(resultList);
+            promise.complete(resultList);
+        });
         return promise.future();
     }
 

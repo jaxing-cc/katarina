@@ -27,9 +27,17 @@ export function addChatListItem(uid) {
 export function deleteChatListItem(uid) {
     return request.delete("api/chat-list/" + uid);
 }
+
 /**
  * 未读消息count
  */
 export function loadOfflineMsgCount() {
     return request.get("/api/offline-msg/count");
+}
+
+/**
+ * 加载聊天记录
+ */
+export function loadMessageRecord(targetId, page, size) {
+    return request.get("/api/msg/record/" + targetId + "?page=" + page + "&size=" + size);
 }

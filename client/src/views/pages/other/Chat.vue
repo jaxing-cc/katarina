@@ -2,7 +2,7 @@
   <div id="chatWrapper">
     <user-card class="chatHeader" :user="targetUser" :show-username="true"></user-card>
     <van-row class="chatBody">
-      <chat-context :data="mock" :targetUser="targetUser" :loginUser="loginUser"></chat-context>
+      <chat-context :data="messageRecordInfo.data" :targetUser="targetUser" :loginUser="loginUser"></chat-context>
     </van-row>
     <van-row class="chatInput">
       <van-field
@@ -25,7 +25,7 @@
 import {getByUid} from "@/api/auth";
 import {Toast} from "vant";
 import UserCard from "@/components/UserCard";
-import {sendMessage} from "@/api/chat";
+import {loadMessageRecord, sendMessage} from "@/api/chat";
 import ChatContext from "@/components/ChatContext";
 
 export default {
@@ -35,40 +35,41 @@ export default {
     return {
       targetUser: {},
       inputMessage: "",
-      mock: [
-        {
-          messageId: "64cb1846d35ecf725e05a65f",
-          from: "64882d8cb11b5f4c1827460b",
-          to: "64b7af62f6c5071f233c6352",
-          groupMessage: false,
-          content: "hi",
-          contentType: 0,
-          offlineMessage: false,
-          createTime: 1691031622553
-        },
-        {
-          messageId: "64cb1846d35ecf725e05a66f",
-          from: "64b7af62f6c5071f233c6352",
-          to: "64882d8cb11b5f4c1827460b",
-          groupMessage: false,
-          content: "hi",
-          contentType: 0,
-          offlineMessage: false,
-          createTime: 1691031622153
-        },
-      ]
+      messageRecordInfo: {
+        data: [],
+        page: 1,
+        size: 10
+      },
     };
   },
 
   methods: {
     send(type) {
-      sendMessage({
+      let message = {
+        _id: new Date().getTime(),
         groupMessage: false,
         content: this.inputMessage,
         contentType: type,
         to: this.targetUser._id,
         createTime: new Date().getTime()
+      };
+      sendMessage(message)
+      this.messageRecordInfo.data.push(message)
+    },
+    loadHistoryMessage() {
+      loadMessageRecord(this.targetUser._id, this.messageRecordInfo.page, this.messageRecordInfo.size).then(res => {
+        if (res.success) {
+          if (res.data) {
+            this.messageRecordInfo.data = res.data;
+          } else {
+            Toast("网络异常，请重试")
+          }
+        }
       })
+    },
+    chatMsgHandler(e) {
+      this.messageRecordInfo.data.push(e.detail)
+      console.log(this.messageRecordInfo.data)
     }
   },
 
@@ -80,18 +81,22 @@ export default {
   },
 
   created() {
+    let that = this;
+    window.addEventListener("msg@1001", this.chatMsgHandler)
     getByUid(this.targetUid).then(res => {
       if (res.success) {
         if (!res.data) {
           Toast("用户不存在")
         } else {
           this.targetUser = res.data;
+          that.loadHistoryMessage()
         }
       }
     })
   },
 
   destroyed() {
+    window.removeEventListener("msg@1001", this.chatMsgHandler)
   },
 };
 </script>

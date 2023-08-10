@@ -1,6 +1,6 @@
 <template>
   <van-row>
-    <van-row type="flex" v-if="data" v-for="(d,index) in data" :key="d.messageId" class="messageRow">
+    <van-row type="flex" v-if="data" v-for="(d,index) in data" :key="d._id" class="messageRow">
       <van-col :span="4">
         <van-image
             v-if="!myMessage(d.from)"
