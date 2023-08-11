@@ -36,6 +36,13 @@ export function loadOfflineMsgCount() {
 }
 
 /**
+ * 清理未读消息
+ */
+export function clearOfflineMsg(targetId) {
+    return request.put("/api/offline-msg/" + targetId);
+}
+
+/**
  * 加载聊天记录
  */
 export function loadMessageRecord(targetId, page, size) {

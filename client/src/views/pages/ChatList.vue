@@ -40,6 +40,7 @@
     <van-popup
         v-model="chat.switch" closeable round
         :close-on-click-overlay="false"
+        @close="closeChat(chat.targetId)"
         position="bottom" :style="{ height: '95%' }">
       <chat v-if="chat.switch" :login-user="loginUser" :target-uid="chat.targetId"></chat>
     </van-popup>
@@ -55,7 +56,7 @@ import {decodeToken} from "@/utils/token";
 import {getByUid} from "@/api/auth";
 import {Toast} from "vant";
 import UserCard from "@/components/UserCard";
-import {addChatListItem, deleteChatListItem, loadChatList, loadOfflineMsgCount} from "@/api/chat";
+import {addChatListItem, clearOfflineMsg, deleteChatListItem, loadChatList, loadOfflineMsgCount} from "@/api/chat";
 
 export default {
   name: 'ChatList',
@@ -64,7 +65,7 @@ export default {
     return {
       chat: {
         switch: false,
-        targetId: '64b7af62f6c5071f233c6352'
+        targetId: null,
       },
       loginUser: {},
       searchStatus: false,
@@ -163,7 +164,7 @@ export default {
     addItemToChatList(uid, callback) {
       addChatListItem(uid).then(res => {
         if (res.success) {
-          callback
+          callback()
         } else {
           Toast("网络异常，请重试")
         }
@@ -173,15 +174,30 @@ export default {
     startChat(uid) {
       this.chat.targetId = uid
       this.chat.switch = true
+      this.addItemToChatList(uid, () => {
+        clearOfflineMsg(uid)
+      })
     },
 
-    chatMsgHandler(e) {
-      e = e.detail
+    closeChat(uid) {
+      this.chat.targetId = null
+      this.chat.switch = false
+      this.updateOfflineMsgCount(uid, () => null)
+    },
+    updateOfflineMsgCount(uid, callback) {
       let obj = {}
       const keys = Object.keys(this.chatList.unreadCount);
       Object.values(this.chatList.unreadCount).forEach((item, index) => obj[keys[index]] = item);
-      obj[e.from] = obj[e.from] ? obj[e.from] + 1 : 1;
+      obj[uid] = callback(obj[uid])
       this.chatList.unreadCount = obj;
+    },
+    chatMsgHandler(e) {
+      e = e.detail
+      //不是正在聊天的用户则+1
+      if (e.from !== this.chat.targetId && !this.chat.switch) {
+        //未读计数+1
+        this.updateOfflineMsgCount(e.from, num => num ? num + 1 : 1)
+      }
       let data = this.chatList.data;
       let hasFromUser = false;
       for (let i = 0; i < data.length; i++) {
@@ -202,7 +218,6 @@ export default {
                 createTime: new Date().getTime()
               }
             })
-            console.log(data)
           }
         })
       }
