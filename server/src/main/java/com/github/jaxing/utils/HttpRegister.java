@@ -33,7 +33,8 @@ public abstract class HttpRegister {
                     .handler(
                             CorsHandler.create()
                                     .addOrigin("http://localhost")
-                                    .addOrigin("http://192.168.1.102")
+                                    .addOrigin("http://10.0.8.8")
+                                    .addOrigin("http://101.42.249.167")
                                     .allowedMethods(new HashSet<>(Arrays.asList(
                                             HttpMethod.GET,
                                             HttpMethod.POST,

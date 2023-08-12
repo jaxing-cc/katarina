@@ -22,6 +22,8 @@ import {
     Divider,
     SwipeCell,
     List,
+    Icon,
+    Grid, GridItem,
     RadioGroup, Radio,
 } from 'vant';
 Vue.use(Button);
@@ -49,3 +51,6 @@ Vue.use(SwipeCell);
 Vue.use(List);
 Vue.use(Radio);
 Vue.use(RadioGroup);
+Vue.use(Icon);
+Vue.use(Grid);
+Vue.use(GridItem);

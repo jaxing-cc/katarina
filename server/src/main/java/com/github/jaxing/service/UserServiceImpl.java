@@ -7,7 +7,6 @@ import com.github.jaxing.common.dto.RegisterRequestDTO;
 import com.github.jaxing.common.enums.CollectionEnum;
 import com.github.jaxing.common.enums.RoleEnum;
 import com.github.jaxing.common.utils.SecurityUtils;
-import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonArray;

@@ -1,9 +1,9 @@
 <template>
   <van-row>
-    <van-row type="flex" v-if="data" v-for="(d,index) in data" :key="d._id" class="messageRow">
-      <van-col :span="4">
+    <van-row type="flex" v-if="data" v-for="(d,index) in data" :key="d._id" class="messageRow"
+             :class="{ right: myMessage(d.from) }">
+      <van-col v-if="!myMessage(d.from)" :span="4">
         <van-image
-            v-if="!myMessage(d.from)"
             error-icon="smile-o"
             class="userImg"
             width="30" height="30"
@@ -11,7 +11,7 @@
             position="left" :src="loadAvatar(d.from)"/>
       </van-col>
 
-      <van-col :span="16" :style="myMessage(d.from)? 'text-align: right;':'text-align: left;'">
+      <van-col :span="16" :class="myMessage(d.from)? 'right_msg' : 'left_msg'">
         <div class="messageContentHeader">
           {{ getUserById(d.from).name + " " + new Date(d.createTime).toLocaleString() }}
         </div>
@@ -20,9 +20,8 @@
         </div>
       </van-col>
 
-      <van-col :span="4">
+      <van-col v-if="myMessage(d.from)" :span="4">
         <van-image
-            v-if="myMessage(d.from)"
             error-icon="smile-o"
             class="userImg"
             width="30" height="30"
@@ -66,7 +65,15 @@ export default {
   margin-top: 10px;
 }
 
-.messageBox {
+.messageRow.right {
+  justify-content: end;
+}
+
+.right_msg {
+  text-align: right;
+}
+
+.left_msg {
   text-align: left;
 }
 
@@ -79,8 +86,15 @@ export default {
 
 .messageContent {
   font-size: 13px;
-  background-color: darkgrey;
+  font-weight: bolder;
+  line-height: 1.5;
   border-radius: 10px;
+  word-break: break-all;
   padding: 10px;
+  text-align: left;
+  width: fit-content;
+  display: inline-block;
+  background-color: #f0f0ee;
 }
+
 </style>

@@ -4,16 +4,21 @@
     <div class="chatBody" id="body">
       <chat-context :data="messageRecordInfo.data" :targetUser="targetUser" :loginUser="loginUser"></chat-context>
     </div>
-    <van-row class="chatInput">
+    <van-row class="chatInput" @click.stop>
+      <VEmojiV2 v-if="emoji.showEmoji" :showCategories="false" :showSearch="false" :continuousList="true" @select="selectEmoji"/>
+      <van-row>
+        <van-col :span="4" class="chatInputIcon">
+          <van-icon size="20" :name="emoji.icon" @click="clickEmojiSwitch"></van-icon>
+        </van-col>
+      </van-row>
       <van-field
           v-model="inputMessage"
-          rows="1"
           :autosize="{ maxHeight: 50, minHeight: 50 }"
           type="textarea"
-          maxlength="200"
-          show-word-limit>
+          placeholder="200字以内"
+          maxlength="200">
         <template #button>
-          <van-button size="small" color="#814f56" icon="guide-o" @click="send(0)"></van-button>
+          <van-button size="small" color="#3E7FCC" @click="send(0)" icon="success"></van-button>
         </template>
       </van-field>
     </van-row>
@@ -28,6 +33,7 @@ import UserCard from "@/components/UserCard";
 import {loadMessageRecord, sendMessage} from "@/api/chat";
 import ChatContext from "@/components/ChatContext";
 
+
 export default {
   name: 'Chat',
   components: {ChatContext, UserCard},
@@ -35,6 +41,11 @@ export default {
     return {
       targetUser: {},
       inputMessage: "",
+      active: '',
+      emoji: {
+        showEmoji: false,
+        icon: "smile-o"
+      },
       messageRecordInfo: {
         data: [],
         page: 1,
@@ -54,7 +65,11 @@ export default {
       }).then(res => {
         if (res.success) {
           this.messageRecordInfo.data.push(res.data)
-          this.moveToBottom()
+          this.closeEmojiSwitch()
+          this.inputMessage = null
+          this.$nextTick(() => {
+            this.moveToBottom();
+          });
         } else {
           Toast("网络异常，请重试")
         }
@@ -62,14 +77,16 @@ export default {
     },
     moveToBottom() {
       let body = document.getElementById("body")
-      body.scrollTop = body.scrollHeight
-      console.log(body)
+      body.scrollTo(0, body.scrollHeight)
     },
     loadHistoryMessage() {
       loadMessageRecord(this.targetUser._id, this.messageRecordInfo.page, this.messageRecordInfo.size).then(res => {
         if (res.success) {
           if (res.data) {
             this.messageRecordInfo.data = res.data;
+            this.$nextTick(() => {
+              this.moveToBottom();
+            });
           } else {
             Toast("网络异常，请重试")
           }
@@ -78,6 +95,21 @@ export default {
     },
     chatMsgHandler(e) {
       this.messageRecordInfo.data.push(e.detail)
+    },
+    clickEmojiSwitch() {
+      this.emoji.showEmoji = !this.emoji.showEmoji
+      if (this.emoji.showEmoji) {
+        this.emoji.icon = "smile"
+      } else {
+        this.emoji.icon = "smile-o"
+      }
+    },
+    closeEmojiSwitch() {
+      this.emoji.showEmoji = false
+      this.emoji.icon = "smile-o"
+    },
+    selectEmoji(e) {
+      this.inputMessage += e.data
     }
   },
 
@@ -86,6 +118,7 @@ export default {
   updated() {
   },
   mounted() {
+    document.addEventListener("click", this.closeEmojiSwitch);
   },
 
   created() {
@@ -104,6 +137,7 @@ export default {
   },
 
   destroyed() {
+    document.removeEventListener("click", this.closeEmojiSwitch);
     window.removeEventListener("msg@1001", this.chatMsgHandler)
   },
 };
@@ -126,12 +160,18 @@ export default {
   width: 100%;
   top: 55px;
   position: absolute;
-  bottom: 90px;
+  bottom: 100px;
 }
 
 .chatInput {
   width: 100%;
   position: absolute;
   bottom: 0;
+}
+
+.chatInputIcon {
+  background-color: white;
+  border-radius: 5px;
+  margin-top: 5px;
 }
 </style>
