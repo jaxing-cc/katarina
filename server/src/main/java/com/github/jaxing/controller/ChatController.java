@@ -18,15 +18,17 @@ import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.validation.builder.Parameters;
 import io.vertx.json.schema.draft7.dsl.Keywords;
+import io.vertx.redis.client.RedisAPI;
+import io.vertx.redis.client.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import static io.vertx.json.schema.common.dsl.Schemas.numberSchema;
 import static io.vertx.json.schema.common.dsl.Schemas.objectSchema;
-import static io.vertx.json.schema.common.dsl.Schemas.stringSchema;
 
 @Component
 @Slf4j
@@ -44,8 +46,16 @@ public class ChatController extends HttpRegister {
     @Resource
     private ChatService chatService;
 
+    @Resource
+    private RedisAPI redisAPI;
+
     @Override
     protected void start(Router router, Vertx vertx) {
+        redisAPI.keys("*").onSuccess(resp -> {
+            Map<String, Response> attributes = resp.attributes();
+            System.out.println(attributes);
+            System.out.println(resp);
+        });
         router.route("/ws").handler(context -> {
             jwtAuth.authenticate(new TokenCredentials(context.request().getParam(Constant.AUTHORIZATION))).onSuccess(user ->
                     context.request()

@@ -4,7 +4,6 @@ import com.github.jaxing.service.ChatService;
 import com.github.jaxing.utils.ConfigUtils;
 import com.github.jaxing.utils.HttpRegister;
 import io.vertx.core.AbstractVerticle;
-import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
@@ -14,8 +13,6 @@ import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
-
-import javax.annotation.Resource;
 
 
 /**
@@ -27,9 +24,6 @@ import javax.annotation.Resource;
 public class ServerVerticle extends AbstractVerticle implements ApplicationContextAware {
 
     private ApplicationContext applicationContext;
-
-    @Resource
-    private ChatService chatService;
 
     @Override
     public void start(Promise<Void> startPromise) {
