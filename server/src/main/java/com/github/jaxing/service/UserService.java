@@ -38,4 +38,14 @@ public interface UserService {
      * @return 用户信息
      */
     Future<List<UserInfo>> searchUser(String key);
+
+    /**
+     * 关注/取关
+     *
+     * @param uid       用户id
+     * @param targetUid 用户id
+     * @param action  关注/取关/拉黑/取消拉黑
+     * @return 结果
+     */
+    Future<Void> follow(String uid, String targetUid, String action);
 }

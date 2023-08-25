@@ -3,7 +3,6 @@ package com.github.jaxing.controller;
 import com.github.jaxing.auth.UsernameAndPasswordProvider;
 import com.github.jaxing.common.domain.R;
 import com.github.jaxing.common.dto.RegisterRequestDTO;
-import com.github.jaxing.common.enums.CollectionEnum;
 import com.github.jaxing.service.UserService;
 import com.github.jaxing.utils.ConfigUtils;
 import com.github.jaxing.utils.HttpRegister;
@@ -14,10 +13,9 @@ import io.vertx.ext.auth.JWTOptions;
 import io.vertx.ext.auth.User;
 import io.vertx.ext.auth.authentication.UsernamePasswordCredentials;
 import io.vertx.ext.auth.jwt.JWTAuth;
-import io.vertx.ext.mongo.MongoClient;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.handler.JWTAuthHandler;
-import io.vertx.json.schema.common.dsl.NumberKeyword;
+import io.vertx.ext.web.validation.builder.Parameters;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 
@@ -112,5 +110,19 @@ public class UserController extends HttpRegister {
                     .onFailure(t -> context.json(R.fail(t)))
                     .onSuccess(u -> context.json(R.ok(u)));
         });
+
+        /**
+         * 修改用户关系
+         */
+        router.put("/api/user/relationship/:uid/:action").handler(validationUtils.builder()
+                .pathParameter(Parameters.param("uid", stringSchema().with(maxLength(24)).with(minLength(24)))).build())
+                .handler(context -> userService.follow(
+                        context.user().principal().getString("uid"),
+                        context.pathParam("uid"),
+                        context.pathParam("action"))
+                        .onFailure(t -> context.json(R.fail(t)))
+                        .onSuccess(u -> context.json(R.ok()))
+                );
+
     }
 }
