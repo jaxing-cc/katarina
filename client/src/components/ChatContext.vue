@@ -1,35 +1,39 @@
 <template>
-  <van-row>
-    <van-row type="flex" v-if="data" v-for="(d,index) in data" :key="d._id" class="messageRow"
-             :class="{ right: myMessage(d.from) }">
-      <van-col v-if="!myMessage(d.from)" :span="4">
-        <van-image
-            error-icon="smile-o"
-            class="userImg"
-            width="30" height="30"
-            round
-            position="left" :src="loadAvatar(d.from)"/>
-      </van-col>
+  <div>
+    <div v-if="data" v-for="(d,index) in data" :key="index">
+      <span v-if="groupFlagMap && groupFlagMap[index]" class="chatTime">
+        {{ new Date(groupFlagMap[index]).toLocaleString() }}
+      </span>
+      <van-row type="flex" class="messageRow" :class="{ right: myMessage(d.from) }">
+        <van-col v-if="!myMessage(d.from)" :span="4">
+          <van-image
+              error-icon="smile-o"
+              class="userImg"
+              width="30" height="30"
+              round
+              position="left" :src="loadAvatar(d.from)"/>
+        </van-col>
 
-      <van-col :span="16" :class="myMessage(d.from)? 'right_msg' : 'left_msg'">
-        <div class="messageContentHeader">
-          {{ getUserById(d.from).name + " " + new Date(d.createTime).toLocaleString() }}
-        </div>
-        <div class="messageContent">
-          {{ d.content }}
-        </div>
-      </van-col>
+        <van-col :span="16" :class="myMessage(d.from)? 'right_msg' : 'left_msg'">
+          <div class="messageContentHeader">
+            {{ getUserById(d.from).name }}
+          </div>
+          <div class="messageContent">
+            {{ d.content }}
+          </div>
+        </van-col>
 
-      <van-col v-if="myMessage(d.from)" :span="4">
-        <van-image
-            error-icon="smile-o"
-            class="userImg"
-            width="30" height="30"
-            round
-            position="left" :src="loadAvatar(d.from)"/>
-      </van-col>
-    </van-row>
-  </van-row>
+        <van-col v-if="myMessage(d.from)" :span="4">
+          <van-image
+              error-icon="smile-o"
+              class="userImg"
+              width="30" height="30"
+              round
+              position="left" :src="loadAvatar(d.from)"/>
+        </van-col>
+      </van-row>
+    </div>
+  </div>
 </template>
 
 <script>
@@ -38,6 +42,7 @@ export default {
   data() {
     return {
       userMap: [],
+      groupFlagMap: null
     }
   },
   props: ["data", "targetUser", "loginUser"],
@@ -52,8 +57,31 @@ export default {
       let user = this.getUserById(id);
       return user.avatar ? user.avatar : 'avatar-' + (user.gender === 1 ? '1' : '2') + ".jpg";
     },
+    groupByTime() {
+      let dataList = this.data;
+      this.groupFlagMap = [];
+      let last = 0;
+      if (dataList && dataList.length > 0) {
+        this.groupFlagMap[last] = dataList[last].createTime;
+        for (let i = 1; i < dataList.length; i++) {
+          // 五分钟以内分一组
+          if ((dataList[i].createTime - this.groupFlagMap[last]) > (1000 * 60 * 10)) {
+            this.groupFlagMap[i] = dataList[i].createTime;
+            last = i;
+          }
+        }
+      }
+    }
+  },
+  watch: {
+    data(oldV, newV) {
+      this.groupByTime()
+    }
   },
   updated() {
+
+  },
+  mounted() {
   },
   created() {
   }
@@ -61,6 +89,11 @@ export default {
 </script>
 
 <style scoped>
+.chatTime {
+  font-size: 9px;
+  color: darkgrey;
+}
+
 .messageRow {
   margin-top: 10px;
 }

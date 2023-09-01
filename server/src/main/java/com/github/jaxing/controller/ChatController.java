@@ -51,11 +51,6 @@ public class ChatController extends HttpRegister {
 
     @Override
     protected void start(Router router, Vertx vertx) {
-        redisAPI.keys("*").onSuccess(resp -> {
-            Map<String, Response> attributes = resp.attributes();
-            System.out.println(attributes);
-            System.out.println(resp);
-        });
         router.route("/ws").handler(context -> {
             jwtAuth.authenticate(new TokenCredentials(context.request().getParam(Constant.AUTHORIZATION))).onSuccess(user ->
                     context.request()

@@ -56,6 +56,9 @@ export default {
 
   methods: {
     send(type) {
+      if (!this.inputMessage){
+        return;
+      }
       sendMessage({
         groupMessage: false,
         content: this.inputMessage,
