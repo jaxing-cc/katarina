@@ -4,6 +4,7 @@ import {getToken} from '@/utils/token'
 import Home from '@/views/Home.vue'
 import ErrorPage from '../views/ErrorPage.vue'
 import Login from '../views/pages/other/Login.vue'
+import UserInfoPage from "@/views/pages/main/UserInfoPage";
 
 Vue.use(VueRouter)
 
@@ -21,6 +22,11 @@ const routes = [
   {
     path: '/error/page',
     component: ErrorPage
+  }
+  ,
+  {
+    path: '/info',
+    component: UserInfoPage
   }
 ]
 
