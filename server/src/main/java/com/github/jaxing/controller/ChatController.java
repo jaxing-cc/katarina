@@ -24,7 +24,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import static io.vertx.json.schema.common.dsl.Schemas.numberSchema;
@@ -143,7 +142,6 @@ public class ChatController extends HttpRegister {
                                 Integer.parseInt(context.pathParam("page")), Integer.parseInt(context.pathParam("size")))
                                 .onSuccess(list -> context.json(R.ok(list)))
                                 .onFailure(t -> {
-                                    t.printStackTrace();
                                     context.json(R.fail(t));
                                 })
                 );

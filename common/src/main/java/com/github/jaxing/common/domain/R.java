@@ -25,7 +25,11 @@ public class R<T> {
     }
 
     public static R<Void> fail(Throwable throwable) {
-        return resp(false, throwable.getMessage(), null);
+        return resp(false, throwable == null ? null : throwable.getMessage(), null);
+    }
+
+    public static R<Void> fail(String throwable) {
+        return resp(false, throwable, null);
     }
 
     public static <T> R<T> resp(boolean success, String msg, T data) {

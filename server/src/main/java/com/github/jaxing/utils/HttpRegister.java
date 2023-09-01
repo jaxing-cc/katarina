@@ -20,6 +20,8 @@ import java.util.HashSet;
  */
 public abstract class HttpRegister {
 
+    public static final int MAX_BODY_SIZE = 1024 * 1024 * 3;
+
     private static Logger log = LoggerFactory.getLogger(HttpRegister.class);
 
     /**
@@ -43,7 +45,9 @@ public abstract class HttpRegister {
                                             HttpMethod.PATCH,
                                             HttpMethod.PUT
                                     ))))
-                    .handler(BodyHandler.create())//参数处理
+                    .handler(BodyHandler.create()
+                            .setUploadsDirectory(System.getProperty("java.io.tmpdir"))
+                            .setBodyLimit(MAX_BODY_SIZE))
                     .handler(http -> {
                         http.response().setChunked(true);
                         http.next();
