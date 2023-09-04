@@ -13,11 +13,34 @@
           />
         </template>
       </van-cell>
-      <van-cell title="用户名" :label="loginUser.name" is-link/>
-      <van-cell title="性别" :label="loginUser.gender === 1 ? '男' : '女'" is-link/>
-      <van-cell title="邮箱" :label="loginUser.email  ? loginUser.email  : '暂无'" is-link/>
+      <van-cell title="用户名" :label="loginUser.name" is-link @click="openUpdateDialog('name')"/>
+      <van-cell title="性别" :label="loginUser.gender === 1 ? '男' : '女'" is-link @click="openUpdateDialog('gender')"/>
+      <van-cell title="邮箱" :label="loginUser.email  ? loginUser.email  : '暂无'" is-link @click="openUpdateDialog('email')"/>
       <van-cell title="修改密码" is-link/>
     </van-cell-group>
+
+
+    <van-dialog v-model="name.open" title="修改信息" show-cancel-button :before-close="beforeCloseDialog">
+      <van-row>
+        <van-field v-model="name.value" label="昵称" placeholder="请输入用户名"/>
+      </van-row>
+    </van-dialog>
+
+    <van-dialog v-model="gender.open" title="修改信息" show-cancel-button :before-close="beforeCloseDialog">
+      <van-row justify="center" type="flex">
+        <van-radio-group v-model="gender.value" direction="horizontal">
+          <van-radio :name="0">女</van-radio>
+          <van-radio :name="1">男</van-radio>
+        </van-radio-group>
+      </van-row>
+    </van-dialog>
+
+    <van-dialog v-model="email.open" title="修改信息" show-cancel-button :before-close="beforeCloseDialog">
+      <van-row>
+        <van-field v-model="email.value" label="邮箱" placeholder="请输入用户名"/>
+      </van-row>
+    </van-dialog>
+
   </div>
 </template>
 
@@ -36,16 +59,25 @@ export default {
       loginUser: {},
       updateUserInfo: {
         name: null,
-
+      },
+      currentDialog: null,
+      name: {
+        open : false,
+        value: null,
+      },
+      gender: {
+        open : false,
+        value: null,
+      },
+      email: {
+        open : false,
+        value: null,
       }
     }
   },
   methods: {
     onClickLeft() {
       this.$router.push("/")
-    },
-    updateInfo() {
-
     },
     afterRead(file) {
       if (this.avatar.length > 1) {
@@ -100,7 +132,30 @@ export default {
           }
         }
       })
-    }
+    },
+    openUpdateDialog(name){
+      this[name].open = true;
+      this[name].value = this.loginUser[name]
+      this.currentDialog = name;
+    },
+    beforeCloseDialog(action, done){
+      if (action === 'confirm'){
+        let obj = {}
+        obj[this.currentDialog] = this[this.currentDialog].value;
+        updateSelf(obj).then(updateRes => {
+          if (updateRes.success) {
+            Toast("修改成功")
+            this.loadUser()
+            done()
+          } else {
+            Toast("修改失败,请输入有效的数据")
+            done()
+          }
+        })
+      }else{
+        done()
+      }
+    },
   }
   ,
   created() {
