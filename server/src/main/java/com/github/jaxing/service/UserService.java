@@ -44,8 +44,15 @@ public interface UserService {
      *
      * @param uid       用户id
      * @param targetUid 用户id
-     * @param action  关注/取关/拉黑/取消拉黑
+     * @param action    关注/取关/拉黑/取消拉黑
      * @return 结果
      */
     Future<Void> follow(String uid, String targetUid, String action);
+
+    /**
+     * 更新用户信息
+     *
+     * @param userInfo 用户信息
+     */
+    Future<Void> update(UserInfo userInfo);
 }

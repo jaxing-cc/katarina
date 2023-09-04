@@ -15,3 +15,7 @@ export function getByUid(uid) {
 export function getByKey(key) {
     return request.get("api/user/search/" + key);
 }
+
+export function updateSelf(obj) {
+    return request.put("api/user",obj);
+}

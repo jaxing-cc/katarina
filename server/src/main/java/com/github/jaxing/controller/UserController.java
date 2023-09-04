@@ -2,6 +2,7 @@ package com.github.jaxing.controller;
 
 import com.github.jaxing.auth.UsernameAndPasswordProvider;
 import com.github.jaxing.common.domain.R;
+import com.github.jaxing.common.domain.UserInfo;
 import com.github.jaxing.common.dto.RegisterRequestDTO;
 import com.github.jaxing.service.UserService;
 import com.github.jaxing.utils.ConfigUtils;
@@ -103,6 +104,23 @@ public class UserController extends HttpRegister {
         });
 
         /**
+         * 修改用户信息
+         */
+        router.put("/api/user").handler(validationUtils.validationJson(objectSchema()
+                .property("name", validationUtils.get("name"))
+                .property("avatar", validationUtils.get("oid"))
+                .property("email", validationUtils.get("email"))
+                .property("gender", validationUtils.get("gender"))
+        )).handler(context -> {
+            JsonObject body = context.body().asJsonObject();
+            UserInfo userInfo = body.mapTo(UserInfo.class);
+            userInfo.setId(context.user().principal().getString("uid"));
+            userService.update(userInfo)
+                    .onFailure(t -> context.json(R.fail(t)))
+                    .onSuccess(r -> context.json(R.ok()));
+        });
+
+        /**
          * 名字用户名模糊搜索
          */
         router.get("/api/user/search/:key").handler(context -> {
@@ -123,6 +141,5 @@ public class UserController extends HttpRegister {
                         .onFailure(t -> context.json(R.fail(t)))
                         .onSuccess(u -> context.json(R.ok()))
                 );
-
     }
 }

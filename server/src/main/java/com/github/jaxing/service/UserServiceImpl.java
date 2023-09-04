@@ -35,6 +35,9 @@ public class UserServiceImpl implements UserService {
     @Resource
     private MongoClient mongoClient;
 
+    @Resource
+    private FileService fileService;
+
     public void init() {
         UserRole root = new UserRole(ObjectId.get().toHexString(), RoleEnum.ROOT.getCode(), "管理员", "管理员");
         UserRole normal = new UserRole(ObjectId.get().toHexString(), RoleEnum.NORMAL.getCode(), "普通用户", "普通用户");
@@ -136,6 +139,41 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public Future<Void> follow(String uid, String targetUid, String action) {
+        //TODO
         return null;
+    }
+
+    /**
+     * 更新用户信息
+     *
+     * @param userInfo 用户信息
+     */
+    @Override
+    public Future<Void> update(UserInfo userInfo) {
+        Promise<Void> promise = Promise.promise();
+        JsonObject update = JsonObject.of();
+        if (!ObjectUtils.isEmpty(userInfo.getAvatar())){
+            update.put("avatar",userInfo.getAvatar());
+        }
+        if (!ObjectUtils.isEmpty(userInfo.getName())){
+            update.put("name",userInfo.getName());
+        }
+        if (!ObjectUtils.isEmpty(userInfo.getEmail())){
+            update.put("email",userInfo.getEmail());
+        }
+        if (!ObjectUtils.isEmpty(userInfo.getGender())){
+            update.put("gender",userInfo.getGender());
+        }
+        mongoClient.findOneAndUpdate(CollectionEnum.user.name(), JsonObject.of("_id", userInfo.getId()), JsonObject.of("$set", update))
+                .onFailure(promise::fail).onSuccess(event -> {
+            String oldAvatar = event.getString("avatar");
+            String newAvatar = userInfo.getAvatar();
+            if (!ObjectUtils.isEmpty(oldAvatar) && !ObjectUtils.isEmpty(newAvatar) && !oldAvatar.equals(newAvatar)) {
+                // 删除旧头像
+                fileService.delete(oldAvatar);
+            }
+            promise.complete();
+        });
+        return promise.future();
     }
 }

@@ -3,7 +3,7 @@
 
     <van-col span="4" class="marginTop">
       <van-badge dot :color="color">
-        <van-image error-icon="smile-o" class="userImg" :width="imgSize"
+        <van-image error-icon="smile-o" class="userImg" :width="imgSize" :height="imgSize"
                    round position="left" :src="avatar"/>
       </van-badge>
     </van-col>
@@ -27,6 +27,8 @@
 </template>
 
 <script>
+import {getFileUrl} from "@/api/file";
+
 export default {
   name: 'UserCard',
 
@@ -72,7 +74,7 @@ export default {
     },
     loadAvatar() {
       this.avatar = this.user.avatar ?
-          this.user.avatar : 'avatar-' + (this.user.gender === 1 ? '1' : '2') + ".jpg";
+          getFileUrl(this.user.avatar)  : 'avatar-' + (this.user.gender === 1 ? '1' : '2') + ".jpg";
     },
     loadBadge() {
       this.color = this.user.online ? "#1989fa" : "red";

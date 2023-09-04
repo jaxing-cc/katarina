@@ -157,7 +157,7 @@ export default {
     },
 
     selectSearchedUser(uid) {
-      this.addItemToChatList(uid);
+      this.addItemToChatList(uid,()=>{});
       this.startChat(uid)
     },
 

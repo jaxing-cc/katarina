@@ -37,6 +37,8 @@
 </template>
 
 <script>
+import {getFileUrl} from "@/api/file";
+
 export default {
   name: "ChatContext",
   data() {
@@ -55,7 +57,7 @@ export default {
     },
     loadAvatar(id) {
       let user = this.getUserById(id);
-      return user.avatar ? user.avatar : 'avatar-' + (user.gender === 1 ? '1' : '2') + ".jpg";
+      return user.avatar ? getFileUrl(user.avatar) : 'avatar-' + (user.gender === 1 ? '1' : '2') + ".jpg";
     },
     groupByTime() {
       let dataList = this.data;
