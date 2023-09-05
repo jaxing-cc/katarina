@@ -1,17 +1,22 @@
 package com.github.jaxing.service;
 
+import com.github.jaxing.common.domain.ChatListItem;
 import com.github.jaxing.common.domain.Client;
+import com.github.jaxing.common.domain.FollowRecord;
 import com.github.jaxing.common.domain.UserInfo;
 import com.github.jaxing.common.domain.UserRole;
 import com.github.jaxing.common.dto.RegisterRequestDTO;
 import com.github.jaxing.common.enums.CollectionEnum;
 import com.github.jaxing.common.enums.RoleEnum;
+import com.github.jaxing.common.enums.YesOrNoEnum;
 import com.github.jaxing.common.utils.SecurityUtils;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
+import io.vertx.ext.mongo.FindOptions;
 import io.vertx.ext.mongo.MongoClient;
+import io.vertx.ext.mongo.UpdateOptions;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
@@ -21,7 +26,6 @@ import javax.annotation.Resource;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
@@ -138,9 +142,29 @@ public class UserServiceImpl implements UserService {
      * @return 结果
      */
     @Override
-    public Future<Void> follow(String uid, String targetUid, String action) {
-        //TODO
-        return null;
+    public Future<Void> associate(String uid, String targetUid, Integer action) {
+        Promise<Void> promise = Promise.promise();
+        if (uid.equals(targetUid)) {
+            promise.fail("不能关注自己");
+        }
+        JsonObject query = JsonObject.of("$and", JsonArray.of(
+                JsonObject.of("followerUid", uid),
+                JsonObject.of("targetUid", targetUid))
+        );
+
+        if (YesOrNoEnum.getByCode(action)) {
+            mongoClient.findOneAndReplaceWithOptions(
+                    CollectionEnum.follow_list.name(), query,
+                    JsonObject.mapFrom(new FollowRecord(uid, targetUid, System.currentTimeMillis())),
+                    new FindOptions().setFields(JsonObject.of("_id", 0)),
+                    new UpdateOptions().setUpsert(true)
+            ).onFailure(promise::fail).onSuccess(r -> promise.complete());
+        } else {
+            mongoClient.findOneAndDelete(
+                    CollectionEnum.follow_list.name(), query
+            ).onFailure(promise::fail).onSuccess(r -> promise.complete());
+        }
+        return promise.future();
     }
 
     /**
@@ -152,17 +176,17 @@ public class UserServiceImpl implements UserService {
     public Future<Void> update(UserInfo userInfo) {
         Promise<Void> promise = Promise.promise();
         JsonObject update = JsonObject.of();
-        if (!ObjectUtils.isEmpty(userInfo.getAvatar())){
-            update.put("avatar",userInfo.getAvatar());
+        if (!ObjectUtils.isEmpty(userInfo.getAvatar())) {
+            update.put("avatar", userInfo.getAvatar());
         }
-        if (!ObjectUtils.isEmpty(userInfo.getName())){
-            update.put("name",userInfo.getName());
+        if (!ObjectUtils.isEmpty(userInfo.getName())) {
+            update.put("name", userInfo.getName());
         }
-        if (!ObjectUtils.isEmpty(userInfo.getEmail())){
-            update.put("email",userInfo.getEmail());
+        if (!ObjectUtils.isEmpty(userInfo.getEmail())) {
+            update.put("email", userInfo.getEmail());
         }
-        if (!ObjectUtils.isEmpty(userInfo.getGender())){
-            update.put("gender",userInfo.getGender());
+        if (!ObjectUtils.isEmpty(userInfo.getGender())) {
+            update.put("gender", userInfo.getGender());
         }
         mongoClient.findOneAndUpdate(CollectionEnum.user.name(), JsonObject.of("_id", userInfo.getId()), JsonObject.of("$set", update))
                 .onFailure(promise::fail).onSuccess(event -> {

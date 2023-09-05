@@ -44,10 +44,10 @@ public interface UserService {
      *
      * @param uid       用户id
      * @param targetUid 用户id
-     * @param action    关注/取关/拉黑/取消拉黑
+     * @param action    关注/取关/
      * @return 结果
      */
-    Future<Void> follow(String uid, String targetUid, String action);
+    Future<Void> associate(String uid, String targetUid, Integer action);
 
     /**
      * 更新用户信息

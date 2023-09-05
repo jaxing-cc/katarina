@@ -132,12 +132,13 @@ public class UserController extends HttpRegister {
         /**
          * 修改用户关系
          */
-        router.put("/api/user/relationship/:uid/:action").handler(validationUtils.builder()
-                .pathParameter(Parameters.param("uid", stringSchema().with(maxLength(24)).with(minLength(24)))).build())
-                .handler(context -> userService.follow(
+        router.put("/api/user/follow/:uid/:action").handler(validationUtils.builder()
+                .pathParameter(Parameters.param("uid", stringSchema().with(maxLength(24)).with(minLength(24))))
+                .pathParameter(Parameters.param("action", numberSchema().with(maximum(1)).with(minimum(0)))).build())
+                .handler(context -> userService.associate(
                         context.user().principal().getString("uid"),
                         context.pathParam("uid"),
-                        context.pathParam("action"))
+                        Integer.parseInt(context.pathParam("action")))
                         .onFailure(t -> context.json(R.fail(t)))
                         .onSuccess(u -> context.json(R.ok()))
                 );

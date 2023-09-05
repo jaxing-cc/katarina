@@ -33,5 +33,7 @@ public enum CollectionEnum {
      *
      * @see com.github.jaxing.common.domain.ChatListItem
      */
-    chat_list
+    chat_list,
+
+    follow_list
 }
