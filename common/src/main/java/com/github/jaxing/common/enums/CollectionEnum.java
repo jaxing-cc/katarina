@@ -35,5 +35,10 @@ public enum CollectionEnum {
      */
     chat_list,
 
+    /**
+     * 关注列表
+     *
+     * @see com.github.jaxing.common.domain.FollowRecord
+     */
     follow_list
 }

@@ -25,4 +25,10 @@ public class RedisConfig {
         client.connect().onSuccess(conn -> log.info("redis connect success")).onFailure(err -> log.error("redis connect fail", err));
         return RedisAPI.api(client);
     }
+
+    public static class Key {
+        public static class Set {
+            public static final String FOLLOW_LIST = "followList:%s";
+        }
+    }
 }

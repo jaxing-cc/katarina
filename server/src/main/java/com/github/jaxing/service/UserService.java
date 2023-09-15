@@ -5,6 +5,7 @@ import com.github.jaxing.common.dto.RegisterRequestDTO;
 import io.vertx.core.Future;
 
 import java.util.List;
+import java.util.Set;
 
 
 /**
@@ -48,6 +49,14 @@ public interface UserService {
      * @return 结果
      */
     Future<Void> associate(String uid, String targetUid, Integer action);
+
+    /**
+     * 关注列表
+     * @param uid 用户id
+     * @return id列表
+     */
+    Future<Set<String>> followList(String uid);
+
 
     /**
      * 更新用户信息

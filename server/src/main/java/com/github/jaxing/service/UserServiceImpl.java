@@ -1,6 +1,5 @@
 package com.github.jaxing.service;
 
-import com.github.jaxing.common.domain.ChatListItem;
 import com.github.jaxing.common.domain.Client;
 import com.github.jaxing.common.domain.FollowRecord;
 import com.github.jaxing.common.domain.UserInfo;
@@ -10,6 +9,7 @@ import com.github.jaxing.common.enums.CollectionEnum;
 import com.github.jaxing.common.enums.RoleEnum;
 import com.github.jaxing.common.enums.YesOrNoEnum;
 import com.github.jaxing.common.utils.SecurityUtils;
+import com.github.jaxing.config.RedisConfig;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonArray;
@@ -17,6 +17,8 @@ import io.vertx.core.json.JsonObject;
 import io.vertx.ext.mongo.FindOptions;
 import io.vertx.ext.mongo.MongoClient;
 import io.vertx.ext.mongo.UpdateOptions;
+import io.vertx.redis.client.RedisAPI;
+import io.vertx.redis.client.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.bson.types.ObjectId;
 import org.springframework.stereotype.Service;
@@ -26,6 +28,7 @@ import javax.annotation.Resource;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -35,6 +38,9 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class UserServiceImpl implements UserService {
+
+    @Resource
+    private RedisAPI redisAPI;
 
     @Resource
     private MongoClient mongoClient;
@@ -168,6 +174,34 @@ public class UserServiceImpl implements UserService {
     }
 
     /**
+     * 关注列表
+     *
+     * @param uid 用户id
+     * @return id列表
+     */
+    @Override
+    public Future<Set<String>> followList(String uid) {
+        Promise<Set<String>> promise = Promise.promise();
+        String redisKey = String.format(RedisConfig.Key.Set.FOLLOW_LIST, uid);
+        redisAPI.exists(Collections.singletonList(redisKey)).onSuccess(exist -> {
+            if (exist.toBoolean()) {
+                redisAPI.smembers(redisKey).onSuccess(res -> {
+                    Set<String> collect = res.stream().map(Response::toString).collect(Collectors.toSet());
+                }).onFailure(err -> {
+                    log.error("query redis fail", err);
+                    // TODO 查数据库
+                });
+            } else {
+                // TODO 查数据库
+            }
+        }).onFailure(existsErr -> {
+            log.error("query redis fail", existsErr);
+            // TODO 查数据库
+        });
+        return null;
+    }
+
+    /**
      * 更新用户信息
      *
      * @param userInfo 用户信息
@@ -192,6 +226,7 @@ public class UserServiceImpl implements UserService {
                 .onFailure(promise::fail).onSuccess(event -> {
             String oldAvatar = event.getString("avatar");
             String newAvatar = userInfo.getAvatar();
+            redisAPI.del(Collections.singletonList(String.format(RedisConfig.Key.Set.FOLLOW_LIST, userInfo.getId())));
             if (!ObjectUtils.isEmpty(oldAvatar) && !ObjectUtils.isEmpty(newAvatar) && !oldAvatar.equals(newAvatar)) {
                 // 删除旧头像
                 fileService.delete(oldAvatar);

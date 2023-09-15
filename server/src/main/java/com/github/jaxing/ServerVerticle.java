@@ -1,6 +1,6 @@
 package com.github.jaxing;
 
-import com.github.jaxing.service.ChatService;
+import com.github.jaxing.service.UserService;
 import com.github.jaxing.utils.ConfigUtils;
 import com.github.jaxing.utils.HttpRegister;
 import io.vertx.core.AbstractVerticle;
@@ -14,6 +14,8 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
+
 
 /**
  * @author cjxin
@@ -25,11 +27,15 @@ public class ServerVerticle extends AbstractVerticle implements ApplicationConte
 
     private ApplicationContext applicationContext;
 
+    @Resource
+    private UserService userService;
+
     @Override
     public void start(Promise<Void> startPromise) {
         HttpServer server = vertx.createHttpServer(new HttpServerOptions().setRegisterWebSocketWriteHandlers(true));
         Router router = Router.router(vertx);
         HttpRegister.registerHttp(applicationContext, router, vertx);
+        userService.followList("64d204a282879a330e56f6f1");
         server.requestHandler(router).listen(ConfigUtils.getAsInteger("server.port")).onComplete(httpServerAsyncResult -> {
             if (httpServerAsyncResult.succeeded()) {
                 startPromise.complete();
