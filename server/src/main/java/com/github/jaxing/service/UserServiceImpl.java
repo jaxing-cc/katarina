@@ -10,6 +10,7 @@ import com.github.jaxing.common.enums.RoleEnum;
 import com.github.jaxing.common.enums.YesOrNoEnum;
 import com.github.jaxing.common.utils.SecurityUtils;
 import com.github.jaxing.config.RedisConfig;
+import com.github.jaxing.utils.CacheUtils;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.json.JsonArray;
@@ -25,8 +26,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -47,6 +51,9 @@ public class UserServiceImpl implements UserService {
 
     @Resource
     private FileService fileService;
+
+    @Resource
+    private CacheUtils cacheUtils;
 
     public void init() {
         UserRole root = new UserRole(ObjectId.get().toHexString(), RoleEnum.ROOT.getCode(), "管理员", "管理员");
@@ -164,11 +171,17 @@ public class UserServiceImpl implements UserService {
                     JsonObject.mapFrom(new FollowRecord(uid, targetUid, System.currentTimeMillis())),
                     new FindOptions().setFields(JsonObject.of("_id", 0)),
                     new UpdateOptions().setUpsert(true)
-            ).onFailure(promise::fail).onSuccess(r -> promise.complete());
+            ).onFailure(promise::fail).onSuccess(r -> {
+                redisAPI.del(Collections.singletonList(String.format(RedisConfig.Key.Set.FOLLOW_LIST, uid)));
+                promise.complete();
+            });
         } else {
             mongoClient.findOneAndDelete(
                     CollectionEnum.follow_list.name(), query
-            ).onFailure(promise::fail).onSuccess(r -> promise.complete());
+            ).onFailure(promise::fail).onSuccess(r -> {
+                redisAPI.del(Collections.singletonList(String.format(RedisConfig.Key.Set.FOLLOW_LIST, uid)));
+                promise.complete();
+            });
         }
         return promise.future();
     }
@@ -181,24 +194,22 @@ public class UserServiceImpl implements UserService {
      */
     @Override
     public Future<Set<String>> followList(String uid) {
-        Promise<Set<String>> promise = Promise.promise();
         String redisKey = String.format(RedisConfig.Key.Set.FOLLOW_LIST, uid);
-        redisAPI.exists(Collections.singletonList(redisKey)).onSuccess(exist -> {
-            if (exist.toBoolean()) {
-                redisAPI.smembers(redisKey).onSuccess(res -> {
-                    Set<String> collect = res.stream().map(Response::toString).collect(Collectors.toSet());
-                }).onFailure(err -> {
-                    log.error("query redis fail", err);
-                    // TODO 查数据库
+        return cacheUtils.get(redisKey, () -> {
+                    Promise<Set<String>> promise = Promise.promise();
+                    mongoClient.find(CollectionEnum.follow_list.name(), JsonObject.of("followerUid", uid))
+                            .onFailure(promise::fail)
+                            .onSuccess(res -> promise.complete(res.stream().map(j -> j.getString("targetUid")).collect(Collectors.toSet())));
+                    return promise.future();
+                },
+                r -> r.stream().map(Response::toString).collect(Collectors.toSet()),
+                RedisAPI::smembers,
+                r -> {
+                    List<String> args = new ArrayList<>();
+                    args.add(redisKey);
+                    args.addAll(r);
+                    return redisAPI.sadd(args).map(setResp -> null);
                 });
-            } else {
-                // TODO 查数据库
-            }
-        }).onFailure(existsErr -> {
-            log.error("query redis fail", existsErr);
-            // TODO 查数据库
-        });
-        return null;
     }
 
     /**
@@ -226,7 +237,6 @@ public class UserServiceImpl implements UserService {
                 .onFailure(promise::fail).onSuccess(event -> {
             String oldAvatar = event.getString("avatar");
             String newAvatar = userInfo.getAvatar();
-            redisAPI.del(Collections.singletonList(String.format(RedisConfig.Key.Set.FOLLOW_LIST, userInfo.getId())));
             if (!ObjectUtils.isEmpty(oldAvatar) && !ObjectUtils.isEmpty(newAvatar) && !oldAvatar.equals(newAvatar)) {
                 // 删除旧头像
                 fileService.delete(oldAvatar);

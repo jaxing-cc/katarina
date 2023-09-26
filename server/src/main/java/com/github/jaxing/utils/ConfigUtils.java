@@ -1,6 +1,5 @@
 package com.github.jaxing.utils;
 
-import io.vertx.core.Vertx;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PropertiesLoaderUtils;
