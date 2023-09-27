@@ -142,5 +142,14 @@ public class UserController extends HttpRegister {
                         .onFailure(t -> context.json(R.fail(t)))
                         .onSuccess(u -> context.json(R.ok()))
                 );
+
+        /**
+         * 查询关注列表
+         */
+        router.get("/api/user/follow/list").handler(context ->
+                userService.followList(context.user().principal().getString("uid"))
+                        .onFailure(t -> context.json(R.fail(t)))
+                        .onSuccess(list -> context.json(R.ok(list)))
+        );
     }
 }

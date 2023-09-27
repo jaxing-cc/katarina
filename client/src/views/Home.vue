@@ -18,6 +18,8 @@
 import Chat from './pages/ChatList.vue'
 import Friends from './pages/Discover.vue'
 import MainPage from './pages/Main.vue'
+import store from '@/store/index'
+import {followList} from "@/api/auth";
 
 export default {
   components: {Chat, Friends, MainPage},
@@ -43,10 +45,17 @@ export default {
   mounted() {
 
   },
+
   created() {
     this.$socket.connect()
+    followList().then(res => {
+      if (res.success) {
+        store.commit('setFollowList', res.data);
+      }
+    })
     window.addEventListener("msg@1001", this.chatMsgHandler)
   },
+
   destroyed() {
     window.removeEventListener("msg@1001", this.chatMsgHandler)
   }

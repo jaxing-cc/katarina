@@ -19,3 +19,7 @@ export function getByKey(key) {
 export function updateSelf(obj) {
     return request.put("api/user",obj);
 }
+
+export function followList() {
+    return request.get("api/user/follow/list");
+}
