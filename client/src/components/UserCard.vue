@@ -8,19 +8,27 @@
       </van-badge>
     </van-col>
 
-    <van-col v-if="!showText" offset="1" span="14" class="marginTop">
+    <van-col v-if="!showText" offset="1" span="13" class="marginTop">
       <van-row type="flex" class="usernameFont">
         {{ user.name }}
       </van-row>
     </van-col>
 
-    <van-col v-if="showText" offset="1" span="14" class="marginTop">
+    <van-col v-if="showText" offset="1" span="13" class="marginTop">
       <van-row type="flex" style="font-weight: bolder; font-size: 13px" class="van-ellipsis">{{ user.name }}</van-row>
       <van-row type="flex" style="font-size: 9px;" class="van-ellipsis">{{ showText }}</van-row>
     </van-col>
 
-    <van-col v-if="showText && other" span="4" class="marginTop">
+    <van-col span="5" class="marginTop">
       <van-badge v-if="unread && unread !== 0" :content="unread"/>
+      <div v-if="follow">
+        <van-button v-if="followed()" size="mini" @click="associate(0)">
+          已关注
+        </van-button>
+        <van-button v-if="!followed()" icon="plus" size="mini" color="#d47982" @click="associate(1)">
+          关注
+        </van-button>
+      </div>
     </van-col>
 
   </van-row>
@@ -28,6 +36,8 @@
 
 <script>
 import {getFileUrl} from "@/api/file";
+import {follow} from "@/api/auth";
+import {Toast} from "vant";
 
 export default {
   name: 'UserCard',
@@ -58,9 +68,9 @@ export default {
       type: Number,
       default: 40
     },
-    other: {
+    follow: {
       type: Boolean,
-      default: false
+      default: true
     },
     unread: {
       type: Number,
@@ -74,10 +84,22 @@ export default {
     },
     loadAvatar() {
       this.avatar = this.user.avatar ?
-          getFileUrl(this.user.avatar)  : 'avatar-' + (this.user.gender === 1 ? '1' : '2') + ".jpg";
+          getFileUrl(this.user.avatar) : 'avatar-' + (this.user.gender === 1 ? '1' : '2') + ".jpg";
     },
     loadBadge() {
       this.color = this.user.online ? "#1989fa" : "red";
+    },
+    followed() {
+      return this.$store.state.followList.has(this.user._id)
+    },
+    associate(action) {
+      follow(this.user._id, action).then(res => {
+        if (res.success) {
+
+        } else {
+          console.log("fail")
+        }
+      })
     }
   },
 };

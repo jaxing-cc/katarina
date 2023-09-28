@@ -25,7 +25,6 @@
                      :show-text="item.lastMessage? item.lastMessage : new Date(item.info.createTime).toLocaleString()"
                      @click="startChat(item.info.chatTargetUid)"
                      :img-size="30"
-                     :other="true"
                      :unread="chatList.unreadCount[item.info.chatTargetUid]"
                      class="resultItem">
           </user-card>

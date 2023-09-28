@@ -7,11 +7,11 @@ export default new Vuex.Store({
     state: {
         jwtObj: null,
         token: null,
-        followList:[],
+        followList: new Set(),
     },
     mutations: {
         setFollowList(state, list) {
-            state.followList = list;
+            state.followList = new Set(list);
         },
         setUser(state, user) {
             state.jwtObj = user;

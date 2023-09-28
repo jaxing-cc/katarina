@@ -17,9 +17,13 @@ export function getByKey(key) {
 }
 
 export function updateSelf(obj) {
-    return request.put("api/user",obj);
+    return request.put("api/user", obj);
 }
 
 export function followList() {
     return request.get("api/user/follow/list");
+}
+
+export function follow(uid, action) {
+    return request.put("api/user/follow/" + uid + "/" + action);
 }

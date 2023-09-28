@@ -159,6 +159,7 @@ public class UserServiceImpl implements UserService {
         Promise<Void> promise = Promise.promise();
         if (uid.equals(targetUid)) {
             promise.fail("不能关注自己");
+            return promise.future();
         }
         JsonObject query = JsonObject.of("$and", JsonArray.of(
                 JsonObject.of("followerUid", uid),
