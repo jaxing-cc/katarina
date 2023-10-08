@@ -55,8 +55,9 @@ public class CacheUtils {
                 });
             } else {
                 supplier.get().onFailure(promise::fail).onSuccess(r ->
-                        redisSaveFunc.apply(r).onFailure(promise::fail).onSuccess(v ->
-                                redisAPI.expire(Arrays.asList(redisKey, EXPIRE)).onFailure(promise::fail).onSuccess(e -> promise.complete(r))
+                        redisSaveFunc.apply(r).onFailure(promise::fail).onSuccess(v -> {
+                                    redisAPI.expire(Arrays.asList(redisKey, EXPIRE)).onFailure(promise::fail).onSuccess(e -> promise.complete(r));
+                                }
                         )
                 );
             }

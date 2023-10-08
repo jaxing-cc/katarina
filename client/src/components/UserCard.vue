@@ -8,25 +8,23 @@
       </van-badge>
     </van-col>
 
-    <van-col v-if="!showText" offset="1" span="13" class="marginTop">
+    <van-col v-if="!showText" offset="1" span="15" class="marginTop">
       <van-row type="flex" class="usernameFont">
         {{ user.name }}
       </van-row>
     </van-col>
 
-    <van-col v-if="showText" offset="1" span="13" class="marginTop">
+    <van-col v-if="showText" offset="1" span="15" class="marginTop">
       <van-row type="flex" style="font-weight: bolder; font-size: 13px" class="van-ellipsis">{{ user.name }}</van-row>
       <van-row type="flex" style="font-size: 9px;" class="van-ellipsis">{{ showText }}</van-row>
     </van-col>
 
-    <van-col span="5" class="marginTop">
+    <van-col span="4" class="marginTop">
       <van-badge v-if="unread && unread !== 0" :content="unread"/>
-      <div v-if="follow">
-        <van-button v-if="followed()" size="mini" @click="associate(0)">
-          已关注
+      <div v-if="follow === 2">
+        <van-button v-if="followed()" icon="minus" size="mini" color="#D7DBDD" @click.stop="associate(0)">
         </van-button>
-        <van-button v-if="!followed()" icon="plus" size="mini" color="#d47982" @click="associate(1)">
-          关注
+        <van-button v-if="!followed()" icon="plus" size="mini" color="#d47982" @click.stop="associate(1)">
         </van-button>
       </div>
     </van-col>
@@ -36,8 +34,9 @@
 
 <script>
 import {getFileUrl} from "@/api/file";
-import {follow} from "@/api/auth";
+import {follow, followList} from "@/api/auth";
 import {Toast} from "vant";
+import store from "@/store";
 
 export default {
   name: 'UserCard',
@@ -68,9 +67,10 @@ export default {
       type: Number,
       default: 40
     },
+    // 0不展示 1展示 2展示并可点击
     follow: {
-      type: Boolean,
-      default: true
+      type: Number,
+      default: 0
     },
     unread: {
       type: Number,
@@ -95,9 +95,14 @@ export default {
     associate(action) {
       follow(this.user._id, action).then(res => {
         if (res.success) {
-
+          followList().then(res => {
+            if (res.success) {
+              store.commit('setFollowList', res.data);
+              Toast(action === 1 ? '关注成功':'取关成功')
+            }
+          })
         } else {
-          console.log("fail")
+          Toast('服务器异常')
         }
       })
     }

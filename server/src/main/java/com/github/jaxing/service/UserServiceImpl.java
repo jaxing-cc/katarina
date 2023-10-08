@@ -206,6 +206,9 @@ public class UserServiceImpl implements UserService {
                 r -> r.stream().map(Response::toString).collect(Collectors.toSet()),
                 RedisAPI::smembers,
                 r -> {
+                    if (ObjectUtils.isEmpty(r)) {
+                        return Future.succeededFuture();
+                    }
                     List<String> args = new ArrayList<>();
                     args.add(redisKey);
                     args.addAll(r);

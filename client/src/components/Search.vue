@@ -20,7 +20,7 @@
       </van-row>
       <van-row v-if="result && result.length > 0" v-for="item in result" :key="item._id">
         <van-col span="1"/>
-        <user-card :user="item" :show-text="item.username" @click="selectUser" :img-size="30" class="resultItem"></user-card>
+        <user-card :user="item" :show-text="item.username" @click="selectUser" :follow="2" :img-size="30" class="resultItem"></user-card>
       </van-row>
     </van-row>
   </van-row>
