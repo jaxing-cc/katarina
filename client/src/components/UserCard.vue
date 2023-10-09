@@ -8,23 +8,25 @@
       </van-badge>
     </van-col>
 
-    <van-col v-if="!showText" offset="1" span="15" class="marginTop">
+    <van-col v-if="!showText" offset="1" span="14" class="marginTop">
       <van-row type="flex" class="usernameFont">
         {{ user.name }}
       </van-row>
     </van-col>
 
-    <van-col v-if="showText" offset="1" span="15" class="marginTop">
+    <van-col v-if="showText" offset="1" span="14" class="marginTop">
       <van-row type="flex" style="font-weight: bolder; font-size: 13px" class="van-ellipsis">{{ user.name }}</van-row>
       <van-row type="flex" style="font-size: 9px;" class="van-ellipsis">{{ showText }}</van-row>
     </van-col>
 
-    <van-col span="4" class="marginTop">
+    <van-col span="5" class="marginTop">
       <van-badge v-if="unread && unread !== 0" :content="unread"/>
       <div v-if="follow === 2">
-        <van-button v-if="followed()" icon="minus" size="mini" color="#D7DBDD" @click.stop="associate(0)">
+        <van-button v-if="followed()"  size="mini" color="#D7DBDD" @click.stop="associate(0)">
+          已关注
         </van-button>
-        <van-button v-if="!followed()" icon="plus" size="mini" color="#d47982" @click.stop="associate(1)">
+        <van-button v-if="!followed()"  size="mini" color="#d47982" @click.stop="associate(1)">
+          关注
         </van-button>
       </div>
     </van-col>

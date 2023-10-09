@@ -1,16 +1,12 @@
 <template>
   <div id="chatWrapper">
-    <user-card class="chatHeader" :user="targetUser" :show-username="true"></user-card>
+    <user-card class="chatHeader" :user="targetUser" :show-username="true" :follow="2"></user-card>
     <div class="chatBody" id="body">
       <chat-context :data="messageRecordInfo.data" :targetUser="targetUser" :loginUser="loginUser"></chat-context>
     </div>
     <van-row class="chatInput" @click.stop>
-      <VEmojiV2 v-if="emoji.showEmoji" :showCategories="false" :showSearch="false" :continuousList="true" @select="selectEmoji"/>
-      <van-row>
-        <van-col :span="4" class="chatInputIcon">
-          <van-icon size="20" :name="emoji.icon" @click="clickEmojiSwitch"></van-icon>
-        </van-col>
-      </van-row>
+      <VEmojiV2 v-if="emoji.showEmoji" :showCategories="false" :showSearch="false" :continuousList="true"
+                @select="selectEmoji"/>
       <van-field
           v-model="inputMessage"
           :autosize="{ maxHeight: 50, minHeight: 50 }"
@@ -21,6 +17,12 @@
           <van-button size="small" color="#3E7FCC" @click="send(0)" icon="success"></van-button>
         </template>
       </van-field>
+      <van-grid :column-num="4" direction="horizontal" clickable :icon-size="13">
+        <van-grid-item icon="revoke" @click="exit"/>
+        <van-grid-item :icon="emoji.icon" @click="clickEmojiSwitch"/>
+        <van-grid-item icon="photo-o"/>
+        <van-grid-item icon="ellipsis"/>
+      </van-grid>
     </van-row>
   </div>
 </template>
@@ -56,7 +58,7 @@ export default {
 
   methods: {
     send(type) {
-      if (!this.inputMessage){
+      if (!this.inputMessage) {
         return;
       }
       sendMessage({
@@ -113,6 +115,9 @@ export default {
     },
     selectEmoji(e) {
       this.inputMessage += e.data
+    },
+    exit() {
+      this.$emit("exit")
     }
   },
 
@@ -163,7 +168,7 @@ export default {
   width: 100%;
   top: 55px;
   position: absolute;
-  bottom: 100px;
+  bottom: 120px;
 }
 
 .chatInput {
@@ -174,7 +179,6 @@ export default {
 
 .chatInputIcon {
   background-color: white;
-  border-radius: 5px;
   margin-top: 5px;
 }
 </style>

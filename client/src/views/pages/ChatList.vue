@@ -37,11 +37,11 @@
     </div>
 
     <van-popup
-        v-model="chat.switch" closeable round
+        v-model="chat.switch"  round
         :close-on-click-overlay="false"
         @close="closeChat(chat.targetId)"
         position="bottom" :style="{ height: '95%' }">
-      <chat v-if="chat.switch" :login-user="loginUser" :target-uid="chat.targetId"></chat>
+      <chat v-if="chat.switch" :login-user="loginUser" :target-uid="chat.targetId" @exit="chat.switch = false"></chat>
     </van-popup>
   </van-row>
 
