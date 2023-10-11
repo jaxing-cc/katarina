@@ -2,9 +2,9 @@ package com.github.jaxing.common.game.poker.ddz;
 
 import com.github.jaxing.common.enums.game.poker.PokerGame;
 import com.github.jaxing.common.enums.game.poker.PokerGroupType;
+import com.github.jaxing.common.game.poker.ComparablePokerGroup;
 import com.github.jaxing.common.game.poker.PokerFactory;
 import com.github.jaxing.common.game.poker.PokerGameRule;
-import com.github.jaxing.common.game.poker.PokerGroup;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -15,14 +15,56 @@ import java.util.regex.Pattern;
  * @date 2023/10/10
  */
 public class DdzGameRule implements PokerGameRule {
+
     @Override
     public PokerGame getGame() {
         return PokerGame.DOU_DI_ZHU;
     }
 
     @Override
-    public boolean compareTo(PokerGroup a, PokerGroup b) {
-
+    public boolean compareTo(ComparablePokerGroup a, ComparablePokerGroup b) {
+        int[] aCountArray = a.getCountArray();
+        PokerGroupType aType = a.getType();
+        int[] bCountArray = b.getCountArray();
+        PokerGroupType bType = b.getType();
+        //王炸
+        if (aType == PokerGroupType.JOKER) {
+            return true;
+        }
+        if (bType == PokerGroupType.JOKER) {
+            return false;
+        }
+        //存在炸弹时
+        if (bType == PokerGroupType.FOUR) {
+            if (aType == PokerGroupType.FOUR) {
+                return compareAlone(find(bCountArray, 4), find(aCountArray, 4));
+            } else {
+                return false;
+            }
+        } else {
+            if (aType == PokerGroupType.FOUR) {
+                return true;
+            }
+        }
+        //异常情况
+        if (a.getSize() != b.getSize() || a.getType() != b.getType()) {
+            return false;
+        }
+        switch (bType) {
+            case ONE:
+            case MANY_ONE:
+                return compareAlone(find(bCountArray, 1), find(aCountArray, 1));
+            case TWO:
+            case MANY_TWO:
+                return compareAlone(find(bCountArray, 2), find(aCountArray, 2));
+            case THREE:
+            case THREE_AND_ONE:
+            case THREE_AND_TWO:
+            case AIRPLANE:
+            case AIRPLANE_AND_ONE:
+            case AIRPLANE_AND_TWO:
+                return compareAlone(find(bCountArray, 3), find(aCountArray, 3));
+        }
         return false;
     }
 
@@ -56,36 +98,9 @@ public class DdzGameRule implements PokerGameRule {
     }
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     @Override
     public PokerGroupType checkInput(String s) {
-        if ("pass".equals(s)) {
+        if ("p".equals(s)) {
             return PokerGroupType.PASS;
         }
         if (!Pattern.matches("[0-9|aAjJqQkKsS]{1,17}", s)) {
@@ -126,7 +141,7 @@ public class DdzGameRule implements PokerGameRule {
                     result = checkOtherType(countArray);
                 }
         }
-        return result == null || result.getGame() != getGame() ? null : result;
+        return result;
     }
 
     /**

@@ -82,7 +82,6 @@ public class PokerFactory {
      *
      * @param l1 链表1
      * @param l2 链表2
-     * @return
      */
     public static PokerGroupItem merge(PokerGroupItem l1, PokerGroupItem l2) {
         PokerGroupItem answerHead = null;
@@ -175,6 +174,27 @@ public class PokerFactory {
         return countArray;
     }
 
+    /**
+     * 获取计数数组
+     */
+    public static int[] getPokerArray(PokerGroup pokerGroup) {
+        int[] countArray = new int[16];
+        pokerGroup.forEach(i -> {
+            Poker poker = i.get();
+            switch (poker.getType()) {
+                case JOKER:
+                    countArray[14]++;
+                    break;
+                case SUPER_JOKER:
+                    countArray[15]++;
+                    break;
+                default:
+                    countArray[poker.getValue()]++;
+                    break;
+            }
+        });
+        return countArray;
+    }
 
     /**
      * 返回数组中值为 val 的连续长度

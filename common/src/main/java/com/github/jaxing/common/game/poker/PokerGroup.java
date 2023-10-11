@@ -1,5 +1,6 @@
 package com.github.jaxing.common.game.poker;
 
+import com.github.jaxing.common.enums.game.poker.PokerGroupType;
 import com.github.jaxing.common.enums.game.poker.PokerType;
 import lombok.Getter;
 
@@ -12,13 +13,15 @@ import java.util.function.Consumer;
  */
 @Getter
 public class PokerGroup {
+
     //牌组大小
     private byte size;
+
     //牌组链表
     private PokerGroupItem head;
+
     //链表尾部
     private PokerGroupItem tail;
-
 
     public PokerGroup() {
         size = 0;
@@ -29,7 +32,7 @@ public class PokerGroup {
     /**
      * 放入一张牌
      *
-     * @param item
+     * @param item 牌
      */
     public void put(PokerGroupItem item) {
         if (size == 0) {
@@ -45,6 +48,9 @@ public class PokerGroup {
         size++;
     }
 
+    /**
+     * 放入一组牌
+     */
     public void put(PokerGroup pokerGroup) {
         byte size = pokerGroup.getSize();
         if (size == 0) {
@@ -58,13 +64,9 @@ public class PokerGroup {
     }
 
     /**
-     * 根据pComparablePokerGroup取出牌
-     * 返回 0 => 玩家出牌成功，手中已经没有牌了，游戏结束
-     * 返回 1 => 出牌成功
-     * 返回 -1 => 出牌失败
-     *
-     * @param pokerGroup 要出的牌组
-     * @return 弹出的牌组 返回null表示value存在没有的牌组
+     * 出牌
+     * @param pokerGroup 牌组
+     * @return 被删除的牌的id列表
      */
     public byte[] pop(ComparablePokerGroup pokerGroup) {
         int size = pokerGroup.getSize();
@@ -72,20 +74,8 @@ public class PokerGroup {
             return null;
         }
         //检查是否可以出牌
-        int[] array = new int[16];
+        int[] array = PokerFactory.getPokerArray(this);
         int[] targetArray = pokerGroup.getCountArray();
-        forEach(o -> {
-            Poker poker = PokerFactory.get(o.getPokerId());
-            byte value = poker.getValue();
-            PokerType type = poker.getType();
-            if (type == PokerType.JOKER) {
-                array[14]++;
-            } else if (type == PokerType.SUPER_JOKER) {
-                array[15]++;
-            } else {
-                array[value]++;
-            }
-        });
         for (int i = 0; i < array.length; i++) {
             if (array[i] < targetArray[i]) {
                 return null;
@@ -131,6 +121,13 @@ public class PokerGroup {
         return false;
     }
 
+
+
+    /**
+     * 删除一张牌
+     *
+     * @param item 牌
+     */
     private void remove(PokerGroupItem item) {
         PokerGroupItem next = item.getNext();
         PokerGroupItem last = item.getLast();
@@ -164,6 +161,10 @@ public class PokerGroup {
         }
     }
 
+    /**
+     * 链表归并排序
+     * 时间复杂度 log(n)
+     */
     private PokerGroupItem sort(PokerGroupItem head, int size) {
         if (size == 1) {
             return head;

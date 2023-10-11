@@ -18,12 +18,12 @@ public interface PokerGameRule {
      * @param b 牌组b
      * @return 是否大于
      */
-    boolean compareTo(PokerGroup a, PokerGroup b);
+    boolean compareTo(ComparablePokerGroup a, ComparablePokerGroup b);
 
     /**
      * 输入检查
-     * @param s
-     * @return
+     * @param exp 表达式
+     * @return 牌型
      */
-    PokerGroupType checkInput(String s);
+    PokerGroupType checkInput(String exp);
 }
