@@ -11,7 +11,7 @@ import java.util.Arrays;
 public class CommonUtils {
 
     @SuppressWarnings("unchecked")
-    public static  <T extends Enum<T>> T getEnumByCode(Enum<T>[] enums, Object code) {
+    public static <T extends Enum<T>> T getEnumByCode(Enum<T>[] enums, Object code) {
         if (code == null) {
             return null;
         }

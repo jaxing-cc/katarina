@@ -66,7 +66,7 @@ public class ChatController extends HttpRegister {
                                         Client.CLIENT_POOL.values().stream().map(Client::getUid).collect(Collectors.joining("-"))
                                 );
                                 serverWebSocket.handler(buffer -> {
-                                    Message message = null;
+                                    Message message;
                                     try {
                                         message = new JsonObject(buffer.toString()).mapTo(Message.class);
                                     } catch (Exception e) {

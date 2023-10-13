@@ -31,7 +31,6 @@ public interface ChatService {
      */
     Future<Void> addChatListItem(String cUid, String tUid);
 
-
     /**
      * 删除聊天列表
      *

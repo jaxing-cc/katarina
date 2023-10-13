@@ -1,6 +1,5 @@
 package com.github.jaxing.common.game.poker;
 
-import com.github.jaxing.common.enums.game.poker.PokerGroupType;
 import com.github.jaxing.common.enums.game.poker.PokerType;
 import lombok.Getter;
 
@@ -120,8 +119,6 @@ public class PokerGroup {
     public boolean contain(byte[] value) {
         return false;
     }
-
-
 
     /**
      * 删除一张牌
