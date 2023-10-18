@@ -19,8 +19,13 @@ public class ComparablePokerGroup {
             return null;
         }
         ComparablePokerGroup comparablePokerGroup = new ComparablePokerGroup();
-        comparablePokerGroup.setSize(exp.length());
-        comparablePokerGroup.setCountArray(PokerFactory.getPokerArray(exp.toCharArray()));
+        if (pokerGroupType.equals(PokerGroupType.PASS)) {
+            comparablePokerGroup.setSize(0);
+            comparablePokerGroup.setCountArray(new int[16]);
+        } else {
+            comparablePokerGroup.setSize(exp.length());
+            comparablePokerGroup.setCountArray(PokerFactory.getPokerArray(exp.toCharArray()));
+        }
         comparablePokerGroup.setType(pokerGroupType);
         return comparablePokerGroup;
     }

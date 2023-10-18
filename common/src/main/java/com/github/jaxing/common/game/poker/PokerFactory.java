@@ -88,7 +88,7 @@ public class PokerFactory {
         PokerGroupItem answerPoint = null;
         while (l1 != null && l2 != null) {
             PokerGroupItem next;
-            if (l1.val() > l2.val()) {
+            if (l1.val() < l2.val()) {
                 next = l1;
                 l1 = cut(l1, 1);
             } else {
