@@ -1,8 +1,15 @@
 <template>
   <div id="chatWrapper">
-    <user-card class="chatHeader" :user="targetUser" :show-username="true" :follow="2"></user-card>
-    <div class="chatBody" id="body">
-      <chat-context :data="messageRecordInfo.data" :targetUser="targetUser" :loginUser="loginUser"></chat-context>
+    <div v-if="!this.group">
+      <user-card class="chatHeader" :user="targetUser" :show-username="true" :follow="2"></user-card>
+      <div class="chatBody" id="body">
+        <chat-context :data="messageRecordInfo.data" :targetUser="targetUser" :loginUser="loginUser"></chat-context>
+      </div>
+    </div>
+    <div v-if="this.group">
+      <div class="chatBody">
+        <group-chat-context :data="messageRecordInfo.data"></group-chat-context>
+      </div>
     </div>
     <van-row class="chatInput" @click.stop>
       <VEmojiV2 v-if="emoji.showEmoji" :showCategories="false" :showSearch="false" :continuousList="true"
@@ -34,11 +41,12 @@ import {Toast} from "vant";
 import UserCard from "@/components/UserCard";
 import {loadMessageRecord, sendMessage} from "@/api/chat";
 import ChatContext from "@/components/ChatContext";
+import GroupChatContext from "@/components/GroupChatContext";
 
 
 export default {
   name: 'Chat',
-  components: {ChatContext, UserCard},
+  components: {GroupChatContext, ChatContext, UserCard},
   data() {
     return {
       targetUser: {},
@@ -62,10 +70,10 @@ export default {
         return;
       }
       sendMessage({
-        groupMessage: false,
+        groupMessage: this.group,
         content: this.inputMessage,
         contentType: type,
-        to: this.targetUser._id,
+        to: this.targetId,
         createTime: new Date().getTime()
       }).then(res => {
         if (res.success) {
@@ -85,7 +93,7 @@ export default {
       body.scrollTo(0, body.scrollHeight)
     },
     loadHistoryMessage() {
-      loadMessageRecord(this.targetUser._id, this.messageRecordInfo.page, this.messageRecordInfo.size).then(res => {
+      loadMessageRecord(this.targetId, this.group, this.messageRecordInfo.page, this.messageRecordInfo.size).then(res => {
         if (res.success) {
           if (res.data) {
             this.messageRecordInfo.data = res.data;
@@ -121,7 +129,14 @@ export default {
     }
   },
 
-  props: ["targetUid", "loginUser"],
+  props: {
+    targetId: {},
+    loginUser: {},
+    group: {
+      type: Boolean,
+      default: false
+    }
+  },
 
   updated() {
   },
@@ -132,16 +147,18 @@ export default {
   created() {
     let that = this;
     window.addEventListener("msg@1001", this.chatMsgHandler)
-    getByUid(this.targetUid).then(res => {
-      if (res.success) {
-        if (!res.data) {
-          Toast("用户不存在")
-        } else {
-          this.targetUser = res.data;
-          that.loadHistoryMessage()
+    if (!this.group) {
+      getByUid(this.targetId).then(res => {
+        if (res.success) {
+          if (!res.data) {
+            Toast("用户不存在")
+          } else {
+            this.targetUser = res.data;
+            that.loadHistoryMessage()
+          }
         }
-      }
-    })
+      })
+    }
   },
 
   destroyed() {

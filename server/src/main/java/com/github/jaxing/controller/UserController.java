@@ -97,11 +97,11 @@ public class UserController extends HttpRegister {
         /**
          * id查用户
          */
-        router.get("/api/user/:uid").handler(context -> {
-            userService.findById(context.pathParam("uid"))
-                    .onFailure(t -> context.json(R.fail(t)))
-                    .onSuccess(u -> context.json(R.ok(u)));
-        });
+        router.get("/api/user/:uid").handler(context ->
+                userService.findById(context.pathParam("uid"))
+                .onFailure(t -> context.json(R.fail(t)))
+                .onSuccess(u -> context.json(R.ok(u)))
+        );
 
         /**
          * 修改用户信息

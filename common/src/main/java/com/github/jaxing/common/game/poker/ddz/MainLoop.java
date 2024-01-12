@@ -7,6 +7,7 @@ import com.github.jaxing.common.game.poker.ComparablePokerGroup;
 import com.github.jaxing.common.game.poker.Poker;
 import com.github.jaxing.common.game.poker.PokerFactory;
 import com.github.jaxing.common.game.poker.PokerGroup;
+import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import lombok.Data;
 
@@ -41,6 +42,8 @@ public class MainLoop {
 
     private ComparablePokerGroup lastPokerGroup;
 
+    private Vertx vertx;
+
     /**
      * 初始化游戏
      *
@@ -48,9 +51,11 @@ public class MainLoop {
      * @param b 玩家b
      * @param c 玩家c
      */
-    public MainLoop(PlayerDetails a, PlayerDetails b, PlayerDetails c, PokerGame game) {
+    public MainLoop(PlayerDetails a, PlayerDetails b, PlayerDetails c, PokerGame game, Vertx vertx) {
         PokerGroup[] wash = PokerFactory.wash();
         AtomicInteger index = new AtomicInteger();
+        this.pokerGame = game;
+        this.vertx = vertx;
         this.specialPokerGroup = new Poker[3];
         wash[0].forEach(item -> this.specialPokerGroup[index.getAndIncrement()] = item.get());
         this.startTime = System.currentTimeMillis();
@@ -105,7 +110,7 @@ public class MainLoop {
         PlayerDetails a = PlayerDetails.builder().id("A").build();
         PlayerDetails b = PlayerDetails.builder().id("B").build();
         PlayerDetails c = PlayerDetails.builder().id("C").build();
-        MainLoop obj = new MainLoop(a, b, c, PokerGame.DOU_DI_ZHU);
+        MainLoop obj = new MainLoop(a, b, c, PokerGame.DOU_DI_ZHU, Vertx.vertx());
         JsonObject entries = JsonObject.mapFrom(obj);
         System.out.println(entries.toString());
     }

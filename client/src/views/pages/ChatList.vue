@@ -41,7 +41,7 @@
         :close-on-click-overlay="false"
         @close="closeChat(chat.targetId)"
         position="bottom" :style="{ height: '95%' }">
-      <chat v-if="chat.switch" :login-user="loginUser" :target-uid="chat.targetId" @exit="chat.switch = false"></chat>
+      <chat v-if="chat.switch" :login-user="loginUser" :target-id="chat.targetId" @exit="chat.switch = false"></chat>
     </van-popup>
   </van-row>
 

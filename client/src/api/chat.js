@@ -45,6 +45,6 @@ export function clearOfflineMsg(targetId) {
 /**
  * 加载聊天记录
  */
-export function loadMessageRecord(targetId, page, size) {
-    return request.get("/api/msg/record/" + targetId + "?page=" + page + "&size=" + size);
+export function loadMessageRecord(targetId, groupMessage, page, size) {
+    return request.get("/api/msg/record/" + targetId + "?page=" + page + "&size=" + size + "&groupMessage=" + groupMessage);
 }

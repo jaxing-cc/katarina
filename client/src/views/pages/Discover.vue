@@ -1,10 +1,43 @@
 <template>
+  <div>
+    <van-tabs v-model="tabsKey" animated sticky>
+      <van-tab>
+        <template #title>
+          <van-icon name="friends" /> 发现
+        </template>
+      </van-tab>
 
+      <van-tab>
+        <template #title>
+          <van-icon name="star"/> 关注
+        </template>
+      </van-tab>
+
+      <van-tab>
+        <template #title>
+          <van-icon name="chat"/> 聊天室
+        </template>
+      </van-tab>
+    </van-tabs>
+  </div>
 </template>
 
 <script>
+import GroupChatContext from "@/components/GroupChatContext";
+import Chat from "@/views/pages/other/Chat";
+
 export default {
-  name: "Discover"
+  name: "Discover",
+  components: {Chat, GroupChatContext},
+  data() {
+    return {
+      loginUser: {},
+      tabsKey: 0
+    }
+  },
+  created() {
+
+  },
 }
 </script>
 

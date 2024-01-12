@@ -6,12 +6,14 @@ import com.github.jaxing.common.domain.ChatMessage;
 import com.github.jaxing.common.domain.Client;
 import com.github.jaxing.common.domain.Message;
 import com.github.jaxing.common.domain.R;
+import com.github.jaxing.common.enums.ChatGroupEnum;
 import com.github.jaxing.common.enums.MessageTypeEnum;
 import com.github.jaxing.service.ChatService;
 import com.github.jaxing.socket.WsHandler;
 import com.github.jaxing.utils.HttpRegister;
 import com.github.jaxing.utils.ValidationUtils;
 import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.auth.authentication.TokenCredentials;
 import io.vertx.ext.auth.jwt.JWTAuth;
@@ -19,7 +21,6 @@ import io.vertx.ext.web.Router;
 import io.vertx.ext.web.validation.builder.Parameters;
 import io.vertx.json.schema.draft7.dsl.Keywords;
 import io.vertx.redis.client.RedisAPI;
-import io.vertx.redis.client.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -28,6 +29,8 @@ import java.util.stream.Collectors;
 
 import static io.vertx.json.schema.common.dsl.Schemas.numberSchema;
 import static io.vertx.json.schema.common.dsl.Schemas.objectSchema;
+import static io.vertx.json.schema.common.dsl.Schemas.booleanSchema;
+
 
 @Component
 @Slf4j
@@ -105,12 +108,13 @@ public class ChatController extends HttpRegister {
         /** 聊天记录 **/
 
         router.get("/api/msg/record/:targetId").handler(validationUtils.builder()
+                .queryParameter(Parameters.param("groupMessage", booleanSchema().defaultValue(false)))
                 .queryParameter(Parameters.param("page", numberSchema().with(Keywords.minimum(1)).defaultValue(1)))
                 .queryParameter(Parameters.param("size", numberSchema().defaultValue(10))).build())
                 .handler(
                         context -> chatService.getChatMessageRecord(
                                 context.user().principal().getString("uid"),
-                                context.pathParam("targetId"), false,
+                                context.pathParam("targetId"), Boolean.parseBoolean(context.request().getParam("groupMessage")),
                                 Integer.parseInt(context.request().getParam("page")),
                                 Integer.parseInt(context.request().getParam("size"))
                         ).onSuccess(r -> context.json(R.ok(r))).onFailure(t -> context.json(R.fail(t)))
@@ -159,5 +163,14 @@ public class ChatController extends HttpRegister {
                         .onSuccess(r -> context.json(R.ok(null)))
                         .onFailure(t -> context.json(R.fail(t)))
         );
+
+        /** 群聊频道查询 **/
+
+        router.get("/api/chat-group").handler(
+                        context -> {
+                            JsonArray roles = context.user().principal().getJsonArray("roles");
+                            context.json(R.ok(ChatGroupEnum.chatGroupEnums(roles.getList())));
+                        }
+                );
     }
 }
