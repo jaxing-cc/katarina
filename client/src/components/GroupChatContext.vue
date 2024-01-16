@@ -16,7 +16,7 @@
 
         <van-col :span="16" :class="myMessage(d.from)? 'right_msg' : 'left_msg'">
           <div class="messageContentHeader">
-            {{ getUserById(d.from).name }}
+            {{ getUserById(d.from) ? getUserById(d.from).name : "未知" }}
           </div>
           <div class="messageContent">
             {{ d.content }}
@@ -38,6 +38,7 @@
 
 <script>
 import {getFileUrl} from "@/api/file";
+import {getUserInfo} from "@/utils/token";
 
 export default {
   name: "GroupChatContext",
@@ -51,13 +52,17 @@ export default {
   props: ["data"],
   methods: {
     myMessage(fromId) {
-      return fromId === this.loginUser._id
+      console.log(fromId, this.self._id, fromId === this.self._id)
+      return fromId === this.self._id
     },
     getUserById(id) {
-      return id === this.loginUser._id ? this.loginUser : this.targetUser
+      return id === this.self._id ? this.self : this.targetUser
     },
     loadAvatar(id) {
       let user = this.getUserById(id);
+      if (!user){
+        return "avatar-1.jpg"
+      }
       return user.avatar ? getFileUrl(user.avatar) : 'avatar-' + (user.gender === 1 ? '1' : '2') + ".jpg";
     },
     groupByTime() {
@@ -87,6 +92,7 @@ export default {
   mounted() {
   },
   created() {
+    this.self = getUserInfo()
   }
 }
 </script>

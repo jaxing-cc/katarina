@@ -29,3 +29,7 @@ export function removeToken() {
     sessionStorage.clear();
     store.commit('resetToken');
 }
+
+export function getUserInfo() {
+    return store.state.userInfo;
+}

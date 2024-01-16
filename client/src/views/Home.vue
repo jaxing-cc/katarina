@@ -19,8 +19,9 @@ import Chat from './pages/ChatList.vue'
 import Friends from './pages/Discover.vue'
 import MainPage from './pages/Main.vue'
 import store from '@/store/index'
-import {followList} from "@/api/auth";
-
+import {followList, getByUid} from "@/api/auth";
+import {Toast} from "vant";
+import {decodeToken} from "@/utils/token";
 export default {
   components: {Chat, Friends, MainPage},
   name: 'Home',
@@ -48,12 +49,21 @@ export default {
 
   created() {
     this.$socket.connect()
+    window.addEventListener("msg@1001", this.chatMsgHandler)
     followList().then(res => {
       if (res.success) {
         store.commit('setFollowList', res.data);
       }
     })
-    window.addEventListener("msg@1001", this.chatMsgHandler)
+    getByUid(decodeToken().uid).then(res => {
+      if (res.success) {
+        if (!res.data) {
+          Toast("用户不存在")
+        } else {
+          store.commit('setUserInfo',res.data);
+        }
+      }
+    })
   },
 
   destroyed() {

@@ -6,16 +6,14 @@
           <van-icon name="friends" /> 发现
         </template>
       </van-tab>
-
-      <van-tab>
-        <template #title>
-          <van-icon name="star"/> 关注
-        </template>
-      </van-tab>
-
       <van-tab>
         <template #title>
           <van-icon name="chat"/> 聊天室
+        </template>
+      </van-tab>
+      <van-tab>
+        <template #title>
+          <van-icon name="star"/> 关注
         </template>
       </van-tab>
     </van-tabs>
@@ -25,6 +23,7 @@
 <script>
 import GroupChatContext from "@/components/GroupChatContext";
 import Chat from "@/views/pages/other/Chat";
+import {getUserInfo} from "@/utils/token";
 
 export default {
   name: "Discover",
@@ -36,7 +35,7 @@ export default {
     }
   },
   created() {
-
+    this.loginUser = getUserInfo();
   },
 }
 </script>

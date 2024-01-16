@@ -242,20 +242,27 @@ public class ChatServiceImpl implements ChatService {
     @Override
     public Future<List<ChatMessage>> getChatMessageRecord(String uid, String targetId, boolean isGroup, Integer page, Integer size) {
         Promise<List<ChatMessage>> promise = Promise.promise();
-        JsonObject query = JsonObject.of("$or",
-                JsonArray.of(
-                        JsonObject.of("$and", JsonArray.of(
-                                JsonObject.of("from", targetId),
-                                JsonObject.of("to", uid),
-                                JsonObject.of("groupMessage", isGroup)
-                        )),
-                        JsonObject.of("$and", JsonArray.of(
-                                JsonObject.of("from", uid),
-                                JsonObject.of("to", targetId),
-                                JsonObject.of("groupMessage", isGroup)
-                        ))
-                )
-        );
+        JsonObject query;
+        if (isGroup) {
+            query = JsonObject.of("$and",
+                    JsonArray.of(JsonObject.of("to", targetId), JsonObject.of("groupMessage", true))
+            );
+        } else {
+            query = JsonObject.of("$or",
+                    JsonArray.of(
+                            JsonObject.of("$and", JsonArray.of(
+                                    JsonObject.of("from", targetId),
+                                    JsonObject.of("to", uid),
+                                    JsonObject.of("groupMessage", false)
+                            )),
+                            JsonObject.of("$and", JsonArray.of(
+                                    JsonObject.of("from", uid),
+                                    JsonObject.of("to", targetId),
+                                    JsonObject.of("groupMessage", false)
+                            ))
+                    )
+            );
+        }
         mongoClient.findWithOptions(CollectionEnum.message_bucket.name(), query,
                 new FindOptions().setSkip(PageUtils.getSkip(page, size)).setLimit(size).setSort(JsonObject.of("createTime", -1))
         ).onFailure(promise::fail).onSuccess(list -> {

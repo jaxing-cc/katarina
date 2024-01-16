@@ -2,7 +2,7 @@
   <div id="chatWrapper">
     <div v-if="!this.group">
       <user-card class="chatHeader" :user="targetUser" :show-username="true" :follow="2"></user-card>
-      <div class="chatBody" id="body">
+      <div class="chatBody">
         <chat-context :data="messageRecordInfo.data" :targetUser="targetUser" :loginUser="loginUser"></chat-context>
       </div>
     </div>
@@ -89,8 +89,8 @@ export default {
       })
     },
     moveToBottom() {
-      let body = document.getElementById("body")
-      body.scrollTo(0, body.scrollHeight)
+      let body = document.getElementsByClassName("chatBody")
+      body[0].scrollTo(0, body[0].scrollHeight)
     },
     loadHistoryMessage() {
       loadMessageRecord(this.targetId, this.group, this.messageRecordInfo.page, this.messageRecordInfo.size).then(res => {
@@ -130,7 +130,7 @@ export default {
   },
 
   props: {
-    targetId: {},
+    targetId: "",
     loginUser: {},
     group: {
       type: Boolean,
@@ -158,6 +158,8 @@ export default {
           }
         }
       })
+    }else{
+      that.loadHistoryMessage();
     }
   },
 

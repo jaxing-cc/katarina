@@ -9,6 +9,20 @@
     <div class="chatListBody">
       <van-row type="flex" class="title" v-if="!searchStatus">
         <van-col span="1"/>
+        群组列表
+      </van-row>
+      <van-row>
+        <van-col :span="1"/>
+        <user-card :user="{name: '聊天室', online: true}"
+                   :show-text="'  '"
+                   @click="startChatGroup('public-channel')"
+                   :img-size="30"
+                   :unread="0"
+                   class="resultItem">
+        </user-card>
+      </van-row>
+      <van-row type="flex" class="title" v-if="!searchStatus">
+        <van-col span="1"/>
         聊天列表
       </van-row>
       <van-list
@@ -43,6 +57,14 @@
         position="bottom" :style="{ height: '95%' }">
       <chat v-if="chat.switch" :login-user="loginUser" :target-id="chat.targetId" @exit="chat.switch = false"></chat>
     </van-popup>
+
+    <van-popup
+        v-model="chatGroup.switch"  round
+        :close-on-click-overlay="false"
+        @close="closeChatGroup(chatGroup.targetId)"
+        position="bottom" :style="{ height: '95%' }">
+      <chat v-if="chatGroup.switch" :login-user="loginUser" :target-id="chatGroup.targetId" @exit="chatGroup.switch = false" :group="true"></chat>
+    </van-popup>
   </van-row>
 
 </template>
@@ -63,6 +85,10 @@ export default {
   data() {
     return {
       chat: {
+        switch: false,
+        targetId: null,
+      },
+      chatGroup: {
         switch: false,
         targetId: null,
       },
@@ -225,6 +251,16 @@ export default {
     searchFocusCancel() {
       this.searchStatus = false
       this.reloadChatList()
+    },
+
+    startChatGroup(tid) {
+      this.chatGroup.targetId = tid
+      this.chatGroup.switch = true
+    },
+
+    closeChatGroup(tid) {
+      this.chatGroup.targetId = null
+      this.chatGroup.switch = false
     },
   },
 }
