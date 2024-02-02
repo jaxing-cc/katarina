@@ -45,10 +45,6 @@ public class ChatServiceImpl implements ChatService {
     @Override
     public Future<ChatMessage> sendChatMessage(User currentUser, ChatMessage chatMessage) {
         Promise<ChatMessage> promise = Promise.promise();
-        if (chatMessage.getGroupMessage()) {
-            promise.fail("暂不支持群组");
-            return promise.future();
-        }
         Client client = Client.CLIENT_POOL.get(chatMessage.getTo());
         chatMessage.setId(ObjectId.get().toHexString());
         chatMessage.setCreateTime(System.currentTimeMillis());

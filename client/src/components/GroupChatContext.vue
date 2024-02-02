@@ -52,7 +52,6 @@ export default {
   props: ["data"],
   methods: {
     myMessage(fromId) {
-      console.log(fromId, this.self._id, fromId === this.self._id)
       return fromId === this.self._id
     },
     getUserById(id) {

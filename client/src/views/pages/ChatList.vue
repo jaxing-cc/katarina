@@ -13,9 +13,9 @@
       </van-row>
       <van-row>
         <van-col :span="1"/>
-        <user-card :user="{name: '聊天室', online: true}"
+        <user-card :user="{name: '公共频道', online: true}"
                    :show-text="'  '"
-                   @click="startChatGroup('public-channel')"
+                   @click="startChatGroup('public000000000000000001')"
                    :img-size="30"
                    :unread="0"
                    class="resultItem">

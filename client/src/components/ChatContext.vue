@@ -1,5 +1,13 @@
 <template>
   <div>
+    <van-list
+        v-model="loading"
+        :finished="finished"
+        finished-text="没有更多了"
+        @load="onLoad">
+      <van-cell v-for="item in list" :key="item" :title="item" />
+    </van-list>
+
     <div v-if="data" v-for="(d,index) in data" :key="index">
       <span v-if="groupFlagMap && groupFlagMap[index]" class="chatTime">
         {{ new Date(groupFlagMap[index]).toLocaleString() }}
@@ -44,7 +52,8 @@ export default {
   data() {
     return {
       userMap: [],
-      groupFlagMap: null
+      groupFlagMap: null,
+      list:{}
     }
   },
   props: ["data", "targetUser", "loginUser"],
@@ -73,6 +82,9 @@ export default {
           }
         }
       }
+    },
+    onLoad(){
+      this.$emit("onLoad")
     }
   },
   watch: {
