@@ -3,7 +3,8 @@
     <div v-if="!this.group">
       <user-card class="chatHeader" :user="targetUser" :show-username="true" :follow="2"></user-card>
       <div class="chatBody">
-        <chat-context :data="messageRecordInfo.data" :targetUser="targetUser" :loginUser="loginUser"></chat-context>
+        <chat-context :data="messageRecordInfo.data" :targetUser="targetUser" :loginUser="loginUser"
+                      @onLoad="loadMore"></chat-context>
       </div>
     </div>
     <div v-if="this.group">
@@ -58,6 +59,7 @@ export default {
       },
       messageRecordInfo: {
         data: [],
+        end: false,
         page: 1,
         size: 10
       },
@@ -92,22 +94,35 @@ export default {
       let body = document.getElementsByClassName("chatBody")
       body[0].scrollTo(0, body[0].scrollHeight)
     },
-    loadHistoryMessage() {
+    loadHistoryMessage(moveToBottom) {
+      if (this.messageRecordInfo.end){
+        Toast('到顶了')
+        return;
+      }
       loadMessageRecord(this.targetId, this.group, this.messageRecordInfo.page, this.messageRecordInfo.size).then(res => {
         if (res.success) {
-          if (res.data) {
-            this.messageRecordInfo.data = res.data;
-            this.$nextTick(() => {
-              this.moveToBottom();
-            });
-          } else {
-            Toast("网络异常，请重试")
+          let data = res.data;
+          if (data.length === 0){
+            this.messageRecordInfo.end = true;
+            Toast('到顶了');
+          }else{
+            this.messageRecordInfo.data = res.data.concat(this.messageRecordInfo.data);
+            if (moveToBottom){
+              this.$nextTick(() => {
+                this.moveToBottom();
+              });
+            }
           }
         }
       })
     },
     chatMsgHandler(e) {
-      this.messageRecordInfo.data.push(e.detail)
+      if (this.targetId === e.detail.from) {
+        this.messageRecordInfo.data.push(e.detail)
+        this.$nextTick(() => {
+          this.moveToBottom();
+        });
+      }
     },
     clickEmojiSwitch() {
       this.emoji.showEmoji = !this.emoji.showEmoji
@@ -126,6 +141,11 @@ export default {
     },
     exit() {
       this.$emit("exit")
+    },
+    loadMore(end) {
+      this.messageRecordInfo.page++
+      this.loadHistoryMessage();
+      end()
     }
   },
 
@@ -154,12 +174,12 @@ export default {
             Toast("用户不存在")
           } else {
             this.targetUser = res.data;
-            that.loadHistoryMessage()
+            that.loadHistoryMessage(true)
           }
         }
       })
-    }else{
-      that.loadHistoryMessage();
+    } else {
+      that.loadHistoryMessage(true);
     }
   },
 

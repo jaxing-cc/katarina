@@ -36,7 +36,7 @@ export default class SocketService {
      * @param {number} time 心跳间隔毫秒 默认10000
      * @param {string} ping 心跳名称 默认字符串ping
      */
-    sendPing(time = 3000, ping = JSON.stringify({
+    sendPing(time = 10000, ping = JSON.stringify({
         type: 10000,
         data: 'ping',
         createTime: new Date().getTime()

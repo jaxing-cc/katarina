@@ -25,7 +25,8 @@ import {
     Icon,
     Grid, GridItem,
     RadioGroup, Radio,
-    Uploader
+    Uploader,
+    PullRefresh,
 } from 'vant';
 Vue.use(Button);
 Vue.use(Col);
@@ -56,3 +57,4 @@ Vue.use(Icon);
 Vue.use(Grid);
 Vue.use(GridItem);
 Vue.use(Uploader);
+Vue.use(PullRefresh);

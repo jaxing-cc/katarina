@@ -1,46 +1,40 @@
 <template>
   <div>
-    <van-list
-        v-model="loading"
-        :finished="finished"
-        finished-text="没有更多了"
-        @load="onLoad">
-      <van-cell v-for="item in list" :key="item" :title="item" />
-    </van-list>
-
-    <div v-if="data" v-for="(d,index) in data" :key="index">
+    <van-pull-refresh v-model="loading" @refresh="onRefresh">
+      <div v-if="data" v-for="(d,index) in data" :key="index">
       <span v-if="groupFlagMap && groupFlagMap[index]" class="chatTime">
         {{ new Date(groupFlagMap[index]).toLocaleString() }}
       </span>
-      <van-row type="flex" class="messageRow" :class="{ right: myMessage(d.from) }">
-        <van-col v-if="!myMessage(d.from)" :span="4">
-          <van-image
-              error-icon="smile-o"
-              class="userImg"
-              width="30" height="30"
-              round
-              position="left" :src="loadAvatar(d.from)"/>
-        </van-col>
+        <van-row type="flex" class="messageRow" :class="{ right: myMessage(d.from) }">
+          <van-col v-if="!myMessage(d.from)" :span="4">
+            <van-image
+                error-icon="smile-o"
+                class="userImg"
+                width="30" height="30"
+                round
+                position="left" :src="loadAvatar(d.from)"/>
+          </van-col>
 
-        <van-col :span="16" :class="myMessage(d.from)? 'right_msg' : 'left_msg'">
-          <div class="messageContentHeader">
-            {{ getUserById(d.from).name }}
-          </div>
-          <div class="messageContent">
-            {{ d.content }}
-          </div>
-        </van-col>
+          <van-col :span="16" :class="myMessage(d.from)? 'right_msg' : 'left_msg'">
+            <div class="messageContentHeader">
+              {{ getUserById(d.from).name }}
+            </div>
+            <div class="messageContent">
+              {{ d.content }}
+            </div>
+          </van-col>
 
-        <van-col v-if="myMessage(d.from)" :span="4">
-          <van-image
-              error-icon="smile-o"
-              class="userImg"
-              width="30" height="30"
-              round
-              position="left" :src="loadAvatar(d.from)"/>
-        </van-col>
-      </van-row>
-    </div>
+          <van-col v-if="myMessage(d.from)" :span="4">
+            <van-image
+                error-icon="smile-o"
+                class="userImg"
+                width="30" height="30"
+                round
+                position="left" :src="loadAvatar(d.from)"/>
+          </van-col>
+        </van-row>
+      </div>
+    </van-pull-refresh>
   </div>
 </template>
 
@@ -53,7 +47,8 @@ export default {
     return {
       userMap: [],
       groupFlagMap: null,
-      list:{}
+      list:{},
+      loading: false,
     }
   },
   props: ["data", "targetUser", "loginUser"],
@@ -83,8 +78,11 @@ export default {
         }
       }
     },
-    onLoad(){
-      this.$emit("onLoad")
+    onRefresh(){
+      let that = this;
+      this.$emit("onLoad" , () => {
+        that.loading = false
+      })
     }
   },
   watch: {
