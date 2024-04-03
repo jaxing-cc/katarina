@@ -1,51 +1,55 @@
 <template>
   <div>
-    <div v-if="data" v-for="(d,index) in data" :key="index">
+    <van-pull-refresh v-model="loading" @refresh="onRefresh">
+      <div v-if="data" v-for="(d,index) in data" :key="index">
       <span v-if="groupFlagMap && groupFlagMap[index]" class="chatTime">
         {{ new Date(groupFlagMap[index]).toLocaleString() }}
       </span>
-      <van-row type="flex" class="messageRow" :class="{ right: myMessage(d.from) }">
-        <van-col v-if="!myMessage(d.from)" :span="4">
-          <van-image
-              error-icon="smile-o"
-              class="userImg"
-              width="30" height="30"
-              round
-              position="left" :src="loadAvatar(d.from)"/>
-        </van-col>
+        <van-row type="flex" class="messageRow" :class="{ right: myMessage(d.from) }">
+          <van-col v-if="!myMessage(d.from)" :span="4">
+            <van-image
+                error-icon="smile-o"
+                class="userImg"
+                width="30" height="30"
+                round
+                position="left" :src="loadAvatar(d.from)"/>
+          </van-col>
 
-        <van-col :span="16" :class="myMessage(d.from)? 'right_msg' : 'left_msg'">
-          <div class="messageContentHeader">
-            {{ getUserById(d.from) ? getUserById(d.from).name : "未知" }}
-          </div>
-          <div class="messageContent">
-            {{ d.content }}
-          </div>
-        </van-col>
+          <van-col :span="16" :class="myMessage(d.from)? 'right_msg' : 'left_msg'">
+            <div class="messageContentHeader">
+              {{ getUserById(d.from) ? getUserById(d.from).name : "加载中" }}
+            </div>
+            <div class="messageContent">
+              {{ d.content }}
+            </div>
+          </van-col>
 
-        <van-col v-if="myMessage(d.from)" :span="4">
-          <van-image
-              error-icon="smile-o"
-              class="userImg"
-              width="30" height="30"
-              round
-              position="left" :src="loadAvatar(d.from)"/>
-        </van-col>
-      </van-row>
-    </div>
+          <van-col v-if="myMessage(d.from)" :span="4">
+            <van-image
+                error-icon="smile-o"
+                class="userImg"
+                width="30" height="30"
+                round
+                position="left" :src="loadAvatar(d.from)"/>
+          </van-col>
+        </van-row>
+      </div>
+    </van-pull-refresh>
   </div>
 </template>
 
 <script>
 import {getFileUrl} from "@/api/file";
 import {getUserInfo} from "@/utils/token";
+import {getByUid} from "@/api/auth";
 
 export default {
   name: "GroupChatContext",
   data() {
     return {
       self:{},
-      userMap: [],
+      userMap: new Map(),
+      loading: false,
       groupFlagMap: null
     }
   },
@@ -55,7 +59,7 @@ export default {
       return fromId === this.self._id
     },
     getUserById(id) {
-      return id === this.self._id ? this.self : this.targetUser
+      return this.userMap.get(id)
     },
     loadAvatar(id) {
       let user = this.getUserById(id);
@@ -78,11 +82,31 @@ export default {
           }
         }
       }
+    },
+    loadUserMapById(){
+      let set = new Set(this.data.map(obj => obj.from));
+      for (const id of set) {
+        if (!this.userMap.has(id)){
+          getByUid(id).then(res => {
+            if (res.success && res.data) {
+              this.userMap.set(id, res.data)
+              this.$forceUpdate();
+            }
+          })
+        }
+      }
+    },
+    onRefresh(){
+      let that = this;
+      this.$emit("onLoad" , () => {
+        that.loading = false
+      })
     }
   },
   watch: {
     data(oldV, newV) {
       this.groupByTime()
+      this.loadUserMapById();
     }
   },
   updated() {
@@ -92,6 +116,7 @@ export default {
   },
   created() {
     this.self = getUserInfo()
+    this.userMap.set(this.self._id, this.self)
   }
 }
 </script>

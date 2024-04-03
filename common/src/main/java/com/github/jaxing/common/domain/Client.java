@@ -62,4 +62,6 @@ public class Client {
     public EventBus sendText(String text) {
         return VertxHolder.getVertx().eventBus().send(this.getTextAddressId(),text);
     }
+
+
 }

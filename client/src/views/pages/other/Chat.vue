@@ -9,7 +9,7 @@
     </div>
     <div v-if="this.group">
       <div class="chatBody">
-        <group-chat-context :data="messageRecordInfo.data"></group-chat-context>
+        <group-chat-context :data="messageRecordInfo.data" @onLoad="loadMore"></group-chat-context>
       </div>
     </div>
     <van-row class="chatInput" @click.stop>
@@ -61,7 +61,7 @@ export default {
         data: [],
         end: false,
         page: 1,
-        size: 10
+        size: 5
       },
     };
   },
@@ -95,19 +95,19 @@ export default {
       body[0].scrollTo(0, body[0].scrollHeight)
     },
     loadHistoryMessage(moveToBottom) {
-      if (this.messageRecordInfo.end){
+      if (this.messageRecordInfo.end) {
         Toast('到顶了')
         return;
       }
       loadMessageRecord(this.targetId, this.group, this.messageRecordInfo.page, this.messageRecordInfo.size).then(res => {
         if (res.success) {
           let data = res.data;
-          if (data.length === 0){
+          if (data.length === 0) {
             this.messageRecordInfo.end = true;
             Toast('到顶了');
-          }else{
+          } else {
             this.messageRecordInfo.data = res.data.concat(this.messageRecordInfo.data);
-            if (moveToBottom){
+            if (moveToBottom) {
               this.$nextTick(() => {
                 this.moveToBottom();
               });
@@ -117,7 +117,14 @@ export default {
       })
     },
     chatMsgHandler(e) {
-      if (this.targetId === e.detail.from) {
+      if (!this.group) {
+        if (this.targetId === e.detail.from) {
+          this.messageRecordInfo.data.push(e.detail)
+          this.$nextTick(() => {
+            this.moveToBottom();
+          });
+        }
+      } else {
         this.messageRecordInfo.data.push(e.detail)
         this.$nextTick(() => {
           this.moveToBottom();

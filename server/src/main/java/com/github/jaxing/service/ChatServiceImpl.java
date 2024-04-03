@@ -5,6 +5,7 @@ import com.github.jaxing.common.domain.ChatMessage;
 import com.github.jaxing.common.domain.Client;
 import com.github.jaxing.common.domain.UserInfo;
 import com.github.jaxing.common.dto.ChatListItemVO;
+import com.github.jaxing.common.enums.ChatGroupEnum;
 import com.github.jaxing.common.enums.CollectionEnum;
 import com.github.jaxing.common.enums.MessageTypeEnum;
 import com.github.jaxing.common.utils.PageUtils;
@@ -45,13 +46,26 @@ public class ChatServiceImpl implements ChatService {
     @Override
     public Future<ChatMessage> sendChatMessage(User currentUser, ChatMessage chatMessage) {
         Promise<ChatMessage> promise = Promise.promise();
-        Client client = Client.CLIENT_POOL.get(chatMessage.getTo());
         chatMessage.setId(ObjectId.get().toHexString());
         chatMessage.setCreateTime(System.currentTimeMillis());
         chatMessage.setFrom(currentUser.principal().getString("uid"));
         chatMessage.setOfflineMessage(true);
-        if (!ObjectUtils.isEmpty(client)) {
-            client.sendText(MessageTypeEnum.CHAT_MESSAGE.message(chatMessage).toString());
+        String to = chatMessage.getTo();
+        if (chatMessage.getGroupMessage()) {
+            chatMessage.setOfflineMessage(false);
+            if (ChatGroupEnum.COMMON_CHAT_GROUP.getCode().equals(to)) {
+                Client.CLIENT_POOL.forEach((k, v) -> {
+                    if (!currentUser.principal().getString("uid").equals(v.getUid())){
+                        v.sendText(MessageTypeEnum.CHAT_MESSAGE.message(chatMessage).toString());
+                    }
+                });
+            }
+        } else {
+            Client client = Client.CLIENT_POOL.get(to);
+            if (!ObjectUtils.isEmpty(client)) {
+                chatMessage.setOfflineMessage(false);
+                client.sendText(MessageTypeEnum.CHAT_MESSAGE.message(chatMessage).toString());
+            }
         }
         mongoClient.insert(CollectionEnum.message_bucket.name(), JsonObject.mapFrom(chatMessage), res -> {
             if (res.succeeded()) {

@@ -12,7 +12,7 @@ import java.util.stream.Collectors;
  */
 @Getter
 public enum ChatGroupEnum {
-    COMMON_CHAT_GROUP("Public Channel", "public000000000000000001", null)
+    COMMON_CHAT_GROUP("Public Channel", "public-channel", null)
     ;
 
     ChatGroupEnum(String name, String code, String auth) {

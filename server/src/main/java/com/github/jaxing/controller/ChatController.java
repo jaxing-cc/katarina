@@ -19,6 +19,7 @@ import io.vertx.ext.auth.authentication.TokenCredentials;
 import io.vertx.ext.auth.jwt.JWTAuth;
 import io.vertx.ext.web.Router;
 import io.vertx.ext.web.validation.builder.Parameters;
+import io.vertx.json.schema.common.dsl.Schemas;
 import io.vertx.json.schema.draft7.dsl.Keywords;
 import io.vertx.redis.client.RedisAPI;
 import lombok.extern.slf4j.Slf4j;
@@ -27,6 +28,7 @@ import org.springframework.stereotype.Component;
 import javax.annotation.Resource;
 import java.util.stream.Collectors;
 
+import static io.vertx.json.schema.common.dsl.Keywords.minLength;
 import static io.vertx.json.schema.common.dsl.Schemas.numberSchema;
 import static io.vertx.json.schema.common.dsl.Schemas.objectSchema;
 import static io.vertx.json.schema.common.dsl.Schemas.booleanSchema;
@@ -123,7 +125,7 @@ public class ChatController extends HttpRegister {
         /** 消息发送 **/
 
         router.post("/api/msg/send").handler(validationUtils.validationJson(objectSchema()
-                .property("to", validationUtils.get("oid"))
+                .property("to", Schemas.stringSchema().with(minLength(10)))
                 .property("groupMessage", validationUtils.get("boolean"))
                 .property("content", validationUtils.get("chatContent"))
                 .property("contentType", validationUtils.get("chatContentType"))
