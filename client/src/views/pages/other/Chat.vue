@@ -62,7 +62,7 @@ export default {
         data: [],
         end: false,
         page: 1,
-        size: 5
+        size: 20
       },
     };
   },
