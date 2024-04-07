@@ -233,6 +233,9 @@ export default {
 
     chatMsgHandler(e) {
       e = e.detail
+      if (e.groupMessage){
+        return;
+      }
       //不是正在聊天的用户则+1
       if (e.from !== this.chat.targetId && !this.chat.switch) {
         //未读计数+1
