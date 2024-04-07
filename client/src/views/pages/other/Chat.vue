@@ -8,6 +8,7 @@
       </div>
     </div>
     <div v-if="this.group">
+      <user-card class="chatHeader" :user="{name: groupInfo.name, online: true, avatar:groupInfo.avatar}" ></user-card>
       <div class="chatBody">
         <group-chat-context :data="messageRecordInfo.data" @onLoad="loadMore"></group-chat-context>
       </div>
@@ -96,7 +97,7 @@ export default {
     },
     loadHistoryMessage(moveToBottom) {
       if (this.messageRecordInfo.end) {
-        Toast('到顶了')
+        Toast('别翻了,到顶了')
         return;
       }
       loadMessageRecord(this.targetId, this.group, this.messageRecordInfo.page, this.messageRecordInfo.size).then(res => {
@@ -104,7 +105,7 @@ export default {
           let data = res.data;
           if (data.length === 0) {
             this.messageRecordInfo.end = true;
-            Toast('到顶了');
+            Toast('别翻了,到顶了');
           } else {
             this.messageRecordInfo.data = res.data.concat(this.messageRecordInfo.data);
             if (moveToBottom) {
@@ -145,6 +146,8 @@ export default {
     },
     selectEmoji(e) {
       this.inputMessage += e.data
+      this.emoji.showEmoji = false
+      this.emoji.icon = "smile-o"
     },
     exit() {
       this.$emit("exit")
@@ -161,8 +164,9 @@ export default {
     loginUser: {},
     group: {
       type: Boolean,
-      default: false
-    }
+      default: false,
+    },
+    groupInfo: {}
   },
 
   updated() {

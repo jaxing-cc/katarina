@@ -48,3 +48,10 @@ export function clearOfflineMsg(targetId) {
 export function loadMessageRecord(targetId, groupMessage, page, size) {
     return request.get("/api/msg/record/" + targetId + "?page=" + page + "&size=" + size + "&groupMessage=" + groupMessage);
 }
+
+/**
+ * 加载群聊
+ */
+export function loadChatGroup() {
+    return request.get("api/chat-group");
+}

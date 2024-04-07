@@ -4,7 +4,7 @@
         <van-cell title="个人信息" is-link to="info"/>
         <van-cell title="我关注的" is-link/>
         <van-cell title="关注我的" is-link/>
-        <van-cell title="退出账号" is-link/>
+        <van-cell title="退出账号" is-link @click="exit"/>
       </van-cell-group>
       <van-cell-group title="其他" inset>
         <van-cell title="斗地主" label="开发中..." is-link/>
@@ -13,7 +13,7 @@
 </template>
 
 <script>
-import {decodeToken} from '@/utils/token'
+import {decodeToken, removeToken} from '@/utils/token'
 export default {
   components: { },
     name: 'Main',
@@ -29,7 +29,10 @@ export default {
     },
 
     methods: {
-        
+        exit(){
+          removeToken()
+          this.$router.push('/login')
+        }
     },
 
     created(){

@@ -26,6 +26,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static io.vertx.json.schema.common.dsl.Keywords.minLength;
@@ -171,7 +172,10 @@ public class ChatController extends HttpRegister {
         router.get("/api/chat-group").handler(
                         context -> {
                             JsonArray roles = context.user().principal().getJsonArray("roles");
-                            context.json(R.ok(ChatGroupEnum.chatGroupEnums(roles.getList())));
+                            List<ChatGroupEnum> list = ChatGroupEnum.chatGroupEnums(roles.getList());
+                            context.json(R.ok(list.stream()
+                                    .map(g -> JsonObject.of("name", g.getName(), "code", g.getCode(), "avatar", g.getAvatar()))
+                                    .collect(Collectors.toList())));
                         }
                 );
     }

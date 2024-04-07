@@ -11,16 +11,17 @@
         <van-col span="1"/>
         群组列表
       </van-row>
-      <van-row>
+      <van-row v-for="g in chatGroup.data" :key="g.code" v-if="!searchStatus">
         <van-col :span="1"/>
-        <user-card :user="{name: '公共频道', online: true}"
+        <user-card :user="{name: g.name, online: true, avatar:g.avatar}"
                    :show-text="'  '"
-                   @click="startChatGroup('public-channel')"
+                   @click="startChatGroup(g)"
                    :img-size="30"
                    :unread="0"
                    class="resultItem">
         </user-card>
       </van-row>
+
       <van-row type="flex" class="title" v-if="!searchStatus">
         <van-col span="1"/>
         聊天列表
@@ -51,7 +52,7 @@
     </div>
 
     <van-popup
-        v-model="chat.switch"  round
+        v-model="chat.switch" round
         :close-on-click-overlay="false"
         @close="closeChat(chat.targetId)"
         position="bottom" :style="{ height: '95%' }">
@@ -59,11 +60,12 @@
     </van-popup>
 
     <van-popup
-        v-model="chatGroup.switch"  round
+        v-model="chatGroup.switch" round
         :close-on-click-overlay="false"
         @close="closeChatGroup(chatGroup.targetId)"
         position="bottom" :style="{ height: '95%' }">
-      <chat v-if="chatGroup.switch" :login-user="loginUser" :target-id="chatGroup.targetId" @exit="chatGroup.switch = false" :group="true"></chat>
+      <chat v-if="chatGroup.switch" :login-user="loginUser" :target-id="chatGroup.targetId" :groupInfo="this.chatGroup.info"
+            @exit="chatGroup.switch = false" :group="true"></chat>
     </van-popup>
   </van-row>
 
@@ -77,7 +79,14 @@ import {decodeToken} from "@/utils/token";
 import {getByUid} from "@/api/auth";
 import {Toast} from "vant";
 import UserCard from "@/components/UserCard";
-import {addChatListItem, clearOfflineMsg, deleteChatListItem, loadChatList, loadOfflineMsgCount} from "@/api/chat";
+import {
+  addChatListItem,
+  clearOfflineMsg,
+  deleteChatListItem,
+  loadChatGroup,
+  loadChatList,
+  loadOfflineMsgCount
+} from "@/api/chat";
 
 export default {
   name: 'ChatList',
@@ -89,8 +98,10 @@ export default {
         targetId: null,
       },
       chatGroup: {
+        info: {},
         switch: false,
         targetId: null,
+        data: []
       },
       loginUser: {},
       searchStatus: false,
@@ -122,6 +133,7 @@ export default {
         }
       }
     })
+    this.loadAllChatGroup()
     this.loadOfflineMsgCountAndChatList()
   },
 
@@ -182,7 +194,8 @@ export default {
     },
 
     selectSearchedUser(uid) {
-      this.addItemToChatList(uid,()=>{});
+      this.addItemToChatList(uid, () => {
+      });
       this.startChat(uid)
     },
 
@@ -209,6 +222,7 @@ export default {
       this.chat.switch = false
       this.updateOfflineMsgCount(uid, () => null)
     },
+
     updateOfflineMsgCount(uid, callback) {
       let obj = {}
       const keys = Object.keys(this.chatList.unreadCount);
@@ -216,6 +230,7 @@ export default {
       obj[uid] = callback(obj[uid])
       this.chatList.unreadCount = obj;
     },
+
     chatMsgHandler(e) {
       e = e.detail
       //不是正在聊天的用户则+1
@@ -253,8 +268,9 @@ export default {
       this.reloadChatList()
     },
 
-    startChatGroup(tid) {
-      this.chatGroup.targetId = tid
+    startChatGroup(info) {
+      this.chatGroup.targetId = info.code
+      this.chatGroup.info = info
       this.chatGroup.switch = true
     },
 
@@ -262,6 +278,16 @@ export default {
       this.chatGroup.targetId = null
       this.chatGroup.switch = false
     },
+
+    loadAllChatGroup() {
+      loadChatGroup().then(res => {
+        if (res.success) {
+          this.chatGroup.data = res.data
+        } else {
+          Toast("网络繁忙请重试")
+        }
+      })
+    }
   },
 }
 ;
