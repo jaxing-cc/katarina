@@ -1,5 +1,4 @@
 <template>
-  <div>
     <van-pull-refresh v-model="loading" @refresh="onRefresh">
       <div v-if="data" v-for="(d,index) in data" :key="index">
       <span v-if="groupFlagMap && groupFlagMap[index]" class="chatTime">
@@ -35,7 +34,6 @@
         </van-row>
       </div>
     </van-pull-refresh>
-  </div>
 </template>
 
 <script>

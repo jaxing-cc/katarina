@@ -2,16 +2,12 @@
   <div id="chatWrapper">
     <div v-if="!this.group">
       <user-card class="chatHeader" :user="targetUser" :show-username="true" :follow="2"></user-card>
-      <div class="chatBody">
         <chat-context :data="messageRecordInfo.data" :targetUser="targetUser" :loginUser="loginUser"
-                      @onLoad="loadMore"></chat-context>
-      </div>
+                      @onLoad="loadMore" class="chatBody"></chat-context>
     </div>
     <div v-if="this.group">
       <user-card class="chatHeader" :user="{name: groupInfo.name, online: true, avatar:groupInfo.avatar}" ></user-card>
-      <div class="chatBody">
-        <group-chat-context :data="messageRecordInfo.data" @onLoad="loadMore"></group-chat-context>
-      </div>
+        <group-chat-context :data="messageRecordInfo.data" @onLoad="loadMore" class="chatBody"></group-chat-context>
     </div>
     <van-row class="chatInput" @click.stop>
       <VEmojiV2 v-if="emoji.showEmoji" :showCategories="false" :showSearch="false" :continuousList="true"
@@ -51,6 +47,9 @@ export default {
   components: {GroupChatContext, ChatContext, UserCard},
   data() {
     return {
+      loading: false,
+
+
       targetUser: {},
       inputMessage: "",
       active: '',

@@ -1,10 +1,9 @@
 <template>
-  <div>
     <van-pull-refresh v-model="loading" @refresh="onRefresh">
       <div v-if="data" v-for="(d,index) in data" :key="index">
-      <span v-if="groupFlagMap && groupFlagMap[index]" class="chatTime">
-        {{ new Date(groupFlagMap[index]).toLocaleString() }}
-      </span>
+        <span v-if="groupFlagMap && groupFlagMap[index]" class="chatTime">
+          {{ new Date(groupFlagMap[index]).toLocaleString() }}
+        </span>
         <van-row type="flex" class="messageRow" :class="{ right: myMessage(d.from) }">
           <van-col v-if="!myMessage(d.from)" :span="4">
             <van-image
@@ -35,7 +34,6 @@
         </van-row>
       </div>
     </van-pull-refresh>
-  </div>
 </template>
 
 <script>
@@ -83,7 +81,7 @@ export default {
       this.$emit("onLoad" , () => {
         that.loading = false
       })
-    }
+    },
   },
   watch: {
     data(oldV, newV) {
