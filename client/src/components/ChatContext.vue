@@ -1,39 +1,54 @@
 <template>
-    <van-pull-refresh v-model="loading" @refresh="onRefresh">
-      <div v-if="data" v-for="(d,index) in data" :key="index">
+  <van-pull-refresh v-model="loading" @refresh="onRefresh">
+    <div v-if="data" v-for="(d,index) in data" :key="index">
         <span v-if="groupFlagMap && groupFlagMap[index]" class="chatTime">
           {{ new Date(groupFlagMap[index]).toLocaleString() }}
         </span>
-        <van-row type="flex" class="messageRow" :class="{ right: myMessage(d.from) }">
-          <van-col v-if="!myMessage(d.from)" :span="4">
-            <van-image
-                error-icon="smile-o"
-                class="userImg"
-                width="30" height="30"
-                round
-                position="left" :src="loadAvatar(d.from)"/>
-          </van-col>
+      <van-row type="flex" class="messageRow" :class="{ right: myMessage(d.from) }">
+        <van-col v-if="!myMessage(d.from)" :span="4">
+          <van-image
+              error-icon="smile-o"
+              class="userImg"
+              width="30" height="30"
+              round
+              position="left" :src="loadAvatar(d.from)"/>
+        </van-col>
+        <van-col :span="16" :class="myMessage(d.from)? 'right_msg' : 'left_msg'" @click="demo(d)">
+          <div class="messageContentHeader">
+            {{ getUserById(d.from).name }}
+          </div>
+<!--          <van-row type="flex" :class="{ right: myMessage(d.from) }">-->
+<!--            <van-col :span="4" v-if="myMessage(d.from)" >-->
+<!--              <van-button round type="info" icon="plus" size="mini"/>-->
+<!--            </van-col>-->
+<!--            <van-col :span="20" :class="myMessage(d.from)? 'right_msg' : 'left_msg'">-->
+<!--              <div class="messageContent">-->
+<!--                {{ d.content }}-->
+<!--              </div>-->
+<!--            </van-col>-->
+<!--            <van-col :span="4" v-if="!myMessage(d.from)" >-->
+<!--              <van-button round type="info" icon="plus" size="mini"/>-->
+<!--            </van-col>-->
+<!--          </van-row>-->
+<!--          <div class="messageContentHeader">-->
+<!--            {{ getUserById(d.from).name }}-->
+<!--          </div>-->
+          <div class="messageContent">
+            {{ d.content }}
+          </div>
+        </van-col>
 
-          <van-col :span="16" :class="myMessage(d.from)? 'right_msg' : 'left_msg'">
-            <div class="messageContentHeader">
-              {{ getUserById(d.from).name }}
-            </div>
-            <div class="messageContent">
-              {{ d.content }}
-            </div>
-          </van-col>
-
-          <van-col v-if="myMessage(d.from)" :span="4">
-            <van-image
-                error-icon="smile-o"
-                class="userImg"
-                width="30" height="30"
-                round
-                position="left" :src="loadAvatar(d.from)"/>
-          </van-col>
-        </van-row>
-      </div>
-    </van-pull-refresh>
+        <van-col v-if="myMessage(d.from)" :span="4">
+          <van-image
+              error-icon="smile-o"
+              class="userImg"
+              width="30" height="30"
+              round
+              position="left" :src="loadAvatar(d.from)"/>
+        </van-col>
+      </van-row>
+    </div>
+  </van-pull-refresh>
 </template>
 
 <script>
@@ -43,9 +58,13 @@ export default {
   name: "ChatContext",
   data() {
     return {
+      popover: {
+        show: false,
+        actions: [{text: '选项一'}, {text: '选项二'}, {text: '选项三'}],
+      },
       userMap: [],
       groupFlagMap: null,
-      list:{},
+      list: {},
       loading: false,
     }
   },
@@ -76,12 +95,15 @@ export default {
         }
       }
     },
-    onRefresh(){
+    onRefresh() {
       let that = this;
-      this.$emit("onLoad" , () => {
+      this.$emit("onLoad", () => {
         that.loading = false
       })
     },
+    demo(data) {
+      console.log(data)
+    }
   },
   watch: {
     data(oldV, newV) {
