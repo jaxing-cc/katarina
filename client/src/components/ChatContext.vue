@@ -13,26 +13,11 @@
               round
               position="left" :src="loadAvatar(d.from)"/>
         </van-col>
-        <van-col :span="16" :class="myMessage(d.from)? 'right_msg' : 'left_msg'" @click="demo(d)">
+
+        <van-col :span="16" :class="myMessage(d.from)? 'right_msg' : 'left_msg'">
           <div class="messageContentHeader">
             {{ getUserById(d.from).name }}
           </div>
-<!--          <van-row type="flex" :class="{ right: myMessage(d.from) }">-->
-<!--            <van-col :span="4" v-if="myMessage(d.from)" >-->
-<!--              <van-button round type="info" icon="plus" size="mini"/>-->
-<!--            </van-col>-->
-<!--            <van-col :span="20" :class="myMessage(d.from)? 'right_msg' : 'left_msg'">-->
-<!--              <div class="messageContent">-->
-<!--                {{ d.content }}-->
-<!--              </div>-->
-<!--            </van-col>-->
-<!--            <van-col :span="4" v-if="!myMessage(d.from)" >-->
-<!--              <van-button round type="info" icon="plus" size="mini"/>-->
-<!--            </van-col>-->
-<!--          </van-row>-->
-<!--          <div class="messageContentHeader">-->
-<!--            {{ getUserById(d.from).name }}-->
-<!--          </div>-->
           <div class="messageContent">
             {{ d.content }}
           </div>
@@ -59,7 +44,7 @@ export default {
   data() {
     return {
       popover: {
-        show: false,
+        show: {},
         actions: [{text: '选项一'}, {text: '选项二'}, {text: '选项三'}],
       },
       userMap: [],
@@ -100,9 +85,6 @@ export default {
       this.$emit("onLoad", () => {
         that.loading = false
       })
-    },
-    demo(data) {
-      console.log(data)
     }
   },
   watch: {
@@ -162,4 +144,9 @@ export default {
   background-color: #f0f0ee;
 }
 
+.functionBtn{
+  border: 0;
+  border-radius: 40px;
+  margin: 5px;
+}
 </style>
