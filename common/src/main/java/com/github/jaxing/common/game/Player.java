@@ -26,6 +26,16 @@ public class Player {
     private String id;
 
     /**
+     * 用户名
+     */
+    private String name;
+
+    /**
+     * 头像
+     */
+    private String avatar;
+
+    /**
      * 用户状态
      */
     private volatile boolean ready;

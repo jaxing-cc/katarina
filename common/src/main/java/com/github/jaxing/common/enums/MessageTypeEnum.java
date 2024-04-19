@@ -22,7 +22,7 @@ public enum MessageTypeEnum implements EnumCode<Integer> {
 
     CHAT_MESSAGE(1001, ChatMessage.class, true),
 
-    DDZ_MESSAGE(1002, DdzContext.class, true),
+    DDZ_MESSAGE(1002, JsonObject.class, true),
 
     /*** 输入指令 ****/
 
@@ -50,7 +50,8 @@ public enum MessageTypeEnum implements EnumCode<Integer> {
                 data instanceof Double ||
                 data instanceof Date ||
                 data instanceof Long ||
-                data instanceof Boolean
+                data instanceof Boolean ||
+                data instanceof JsonObject
         ) {
             return new Message(this.code, data, new Date());
         }

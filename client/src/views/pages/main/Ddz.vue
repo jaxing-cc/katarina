@@ -71,12 +71,11 @@ export default {
         }
         createRoom(this.create.name).then(res => {
           if (res.success) {
-            done()
             this.loadRoomList()
           } else {
             Toast(res.msg)
-            done()
           }
+          done()
         })
       }
     },

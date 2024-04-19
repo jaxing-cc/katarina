@@ -10,6 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
+import javax.annotation.Resource;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -21,6 +22,9 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 public class DdzServiceImpl implements DdzService {
+
+    @Resource
+    private UserService userService;
 
     @Override
     public Future<List<DdzRoomVO>> roomList(String name) {
@@ -61,14 +65,20 @@ public class DdzServiceImpl implements DdzService {
     @Override
     public Future<Void> joinRoom(String uid, String roomId) {
         Promise<Void> promise = Promise.promise();
-        getPlayerByUid(uid).onSuccess(r -> promise.fail("已在房间内")).onFailure(t -> {
-            getContextByRoomId(roomId).onSuccess(context -> {
-                Player player = Player.builder().id(uid).ready(false).roomId(roomId).build();
+        getPlayerByUid(uid).onSuccess(r -> promise.fail("已在房间内")).onFailure(t -> getContextByRoomId(roomId).onSuccess(context -> {
+            userService.findById(uid).onFailure(promise::fail).onSuccess(u -> {
+                Player player = Player.builder()
+                        .id(uid)
+                        .ready(false)
+                        .name(u.getName())
+                        .avatar(u.getAvatar())
+                        .roomId(roomId)
+                        .build();
                 Player.PLAYER_MAP.put(player.getId(), player);
                 context.addPlayer(player);
                 promise.complete();
-            }).onFailure(promise::fail);
-        });
+            });
+        }).onFailure(promise::fail));
         return promise.future();
     }
 

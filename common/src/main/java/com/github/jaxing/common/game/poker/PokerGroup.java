@@ -64,6 +64,7 @@ public class PokerGroup {
 
     /**
      * 出牌
+     *
      * @param pokerGroup 牌组
      * @return 被删除的牌的id列表
      */
@@ -172,6 +173,16 @@ public class PokerGroup {
         l = sort(l, mid);
         r = sort(r, size - mid);
         return PokerFactory.merge(l, r);
+    }
+
+    /**
+     * 转为poker数组
+     * @return 数组
+     */
+    public List<Byte> toPokerArray() {
+        List<Byte> ids = new ArrayList<>();
+        forEach(p -> ids.add(p.getPokerId()));
+        return ids;
     }
 
     @Override

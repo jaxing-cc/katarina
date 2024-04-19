@@ -1,12 +1,14 @@
 package com.github.jaxing.job;
 
 import com.github.jaxing.common.domain.Client;
+import com.github.jaxing.common.domain.Message;
 import com.github.jaxing.common.enums.MessageTypeEnum;
 import com.github.jaxing.common.game.Player;
 import com.github.jaxing.common.game.poker.ddz.DdzContext;
 import com.github.jaxing.service.DdzService;
 import io.vertx.core.Handler;
 import io.vertx.core.Vertx;
+import io.vertx.core.json.JsonObject;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
@@ -42,7 +44,7 @@ public class DdzJob implements Handler<Long> {
             }
             DdzContext context = roomMap.get(v.getRoomId());
             if (context != null){
-                client.sendText(MessageTypeEnum.DDZ_MESSAGE.message(context).toString());
+                client.sendText(MessageTypeEnum.DDZ_MESSAGE.message(context.toJson()).toString());
             }
         });
     }
