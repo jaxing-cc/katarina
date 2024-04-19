@@ -7,7 +7,7 @@
         <van-cell title="退出账号" is-link @click="exit"/>
       </van-cell-group>
       <van-cell-group title="其他" inset>
-        <van-cell title="斗地主" label="开发中..." is-link/>
+        <van-cell title="斗地主" label="开发中..." is-link to="ddz"/>
       </van-cell-group>
     </div>
 </template>

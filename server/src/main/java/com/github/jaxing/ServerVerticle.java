@@ -1,8 +1,10 @@
 package com.github.jaxing;
 
+import com.github.jaxing.job.DdzJob;
 import com.github.jaxing.utils.ConfigUtils;
 import com.github.jaxing.utils.HttpRegister;
 import io.vertx.core.AbstractVerticle;
+import io.vertx.core.Handler;
 import io.vertx.core.Promise;
 import io.vertx.core.http.HttpServer;
 import io.vertx.core.http.HttpServerOptions;
@@ -13,6 +15,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 
 
 /**
@@ -25,10 +28,14 @@ public class ServerVerticle extends AbstractVerticle implements ApplicationConte
 
     private ApplicationContext applicationContext;
 
+    @Resource
+    private DdzJob ddzJob;
+
     @Override
     public void start(Promise<Void> startPromise) {
         HttpServer server = vertx.createHttpServer(new HttpServerOptions().setRegisterWebSocketWriteHandlers(true));
         Router router = Router.router(vertx);
+        vertx.setPeriodic(1000 , ddzJob);
         HttpRegister.registerHttp(applicationContext, router, vertx);
         server.requestHandler(router).listen(ConfigUtils.getAsInteger("server.port")).onComplete(httpServerAsyncResult -> {
             if (httpServerAsyncResult.succeeded()) {

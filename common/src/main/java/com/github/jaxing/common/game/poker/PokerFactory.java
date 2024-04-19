@@ -3,6 +3,9 @@ package com.github.jaxing.common.game.poker;
 
 import com.github.jaxing.common.enums.game.poker.PokerType;
 
+import java.util.Arrays;
+import java.util.List;
+
 /**
  * 扑克牌工厂
  */
@@ -27,9 +30,9 @@ public class PokerFactory {
             index++;
             val++;
         }
-        POKER_MAP[index] = new Poker(index, (byte) 0, PokerType.SUPER_JOKER);
+        POKER_MAP[index] = new Poker(index, (byte) 15, PokerType.SUPER_JOKER);
         index++;
-        POKER_MAP[index] = new Poker(index, (byte) 0, PokerType.JOKER);
+        POKER_MAP[index] = new Poker(index, (byte) 14, PokerType.JOKER);
     }
 
     public static Poker get(byte id) {
@@ -181,18 +184,19 @@ public class PokerFactory {
         int[] countArray = new int[16];
         pokerGroup.forEach(i -> {
             Poker poker = i.get();
-            switch (poker.getType()) {
-                case JOKER:
-                    countArray[14]++;
-                    break;
-                case SUPER_JOKER:
-                    countArray[15]++;
-                    break;
-                default:
-                    countArray[poker.getValue()]++;
-                    break;
-            }
+            countArray[poker.getValue()]++;
         });
+        return countArray;
+    }
+
+    /**
+     * 获取计数数组
+     */
+    public static int[] getPokerArray(List<Byte> ids) {
+        int[] countArray = new int[16];
+        ids.stream().map(id -> POKER_MAP[id]).forEach(p ->
+                countArray[p.getValue()]++
+        );
         return countArray;
     }
 

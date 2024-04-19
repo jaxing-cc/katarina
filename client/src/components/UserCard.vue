@@ -123,6 +123,7 @@ export default {
 }
 
 .userImg {
+  margin-left: 10px;
 }
 
 .wrapper {

@@ -1,5 +1,5 @@
 <template>
-  <van-pull-refresh v-model="loading" @refresh="onRefresh">
+  <van-pull-refresh v-model="loading" @refresh="onRefresh" class="wrapper">
     <div v-if="data" v-for="(d,index) in data" :key="index">
         <span v-if="groupFlagMap && groupFlagMap[index]" class="chatTime">
           {{ new Date(groupFlagMap[index]).toLocaleString() }}
@@ -143,7 +143,9 @@ export default {
   display: inline-block;
   background-color: #f0f0ee;
 }
-
+.wrapper{
+  text-align: center;
+}
 .functionBtn{
   border: 0;
   border-radius: 40px;

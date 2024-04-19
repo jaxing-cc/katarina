@@ -2,6 +2,7 @@ package com.github.jaxing.common.enums;
 
 import com.github.jaxing.common.domain.ChatMessage;
 import com.github.jaxing.common.domain.Message;
+import com.github.jaxing.common.game.poker.ddz.DdzContext;
 import io.vertx.core.json.JsonObject;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -20,6 +21,8 @@ public enum MessageTypeEnum implements EnumCode<Integer> {
     HEARTBEAT_OK(1000, String.class, true),
 
     CHAT_MESSAGE(1001, ChatMessage.class, true),
+
+    DDZ_MESSAGE(1002, DdzContext.class, true),
 
     /*** 输入指令 ****/
 

@@ -5,6 +5,8 @@ import Home from '@/views/Home.vue'
 import ErrorPage from '../views/ErrorPage.vue'
 import Login from '../views/pages/other/Login.vue'
 import UserInfoPage from "@/views/pages/main/UserInfoPage";
+import Ddz from "@/views/pages/main/Ddz";
+import DdzGamePage from "@/views/pages/main/DdzGamePage";
 
 Vue.use(VueRouter)
 
@@ -27,6 +29,16 @@ const routes = [
   {
     path: '/info',
     component: UserInfoPage
+  }
+  ,
+  {
+    path: '/ddz',
+    component: Ddz
+  }
+  ,
+  {
+    path: '/ddz/room',
+    component: DdzGamePage
   }
 ]
 
