@@ -9,6 +9,13 @@ export function getFileUrl(key) {
 }
 
 /**
+ * 获取url，key为空返回默认头像
+ */
+export function getAvatarUrlOrDefault(key, gender) {
+    return key ? URL.baseURL + "/file/" + key : 'avatar-' + (gender === 1 ? '1' : '2') + ".jpg"
+}
+
+/**
  * 上传文件
  */
 export function upload(file) {

@@ -30,9 +30,9 @@ public class PokerFactory {
             index++;
             val++;
         }
-        POKER_MAP[index] = new Poker(index, (byte) 15, PokerType.SUPER_JOKER);
-        index++;
         POKER_MAP[index] = new Poker(index, (byte) 14, PokerType.JOKER);
+        index++;
+        POKER_MAP[index] = new Poker(index, (byte) 15, PokerType.SUPER_JOKER);
     }
 
     public static Poker get(byte id) {
@@ -67,15 +67,18 @@ public class PokerFactory {
             answer[i] = new PokerGroup();
         }
         for (byte i = 0; i < MAX_POKER_SIZE; i++) {
-            if (i < 3) {
+            if (i < 17) {
                 answer[0].put(new PokerGroupItem(all[i]));
-            } else if (i < 20) {
+            } else if (i < 34) {
                 answer[1].put(new PokerGroupItem(all[i]));
-            } else if (i < 37) {
+            } else if (i < 51) {
                 answer[2].put(new PokerGroupItem(all[i]));
             } else {
                 answer[3].put(new PokerGroupItem(all[i]));
             }
+        }
+        for (PokerGroup pokerGroup : answer) {
+            pokerGroup.sort();
         }
         return answer;
     }

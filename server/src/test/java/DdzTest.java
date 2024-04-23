@@ -1,4 +1,5 @@
 import com.github.jaxing.common.game.Player;
+import com.github.jaxing.common.game.poker.Poker;
 import com.github.jaxing.common.game.poker.PokerFactory;
 import com.github.jaxing.common.game.poker.ddz.DdzContext;
 import com.github.jaxing.service.DdzService;
@@ -32,7 +33,10 @@ public class DdzTest {
         // print();
         // service.joinRoom(b, roomId);
         // print();
-        System.out.println(Arrays.toString(PokerFactory.POKER_MAP));
+        for (int i = 0; i < 54; i++) {
+            Poker p = PokerFactory.get((byte) i);
+            System.out.printf("{\"id\":%d, \"value\":%d, \"type\": %s},\n",p.getId(), p.getValue(), p.getType().name);
+        }
 
     }
 

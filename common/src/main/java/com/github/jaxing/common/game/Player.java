@@ -36,6 +36,11 @@ public class Player {
     private String avatar;
 
     /**
+     * 性别
+     */
+    private Integer gender;
+
+    /**
      * 用户状态
      */
     private volatile boolean ready;

@@ -72,6 +72,7 @@ public class DdzServiceImpl implements DdzService {
                         .ready(false)
                         .name(u.getName())
                         .avatar(u.getAvatar())
+                        .gender(u.getGender())
                         .roomId(roomId)
                         .build();
                 Player.PLAYER_MAP.put(player.getId(), player);
