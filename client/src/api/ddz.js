@@ -30,3 +30,11 @@ export function joinRoom(id) {
 export function exitRoom() {
     return request.delete("/api/game/ddz/room");
 }
+
+
+/**
+ * 查询房间列表
+ */
+export function readyRequest() {
+    return request.post("/api/game/ddz/ready");
+}

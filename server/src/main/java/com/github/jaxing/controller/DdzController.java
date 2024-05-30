@@ -61,5 +61,14 @@ public class DdzController extends HttpRegister {
                         .onSuccess(list -> context.json(R.ok(list)))
         );
 
+        /**
+         * 准备
+         */
+        router.post("/api/game/ddz/ready").handler(context ->
+                ddzService.ready(CommonUtils.getUid(context))
+                        .onFailure(t -> context.json(R.fail(t)))
+                        .onSuccess(v -> context.json(R.ok()))
+        );
+
     }
 }

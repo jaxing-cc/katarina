@@ -33,11 +33,7 @@ public class DdzTest {
         // print();
         // service.joinRoom(b, roomId);
         // print();
-        for (int i = 0; i < 54; i++) {
-            Poker p = PokerFactory.get((byte) i);
-            System.out.printf("{\"id\":%d, \"value\":%d, \"type\": %s},\n",p.getId(), p.getValue(), p.getType().name);
-        }
-
+        System.out.println("00000000199999".length());
     }
 
     private void print(){

@@ -103,6 +103,7 @@ public class DdzContext implements Serializable {
         this.size = new AtomicInteger();
         this.size.set(0);
         this.pokerGroups = PokerFactory.wash();
+        this.callList = new int[3];
     }
 
     /**

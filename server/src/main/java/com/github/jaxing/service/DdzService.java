@@ -42,7 +42,7 @@ public interface DdzService {
     /**
      * 准备/开始
      */
-    void ready(String uid);
+    Future<Void> ready(String uid);
 
     /**
      * 叫

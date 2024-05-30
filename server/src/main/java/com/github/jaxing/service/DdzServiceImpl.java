@@ -2,7 +2,9 @@ package com.github.jaxing.service;
 
 import com.github.jaxing.common.enums.game.poker.GameStatus;
 import com.github.jaxing.common.game.Player;
+import com.github.jaxing.common.game.poker.PokerFactory;
 import com.github.jaxing.common.game.poker.ddz.DdzContext;
+import com.github.jaxing.common.utils.CommonUtils;
 import com.github.jaxing.dto.vo.DdzRoomVO;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
@@ -104,26 +106,29 @@ public class DdzServiceImpl implements DdzService {
      * 准备/开始
      */
     @Override
-    public void ready(String uid) {
-        // Player player = getPlayerByUid(uid);
-        // player.setReady(true);
-        // DdzContext context = getContextByRoomId(player.getRoomId());
-        // if (!context.getGameStatus().equals(GameStatus.WAIT)) {
-        //     throw new ServiceException("当前不能做此操作");
-        // }
-        // Player[] players = context.getPlayers();
-        // boolean allReady = true;
-        // for (Player p : players) {
-        //     if (p == null || !p.isReady()) {
-        //         allReady = false;
-        //         break;
-        //     }
-        // }
-        // if (allReady) {
-        //     context.setGameStatus(GameStatus.CALL);
-        //     context.setPokerGroups(PokerFactory.wash());
-        //     context.setCurrent(CommonUtils.random(0, 3));
-        // }
+    public Future<Void> ready(String uid) {
+        Promise<Void> promise = Promise.promise();
+        getPlayerByUid(uid).onFailure(promise::fail).onSuccess(player -> getContextByRoomId(player.getRoomId()).onFailure(promise::fail).onSuccess(c -> {
+            if (!c.getGameStatus().equals(GameStatus.WAIT)) {
+                promise.fail("游戏进行中不能进行此操作");
+                return;
+            }
+            player.setReady(!player.isReady());
+            boolean allReady = true;
+            for (Player p : c.getPlayers()) {
+                if (p == null || !p.isReady()) {
+                    allReady = false;
+                    break;
+                }
+            }
+            if (allReady) {
+                c.setGameStatus(GameStatus.CALL);
+                c.setPokerGroups(PokerFactory.wash());
+                c.setCurrent(CommonUtils.random(0, 3));
+            }
+            promise.complete();
+        }));
+        return promise.future();
     }
 
 
