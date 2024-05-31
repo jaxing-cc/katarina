@@ -88,7 +88,7 @@ public class DdzContext implements Serializable {
     /**
      * 叫牌数据表
      */
-    private int[] callList;
+    private Integer[] callList;
 
     public DdzContext(String name) {
         String randomId;
@@ -103,7 +103,7 @@ public class DdzContext implements Serializable {
         this.size = new AtomicInteger();
         this.size.set(0);
         this.pokerGroups = PokerFactory.wash();
-        this.callList = new int[3];
+        this.callList = new Integer[3];
     }
 
     /**
@@ -170,5 +170,9 @@ public class DdzContext implements Serializable {
             entries.put("pokerGroups", lists);
         }
         return entries;
+    }
+
+    public void start(Integer master) {
+
     }
 }

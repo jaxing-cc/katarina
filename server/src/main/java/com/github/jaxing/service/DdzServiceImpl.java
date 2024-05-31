@@ -96,6 +96,8 @@ public class DdzServiceImpl implements DdzService {
                     if (context.getGameStatus().equals(GameStatus.WAIT)) {
                         context.removePlayer(player);
                         promise.complete();
+                    } else {
+                        //TODO 其他状态退出处理
                     }
                 })
         );
@@ -125,6 +127,7 @@ public class DdzServiceImpl implements DdzService {
                 c.setGameStatus(GameStatus.CALL);
                 c.setPokerGroups(PokerFactory.wash());
                 c.setCurrent(CommonUtils.random(0, 3));
+                c.setMaster(c.getCurrent());
             }
             promise.complete();
         }));
@@ -138,8 +141,57 @@ public class DdzServiceImpl implements DdzService {
      * @param v 分数
      */
     @Override
-    public void callMaster(String uid, int v) {
-
+    public Future<Void> callMaster(String uid, Integer v) {
+        Promise<Void> promise = Promise.promise();
+        if (v == null || v < 0 || v > 3) {
+            promise.fail("数据格式错误");
+            return promise.future();
+        }
+        getPlayerByUid(uid).onFailure(promise::fail).onSuccess(player -> getContextByRoomId(player.getRoomId()).onFailure(promise::fail).onSuccess(c -> {
+            if (!c.getGameStatus().equals(GameStatus.CALL)) {
+                promise.fail("不能进行此操作");
+                return;
+            }
+            Integer playerIndex = c.getPlayerMap().get(uid);
+            Integer currentIndex = c.getCurrent();
+            int lastIndex = (currentIndex + 2) % 3;
+            int nextIndex = (currentIndex + 1) % 3;
+            if (!playerIndex.equals(currentIndex)) {
+                promise.fail("不是你的回合");
+                return;
+            }
+            Integer[] callList = c.getCallList();
+            if (c.getMaster().equals(playerIndex)) {
+                if (v.equals(3)) {
+                    c.start(playerIndex);
+                } else if (callList[playerIndex] == null) {
+                    callList[playerIndex] = v;
+                } else if (callList[lastIndex] > v) {
+                    promise.fail("数值错误");
+                    return;
+                } else {
+                    callList[playerIndex] = v;
+                    c.start(playerIndex);
+                }
+            } else {
+                if (v <= callList[lastIndex]) {
+                    promise.fail("数值错误");
+                    return;
+                } else {
+                    callList[playerIndex] = v;
+                    if (v == 3) {
+                        c.start(playerIndex);
+                    }
+                    if (c.getMaster().equals(nextIndex)) {
+                        if (callList[nextIndex] == 0){
+                            c.start(playerIndex);
+                        }
+                    }
+                }
+            }
+            promise.complete();
+        }));
+        return promise.future();
     }
 
     /**

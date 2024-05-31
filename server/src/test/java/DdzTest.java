@@ -17,7 +17,7 @@ public class DdzTest {
 
 
     @Test
-    public void test(){
+    public void test() {
         String a = "a";
         String b = "b";
         String c = "c";
@@ -34,9 +34,11 @@ public class DdzTest {
         // service.joinRoom(b, roomId);
         // print();
         System.out.println("00000000199999".length());
+        int x = 2;
+        System.out.println((x + 2) % 3);
     }
 
-    private void print(){
+    private void print() {
         Map<String, DdzContext> roomMap = DdzContext.ROOM_MAP;
         for (Player value : Player.PLAYER_MAP.values()) {
             System.out.println(value);

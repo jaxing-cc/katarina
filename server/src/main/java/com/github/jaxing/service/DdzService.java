@@ -49,7 +49,7 @@ public interface DdzService {
      *
      * @param v 分数
      */
-    void callMaster(String uid, int v);
+    Future<Void> callMaster(String uid, Integer v);
 
     /**
      * 出

@@ -22,9 +22,10 @@
             </div>
             <!--准备阶段-->
             <van-row style="font-size: 13px" v-if="info.gameStatus === 'WAIT'">
-              <van-icon name="success" color="#1989fa" v-if="info.players[info.playerMap[lid]].ready">已准备</van-icon>
-              <van-icon name="cross" color="darkseagreen" v-if="!info.players[info.playerMap[lid]].ready">未准备</van-icon>
+              <van-icon name="success" color="#1989fa" v-if="player(lid).ready">已准备</van-icon>
+              <van-icon name="cross" color="darkseagreen" v-if="!player(lid).ready">未准备</van-icon>
             </van-row>
+            <!--CALL阶段-->
           </div>
           <div v-if="!lid">
             等待加入...
@@ -47,9 +48,11 @@
             </div>
             <!--准备阶段-->
             <van-row style="font-size: 13px" v-if="info.gameStatus === 'WAIT'">
-              <van-icon name="success" color="#1989fa" v-if="info.players[info.playerMap[rid]].ready">已准备</van-icon>
-              <van-icon name="cross" color="darkseagreen" v-if="!info.players[info.playerMap[rid]].ready">未准备</van-icon>
+              <van-icon name="success" color="#1989fa" v-if="player(rid).ready">已准备</van-icon>
+              <van-icon name="cross" color="darkseagreen" v-if="!player(rid).ready">未准备</van-icon>
             </van-row>
+            <!--CALL阶段-->
+
           </div>
           <div v-if="!rid">
             等待加入...
@@ -58,8 +61,18 @@
       </van-row>
 
       <div style="margin-top: 10%">
-        <div v-for="p in info.lastPush" :key="p" class="poker_unselected">
-          {{ pokerValue(p) }}
+        <div>
+          游戏阶段: {{ convertGameState(info.gameStatus) }}
+        </div>
+        <div v-if="info.gameStatus === 'UNDERWAY'">
+          <div v-for="p in info.lastPush" :key="p" class="poker_unselected">
+            {{ convertPokerValue(p) }}
+          </div>
+        </div>
+        <div v-if="info.gameStatus === 'CALL'">
+          <div v-for="p in info.pokerGroups[3]" :key="p" class="poker_unselected">
+            {{ convertPokerValue(p) }}
+          </div>
         </div>
       </div>
     </div>
@@ -82,15 +95,15 @@
       <div v-if="info.gameStatus === 'CALL' || info.gameStatus === 'UNDERWAY'">
         <div v-for="p in info.pokerGroups[info.playerMap[mid]]" :key="p"
              :class="selected.has(p) ? 'poker_selected':'poker_unselected'" @click="selectPoker(p)">
-          {{ pokerValue(p) }}
+          {{ convertPokerValue(p) }}
         </div>
       </div>
       <!--准备阶段-->
       <van-row style="font-size: 13px;margin: 5px" v-if="info.gameStatus === 'WAIT'">
-        <van-button round type="default" size="normal" block @click="ready(true)" v-if="!info.players[info.playerMap[mid]].ready">
+        <van-button round type="default" size="normal" block @click="ready(true)" v-if="!player(mid).ready">
           准备
         </van-button>
-        <van-button round type="warning" size="normal" block @click="ready(false)" v-if="info.players[info.playerMap[mid]].ready">
+        <van-button round type="warning" size="normal" block @click="ready(false)" v-if="player(mid).ready">
           取消准备
         </van-button>
       </van-row>
@@ -100,10 +113,10 @@
 
 <script>
 import {exitRoom, readyRequest} from "@/api/ddz";
-import {Toast} from "vant";
 import {decodeToken} from "@/utils/token";
-import UserCard from "@/components/UserCard";
 import {getAvatarUrlOrDefault} from "@/api/file";
+import {Toast} from "vant";
+import UserCard from "@/components/UserCard";
 import pokerMap from "@/utils/poker";
 
 export default {
@@ -140,10 +153,10 @@ export default {
             "roomId": "13aa99"
           }],
         "playerMap": {"64d204c182879a330e56f6f1": 0, "64d204a282879a330e56f6f0": 1, "64d204a282879a330e56f6f2": 2},
-        "gameStatus": "WAIT",
+        "gameStatus": "CALL",
         "size": 3,
         "master": null,
-        "current": null,
+        "current": 1,
         "callList": null,
         "lastPush": null,
         "pokerGroups": [
@@ -170,7 +183,10 @@ export default {
       })
     },
 
-    pokerValue(index) {
+    /**
+     * 编码转换
+     */
+    convertPokerValue(index) {
       let poker = pokerMap[index];
       let type;
       if (poker.type === 0) {
@@ -198,6 +214,24 @@ export default {
         return type + poker.value;
       }
     },
+    convertGameState(state) {
+      if (state === 'WAIT') {
+        return '准备中'
+      }
+      if (state === 'WAIT') {
+        return '叫地主'
+      }
+      if (state === 'UNDERWAY') {
+        return '进行中'
+      }
+      if (state === 'UNDERWAY') {
+        return '结束'
+      }
+    },
+
+    /**
+     * 获取头像
+     */
     avatar(key) {
       return getAvatarUrlOrDefault(key);
     },
@@ -207,12 +241,15 @@ export default {
     ready(ready) {
       readyRequest().then(res => {
         if (res.success) {
-          Toast(ready ? "已准备": "已取消准备")
+          Toast(ready ? "已准备" : "已取消准备")
         } else {
           Toast(res.msg)
         }
       })
     },
+    /**
+     * id获取用户信息
+     */
     player(id) {
       let index = this.info.playerMap[id];
       return this.info.players[index] ? this.info.players[index] : {}
@@ -230,7 +267,7 @@ export default {
       this.selected = set;
     },
     /**
-     * 设置三个用户的id
+     * 设置三个用户的id: lid/rid/mid
      */
     setPlayerId() {
       let players = this.info.players;
@@ -256,7 +293,7 @@ export default {
   created() {
     this.loginInfo = decodeToken();
     this.mid = this.loginInfo.uid
-    this.$socket.connect()
+    // this.$socket.connect()
     window.addEventListener("msg@1002", this.chatMsgHandler)
     this.setPlayerId()
   },
