@@ -40,5 +40,12 @@ public enum CollectionEnum {
      *
      * @see com.github.jaxing.common.domain.FollowRecord
      */
-    follow_list
+    follow_list,
+
+    /**
+     * 文章/动态列表
+     *
+     * @see com.github.jaxing.common.domain.Post
+     */
+    post
 }

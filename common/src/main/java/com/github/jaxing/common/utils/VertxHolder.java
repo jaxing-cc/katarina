@@ -1,6 +1,7 @@
 package com.github.jaxing.common.utils;
 
 import io.vertx.core.Vertx;
+import lombok.Getter;
 
 /**
  * @author cjxin
@@ -8,9 +9,7 @@ import io.vertx.core.Vertx;
  */
 public class VertxHolder {
 
+    @Getter
     private static final Vertx vertx = Vertx.vertx();
 
-    public static Vertx getVertx() {
-        return vertx;
-    }
 }

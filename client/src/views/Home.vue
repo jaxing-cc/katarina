@@ -4,7 +4,7 @@
       <van-tabbar-item name="chat" icon="chat-o" :badge="newChatMessageCount" @click="chatClick">
         聊天
       </van-tabbar-item>
-      <van-tabbar-item name="friends" icon="friends-o">发现</van-tabbar-item>
+      <van-tabbar-item name="friends" icon="friends-o">动态</van-tabbar-item>
       <van-tabbar-item name="main" icon="home-o">我</van-tabbar-item>
     </van-tabbar>
 

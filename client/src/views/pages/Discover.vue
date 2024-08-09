@@ -11,6 +11,11 @@
           <van-icon name="star"/> 关注
         </template>
       </van-tab>
+      <van-tab>
+        <template #title>
+          <van-icon name="star"/> 我的
+        </template>
+      </van-tab>
     </van-tabs>
   </div>
 </template>
