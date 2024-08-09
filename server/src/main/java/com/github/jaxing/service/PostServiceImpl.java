@@ -37,9 +37,13 @@ public class PostServiceImpl implements PostService {
         BeanUtils.copyProperties(saveDTO, post);
         post.setUid(uid);
         post.setCreateTime(new Date());
-        post.setState(Post.STATE_PREPARE);
-        if (post.getMarkdown() && StringUtils.isEmpty(post.getTitle())) {
-            promise.fail("参数错误");
+        if (post.getMarkdown()) {
+            post.setState(Post.STATE_PUBLISH);
+            if (StringUtils.isEmpty(post.getTitle())){
+                promise.fail("参数错误");
+            }
+        }else{
+            post.setState(Post.STATE_PREPARE);
         }
         JsonObject document = JsonObject.mapFrom(post);
         document.remove("_id");

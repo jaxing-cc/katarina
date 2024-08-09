@@ -16,9 +16,7 @@ import java.util.regex.Pattern;
 import static io.vertx.json.schema.common.dsl.Keywords.maxLength;
 import static io.vertx.json.schema.common.dsl.Keywords.minLength;
 import static io.vertx.json.schema.common.dsl.Keywords.pattern;
-import static io.vertx.json.schema.common.dsl.Schemas.booleanSchema;
-import static io.vertx.json.schema.common.dsl.Schemas.numberSchema;
-import static io.vertx.json.schema.common.dsl.Schemas.stringSchema;
+import static io.vertx.json.schema.common.dsl.Schemas.*;
 import static io.vertx.json.schema.draft7.dsl.Keywords.maximum;
 import static io.vertx.json.schema.draft7.dsl.Keywords.minimum;
 
@@ -40,11 +38,14 @@ public class ValidationUtils {
         SCHEMA_BUILDER_MAP.put("email", stringSchema().with(pattern(Pattern.compile(".{1,20}@.{3,20}"))));
 
         SCHEMA_BUILDER_MAP.put("chatContent", stringSchema().with(maxLength(500)).with(minLength(1)));
+        SCHEMA_BUILDER_MAP.put("postContent", stringSchema().with(maxLength(10000)).with(minLength(1)));
         SCHEMA_BUILDER_MAP.put("chatContentType", numberSchema().with(maximum(2)).with(minimum(0)));
         //通用
         SCHEMA_BUILDER_MAP.put("oid", stringSchema().with(maxLength(24)).with(minLength(24)));
         SCHEMA_BUILDER_MAP.put("boolean", booleanSchema());
         SCHEMA_BUILDER_MAP.put("number", numberSchema());
+        SCHEMA_BUILDER_MAP.put("array", arraySchema());
+
     }
 
     @Resource
