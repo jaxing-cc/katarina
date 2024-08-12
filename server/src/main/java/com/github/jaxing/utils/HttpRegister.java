@@ -61,7 +61,6 @@ public abstract class HttpRegister {
         COMMON_HTTP_REGISTER.start(router, vertx);
         String[] beanNames = context.getBeanNamesForType(HttpRegister.class);
         for (String beanName : beanNames) {
-            log.info("[{}] 已被注册", beanName);
             HttpRegister httpRegister = context.getBean(beanName, HttpRegister.class);
             httpRegister.start(router, vertx);
         }

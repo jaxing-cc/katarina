@@ -1,39 +1,33 @@
 <template>
   <div class="home">
     <van-tabbar v-model="active">
-      <van-tabbar-item name="chat" icon="chat-o" :badge="newChatMessageCount" @click="chatClick">
+      <van-tabbar-item name="chat" icon="chat-o" :badge="newChatMessageCount" @click="chatClick" to="chat-list">
         聊天
       </van-tabbar-item>
-      <van-tabbar-item name="friends" icon="friends-o">动态</van-tabbar-item>
-      <van-tabbar-item name="main" icon="home-o">我</van-tabbar-item>
+      <van-tabbar-item name="post" icon="friends-o" to="/">动态</van-tabbar-item>
+      <van-tabbar-item name="main" icon="home-o" to="main">我</van-tabbar-item>
     </van-tabbar>
-
-    <chat v-if="active === 'chat'"></chat>
-    <friends v-if="active === 'friends'"></friends>
-    <main-page v-if="active === 'main'"></main-page>
+    <router-view/>
   </div>
 </template>
 
 <script>
-import Chat from './pages/ChatList.vue'
-import Friends from './pages/Discover.vue'
-import MainPage from './pages/Main.vue'
 import store from '@/store/index'
 import {followList, getByUid} from "@/api/auth";
 import {Toast} from "vant";
 import {decodeToken} from "@/utils/token";
 export default {
-  components: {Chat, Friends, MainPage},
   name: 'Home',
   data() {
     return {
-      active: 'chat',
+      active: 'post',
       newChatMessageCount: null
     }
   },
   methods: {
     chatMsgHandler(e) {
       e = e.detail
+      console.log(e)
       if (this.active !== 'chat') {
         this.newChatMessageCount = this.newChatMessageCount ? this.newChatMessageCount + 1 : 1
       }
