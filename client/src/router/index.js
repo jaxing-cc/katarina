@@ -7,6 +7,7 @@ import Login from '../views/pages/other/Login.vue'
 import UserInfoPage from "@/views/pages/main/UserInfoPage";
 import Ddz from "@/views/pages/main/Ddz";
 import DdzGamePage from "@/views/pages/main/DdzGamePage";
+import Register from "@/views/pages/other/Register";
 
 Vue.use(VueRouter)
 
@@ -20,6 +21,11 @@ const routes = [
     path: '/login',
     name: 'Login',
     component: Login
+  },
+  {
+    path: '/register',
+    name: 'Register',
+    component: Register
   },
   {
     path: '/error/page',
@@ -48,7 +54,7 @@ const router = new VueRouter({
 
 router.beforeEach( (to,from,next) =>{
   let token;
-  if (to.path === '/login' || ((token = getToken()) && token.length > 10)){
+  if (to.path === '/login' || to.path === '/register' || ((token = getToken()) && token.length > 10)){
     return next();
   }
   return next('/login');
