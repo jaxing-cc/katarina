@@ -30,6 +30,14 @@ public class PostController extends HttpRegister {
     protected void start(Router router, Vertx vertx) {
 
         /**
+         * 查询
+         */
+        router.get("/api/post").handler(context -> postService.save(context.body().asJsonObject().mapTo(PostSaveDTO.class),
+                        context.user().principal().getString("uid"))
+                .onFailure(t -> context.json(R.fail(t)))
+                .onSuccess(u -> context.json(R.ok())));
+
+        /**
          * 创建
          */
         router.post("/api/post").handler(validationUtils.validationJson(objectSchema()

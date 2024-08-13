@@ -50,8 +50,16 @@ public class FileServiceImpl implements FileService {
                 .onFailure(promise::fail)
                 .onSuccess(
                         client -> client.delete(key)
-                                .onFailure(promise::fail).onSuccess(promise::complete)
+                                .onFailure(t -> {
+                                    if (t.getMessage().startsWith("No file found with the ObjectId")) {
+                                        promise.complete();
+                                    } else {
+                                        promise.fail(t);
+                                    }
+                                }).onSuccess(promise::complete)
                 );
         return promise.future();
     }
+
+
 }

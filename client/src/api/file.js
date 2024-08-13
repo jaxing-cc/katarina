@@ -25,3 +25,10 @@ export function upload(file) {
         headers: {'Content-Type': 'multipart/form-data'}
     })
 }
+
+/**
+ * 上传文件
+ */
+export function remove(key) {
+    return request.delete("/api/file/"+ key)
+}

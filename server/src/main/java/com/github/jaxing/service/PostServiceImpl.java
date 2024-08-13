@@ -4,9 +4,11 @@ package com.github.jaxing.service;
 import com.github.jaxing.common.domain.Post;
 import com.github.jaxing.common.dto.post.PostSaveDTO;
 import com.github.jaxing.common.dto.post.PostUpdateDTO;
+import com.github.jaxing.common.dto.post.PostVO;
 import com.github.jaxing.common.enums.CollectionEnum;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
+import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.mongo.MongoClient;
@@ -18,7 +20,11 @@ import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
+
+import static com.github.jaxing.common.Constant.DEFAULT_PAGE_SIZE;
 
 /**
  * @author cjxin
@@ -27,8 +33,48 @@ import java.util.Date;
 @Component
 public class PostServiceImpl implements PostService {
 
+
     @Resource
     private MongoClient mongoClient;
+
+    @Override
+    public Future<List<PostVO>> search(String value, Integer page) {
+        if (page == null) {
+            page = 1;
+        }
+        Promise<List<PostVO>> promise = Promise.promise();
+        JsonObject projectField = JsonObject.of(
+                "title", 1,
+                "images", 1,
+                "content", 1,
+                "state", 1,
+                "createTime", 1,
+                "updateTime", 1
+        );
+        JsonObject match = JsonObject.of("state", 1);
+        if (!ObjectUtils.isEmpty(value)) {
+            match.put("content", JsonObject.of("$regex", value));
+        }
+        JsonArray pipeline = JsonArray.of(
+                JsonObject.of("$match", match),
+                JsonObject.of("$project", projectField.copy().put("uid", JsonObject.of("$toObjectId", "$uid"))),
+                JsonObject.of("$lookup", JsonObject.of(
+                        "from", "user",
+                        "localField", "uid",
+                        "foreignField", "_id",
+                        "as", "user")
+                ),
+                JsonObject.of("$project", projectField.copy().put("user", JsonObject.of("$arrayElemAt", JsonArray.of("$user", 0)))),
+                JsonObject.of("$sort", JsonObject.of("createTime", -1)),
+                JsonObject.of("$limit", DEFAULT_PAGE_SIZE),
+                JsonObject.of("$skip", (page - 1) * DEFAULT_PAGE_SIZE)
+        );
+        List<PostVO> list = new ArrayList<>();
+        mongoClient.aggregate(CollectionEnum.post.name(), pipeline).endHandler(v -> {
+            promise.complete(list);
+        }).handler(o -> list.add(o.mapTo(PostVO.class)));
+        return promise.future();
+    }
 
     @Override
     public Future<String> save(PostSaveDTO saveDTO, String uid) {
@@ -37,12 +83,12 @@ public class PostServiceImpl implements PostService {
         BeanUtils.copyProperties(saveDTO, post);
         post.setUid(uid);
         post.setCreateTime(new Date());
-        if (post.getMarkdown()) {
+        if (!post.getMarkdown()) {
             post.setState(Post.STATE_PUBLISH);
-            if (StringUtils.isEmpty(post.getTitle())){
+            if (StringUtils.isEmpty(post.getTitle())) {
                 promise.fail("参数错误");
             }
-        }else{
+        } else {
             post.setState(Post.STATE_PREPARE);
         }
         JsonObject document = JsonObject.mapFrom(post);

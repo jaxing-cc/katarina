@@ -2,12 +2,13 @@
   <div class="wrapper">
     <van-grid direction="horizontal"
               :border="false" clickable icon-size="15"
-              :column-num="3">
+              :column-num="4">
       <van-grid-item text="发现" :style="'font-weight:' + (routerIndex === 0?'bolder' :'normal')"
                      @click="goto(0)"/>
       <van-grid-item text="关注" :style="'font-weight:' + (routerIndex === 1?'bolder' :'normal')"
                      @click="goto(1)"/>
-      <van-grid-item icon="search" @click="goto(2)"/>
+      <van-grid-item icon="plus" @click="goto(2)"/>
+      <van-grid-item icon="search" @click="goto(3)"/>
     </van-grid>
     <router-view/>
   </div>
@@ -34,6 +35,8 @@ export default {
         this.$router.push("/")
       } else if (v === 1) {
         this.$router.push("/follow")
+      }else if (v === 2) {
+        this.$router.push("/write")
       }
     }
   },

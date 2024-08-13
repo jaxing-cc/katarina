@@ -13,6 +13,7 @@ import Follow from "@/views/pages/post/Follow";
 import ChatList from "@/views/pages/ChatList";
 import Post from "@/views/pages/Post";
 import Main from "@/views/pages/Main";
+import WritePost from "@/views/pages/post/WritePost";
 
 Vue.use(VueRouter)
 
@@ -21,6 +22,7 @@ const routes = [
         path: '/',
         name: 'Home',
         component: Home,
+        redirect: '/',
         children: [
             {
                 path: '/chat-list',
@@ -28,12 +30,13 @@ const routes = [
                 component: ChatList,
             },
             {
-                path: '',
+                path: '/',
                 name: 'post',
                 component: Post,
+                redirect: '/discover',
                 children: [
                     {
-                        path: '',
+                        path: '/discover',
                         name: 'Discover',
                         component: Discover,
                     },
@@ -41,7 +44,7 @@ const routes = [
                         path: '/follow',
                         name: 'Follow',
                         component: Follow,
-                    },
+                    }
                 ]
             },
             {
@@ -50,6 +53,11 @@ const routes = [
                 component: Main,
             },
         ]
+    },
+    {
+        path: '/write',
+        name: 'WritePost',
+        component: WritePost,
     },
     {
         path: '/login',

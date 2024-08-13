@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.Resource;
 import java.util.List;
+import java.util.UUID;
 
 /**
  * @author cjxin
@@ -28,6 +29,7 @@ public class FileController extends HttpRegister {
 
     @Override
     protected void start(Router router, Vertx vertx) {
+
         router.put("/api/file").handler(context -> {
             List<FileUpload> fileUploads = context.fileUploads();
             if (fileUploads.isEmpty()) {

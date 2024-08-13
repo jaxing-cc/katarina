@@ -16,6 +16,7 @@ import store from '@/store/index'
 import {followList, getByUid} from "@/api/auth";
 import {Toast} from "vant";
 import {decodeToken} from "@/utils/token";
+
 export default {
   name: 'Home',
   data() {
@@ -43,6 +44,13 @@ export default {
 
   created() {
     this.$socket.connect()
+    if (this.$route.path.startsWith("/chat-list")) {
+      this.active = "chat"
+    } else if (this.$route.path.startsWith("/main")) {
+      this.active = "main"
+    }else{
+      this.active = "post"
+    }
     window.addEventListener("msg@1001", this.chatMsgHandler)
     followList().then(res => {
       if (res.success) {
@@ -54,7 +62,7 @@ export default {
         if (!res.data) {
           Toast("用户不存在")
         } else {
-          store.commit('setUserInfo',res.data);
+          store.commit('setUserInfo', res.data);
         }
       }
     })
