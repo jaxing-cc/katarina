@@ -44,9 +44,11 @@ public class PostServiceImpl implements PostService {
         }
         Promise<List<PostVO>> promise = Promise.promise();
         JsonObject projectField = JsonObject.of(
+                "uid", 1,
                 "title", 1,
                 "images", 1,
                 "content", 1,
+                "cover", 1,
                 "state", 1,
                 "createTime", 1,
                 "updateTime", 1
@@ -64,7 +66,11 @@ public class PostServiceImpl implements PostService {
                         "foreignField", "_id",
                         "as", "user")
                 ),
-                JsonObject.of("$project", projectField.copy().put("user", JsonObject.of("$arrayElemAt", JsonArray.of("$user", 0)))),
+                JsonObject.of("$project", projectField.copy()
+                        .put("id", JsonObject.of("$toString", "$_id"))
+                        .put("uid", JsonObject.of("$toString", "$uid"))
+                        .put("content", JsonObject.of("$substrCP", JsonArray.of("$content", 0, 100)))
+                        .put("user", JsonObject.of("$arrayElemAt", JsonArray.of("$user", 0)))),
                 JsonObject.of("$sort", JsonObject.of("createTime", -1)),
                 JsonObject.of("$limit", DEFAULT_PAGE_SIZE),
                 JsonObject.of("$skip", (page - 1) * DEFAULT_PAGE_SIZE)
@@ -72,7 +78,7 @@ public class PostServiceImpl implements PostService {
         List<PostVO> list = new ArrayList<>();
         mongoClient.aggregate(CollectionEnum.post.name(), pipeline).endHandler(v -> {
             promise.complete(list);
-        }).handler(o -> list.add(o.mapTo(PostVO.class)));
+        }).handler(jsonObject -> list.add(new PostVO(jsonObject)));
         return promise.future();
     }
 

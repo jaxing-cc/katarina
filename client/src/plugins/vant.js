@@ -27,7 +27,7 @@ import {
     RadioGroup, Radio,
     Uploader,
     PullRefresh,
-    Popover
+    Popover, Sticky
 } from 'vant';
 Vue.use(Button);
 Vue.use(Col);
@@ -59,4 +59,5 @@ Vue.use(Grid);
 Vue.use(GridItem);
 Vue.use(Uploader);
 Vue.use(PullRefresh);
-Vue.use(Popover)
+Vue.use(Popover);
+Vue.use(Sticky)

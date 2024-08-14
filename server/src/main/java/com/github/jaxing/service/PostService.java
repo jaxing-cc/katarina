@@ -14,6 +14,11 @@ import java.util.List;
  */
 public interface PostService {
 
+    /**
+     * 搜索
+     * @param value 字符串
+     * @param page 页码
+     */
     Future<List<PostVO>> search(String value, Integer page);
 
     /**

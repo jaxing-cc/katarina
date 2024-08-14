@@ -21,7 +21,7 @@
 
     <van-col span="5" class="marginTop">
       <van-badge v-if="unread && unread !== 0" :content="unread"/>
-      <div v-if="follow === 2">
+      <div v-if="follow === 2 && this.userId !== user._id">
         <van-button v-if="followed()"  size="mini" color="#D7DBDD" @click.stop="associate(0)">
           已关注
         </van-button>
@@ -39,6 +39,7 @@ import {getFileUrl} from "@/api/file";
 import {follow, followList} from "@/api/auth";
 import {Toast} from "vant";
 import store from "@/store";
+import {decodeToken} from "@/utils/token";
 
 export default {
   name: 'UserCard',
@@ -46,7 +47,8 @@ export default {
   data() {
     return {
       avatar: '',
-      color: "red"
+      color: "red",
+      userId: '',
     };
   },
 
@@ -57,6 +59,7 @@ export default {
   },
 
   created() {
+    this.userId = decodeToken()['uid'];
     this.loadAvatar()
     this.loadBadge()
   },

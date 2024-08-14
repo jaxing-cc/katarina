@@ -62,7 +62,6 @@ export default {
         for (const imageFile of this.form.imageFiles) {
           images.push(imageFile['key'])
         }
-        console.log(images)
         save({
           title: this.form.title,
           content: this.form.content,
