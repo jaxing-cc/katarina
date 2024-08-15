@@ -13,6 +13,7 @@
       </van-grid>
     </van-sticky>
     <router-view/>
+    <div style="height: 44px"></div>
   </div>
 </template>
 
@@ -54,7 +55,8 @@ export default {
 }
 
 .wrapper {
-  background-color: #afb8bc;
+  background-color: #f0f0ee;
+  height: 100%;
 }
 
 .router {

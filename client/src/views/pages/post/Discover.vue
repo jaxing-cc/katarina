@@ -1,8 +1,12 @@
 <template>
   <div>
-    <PostBox v-for="(post,i) in posts" :post="post" :key="i">
-
-    </PostBox>
+    <van-list
+        v-model="loading"
+        :finished="finished"
+        finished-text="没有更多了"
+        @load="onLoad">
+      <PostBox v-for="(post,i) in posts" :post="post" :key="i"/>
+    </van-list>
   </div>
 </template>
 
@@ -15,18 +19,32 @@ export default {
   components: {PostBox},
   data() {
     return {
-      posts: []
+      posts: [],
+      page: 1,
+      loading: false,
+      finished: false
     }
   },
   methods: {
     loadPost() {
-      search().then(res => {
-        this.posts = res.data;
+      this.loading = true;
+      search(null, this.page).then(res => {
+        if (!res.data || res.data.length === 0){
+          this.finished = true
+          return;
+        }
+        for (let i = 0; i < res.data.length; i++) {
+          this.posts.push(res.data[i])
+        }
+        this.loading = false;
       })
-    }
+    },
+    onLoad() {
+      this.loadPost();
+      this.page++;
+    },
   },
   created() {
-    this.loadPost()
   }
 }
 </script>
