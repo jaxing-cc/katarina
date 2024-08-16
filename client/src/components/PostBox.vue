@@ -8,7 +8,7 @@
       <van-col :span="1"/>
     </van-row>
 
-    <van-row>
+    <van-row @click="openPostDetail">
       <van-col :span="2"/>
       <van-col :span="20">
         <div class="contentWrapper">
@@ -60,6 +60,11 @@ export default {
     }
   },
   methods: {
+
+    openPostDetail() {
+      console.log(this.post.id)
+      this.$router.push("/post/detail/" + this.post.id)
+    },
     loadAvatar() {
       let user = this.post.user
       this.avatar = user.avatar ? getFileUrl(user.avatar) : 'avatar-' + (user.gender === 1 ? '1' : '2') + ".jpg";

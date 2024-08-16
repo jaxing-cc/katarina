@@ -1,5 +1,6 @@
 package com.github.jaxing.common.dto.post;
 
+import com.github.jaxing.common.domain.Client;
 import com.github.jaxing.common.domain.UserInfo;
 import io.vertx.core.json.JsonObject;
 import lombok.AllArgsConstructor;
@@ -16,6 +17,11 @@ public class PostVO {
      * 文章id
      */
     private String id;
+
+    /**
+     * 用户id
+     */
+    private String uid;
 
     /**
      * 标题
@@ -60,11 +66,16 @@ public class PostVO {
         this.images = jsonObject.getJsonArray("images").stream().toArray(String[]::new);
         this.createTime = jsonObject.getLong("createTime");
         this.updateTime = jsonObject.getLong("updateTime");
+        this.uid = jsonObject.getString("uid");
         this.user = new UserInfo();
-        this.user.setId(jsonObject.getString("uid"));
-        this.user.setName(jsonObject.getJsonObject("user").getString("name"));
-        this.user.setUsername(jsonObject.getJsonObject("user").getString("username"));
-        this.user.setAvatar(jsonObject.getJsonObject("user").getString("avatar"));
-        this.user.setGender(jsonObject.getJsonObject("user").getInteger("gender"));
+        this.user.setId(this.uid);
+        JsonObject user = jsonObject.getJsonObject("user");
+        if (user != null) {
+            this.user.setName(user.getString("name"));
+            this.user.setUsername(user.getString("username"));
+            this.user.setAvatar(user.getString("avatar"));
+            this.user.setGender(user.getInteger("gender"));
+            this.user.setOnline(Client.CLIENT_POOL.containsKey(this.uid));
+        }
     }
 }

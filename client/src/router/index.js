@@ -14,6 +14,7 @@ import ChatList from "@/views/pages/ChatList";
 import Post from "@/views/pages/Post";
 import Main from "@/views/pages/Main";
 import WritePost from "@/views/pages/post/WritePost";
+import PostDetail from "@/views/pages/post/PostDetail";
 
 Vue.use(VueRouter)
 
@@ -58,6 +59,11 @@ const routes = [
         path: '/write',
         name: 'WritePost',
         component: WritePost,
+    },
+    {
+        path: '/post/detail/:id',
+        name: 'PostDetail',
+        component: PostDetail,
     },
     {
         path: '/login',

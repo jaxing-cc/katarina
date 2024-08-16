@@ -15,9 +15,17 @@ import java.util.List;
 public interface PostService {
 
     /**
+     * 查询动态详情
+     *
+     * @return 动态
+     */
+    Future<PostVO> findById(String id);
+
+    /**
      * 搜索
+     *
      * @param value 字符串
-     * @param page 页码
+     * @param page  页码
      */
     Future<List<PostVO>> search(String value, Integer page);
 

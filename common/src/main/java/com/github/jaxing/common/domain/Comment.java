@@ -11,6 +11,11 @@ public class Comment {
     private String id;
 
     /**
+     * 父评论id
+     */
+    private String parentId;
+
+    /**
      * 评论内容
      */
     private String content;
@@ -31,7 +36,12 @@ public class Comment {
     private String uid;
 
     /**
-     * 父评论id
+     * 删除评论，默认false
      */
-    private String parentId;
+    private boolean deleted;
+
+    /**
+     * 创建时间
+     */
+    private Long createTime;
 }

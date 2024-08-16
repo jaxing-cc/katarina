@@ -2,6 +2,7 @@ package com.github.jaxing.service;
 
 
 import com.github.jaxing.common.domain.Post;
+import com.github.jaxing.common.domain.UserInfo;
 import com.github.jaxing.common.dto.post.PostSaveDTO;
 import com.github.jaxing.common.dto.post.PostUpdateDTO;
 import com.github.jaxing.common.dto.post.PostVO;
@@ -37,6 +38,28 @@ public class PostServiceImpl implements PostService {
     @Resource
     private MongoClient mongoClient;
 
+    @Resource
+    private UserService userService;
+
+    /**
+     * 查询动态详情
+     *
+     * @param id
+     * @return 动态
+     */
+    @Override
+    public Future<PostVO> findById(String id) {
+        Promise<PostVO> promise = Promise.promise();
+        mongoClient.findOne(CollectionEnum.post.name(), JsonObject.of("_id", id), JsonObject.of()).onFailure(promise::fail).onSuccess(json -> {
+            PostVO postVO = new PostVO(json);
+            userService.findById(postVO.getUid()).onFailure(promise::fail).onSuccess(user -> {
+                postVO.setUser(user);
+                promise.complete(postVO);
+            });
+        });
+        return promise.future();
+    }
+
     @Override
     public Future<List<PostVO>> search(String value, Integer page) {
         if (page == null) {
@@ -69,7 +92,7 @@ public class PostServiceImpl implements PostService {
                 JsonObject.of("$project", projectField.copy()
                         .put("id", JsonObject.of("$toString", "$_id"))
                         .put("uid", JsonObject.of("$toString", "$uid"))
-                        .put("content", JsonObject.of("$substrCP", JsonArray.of("$content", 0, 100)))
+//                        .put("content", JsonObject.of("$substrCP", JsonArray.of("$content", 0, 100)))
                         .put("user", JsonObject.of("$arrayElemAt", JsonArray.of("$user", 0)))),
                 JsonObject.of("$sort", JsonObject.of("createTime", -1)),
                 JsonObject.of("$limit", DEFAULT_PAGE_SIZE),

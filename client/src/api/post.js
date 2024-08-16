@@ -3,7 +3,14 @@ import URL from "@/utils/common";
 import url from "@/utils/common";
 
 /**
- * 获取url
+ * 保存
+ */
+export function findById(id) {
+    return request.get("/api/post/" + id)
+}
+
+/**
+ * 保存
  */
 export function save(data) {
     return request.post("/api/post", data)
