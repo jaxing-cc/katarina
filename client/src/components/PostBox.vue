@@ -1,9 +1,20 @@
 <template>
   <van-row class="wrapper">
-    <van-row>
+    <van-sticky v-if="!preview">
+      <van-row>
+        <van-col :span="1"/>
+        <van-col :span="22">
+          <UserCard v-if="post.user" :user="post.user" :img-size="30" :showText="convertDate(post.createTime)"
+                    :follow="2"/>
+        </van-col>
+        <van-col :span="1"/>
+      </van-row>
+    </van-sticky>
+    <van-row v-if="preview">
       <van-col :span="1"/>
       <van-col :span="22">
-        <UserCard :user="post.user" :img-size="30" :showText="convertDate(post.createTime)" :follow="2"/>
+        <UserCard v-if="post.user" :user="post.user" :img-size="30" :showText="convertDate(post.createTime)"
+                  :follow="2"/>
       </van-col>
       <van-col :span="1"/>
     </van-row>
@@ -12,13 +23,15 @@
       <van-col :span="2"/>
       <van-col :span="20">
         <div class="contentWrapper">
-          <div v-if="post.title" style="font-weight: bolder">{{ post.title }}</div>
-          <div v-if="!post.title" class="contentText van-multi-ellipsis--l3">
-            {{ post.content }}
-          </div>
+          <div v-if="post.title" :style="preview ? 'font-weight: bolder' : 'font-weight: bolder;font-size: 15px;margin-bottom: 10px;'">
+              {{ post.title }}
+            </div>
+          <div v-if="!post.title || !preview" :class="preview ? 'contentText van-multi-ellipsis--l3' : 'contentEmpty'">
+              {{ post.content }}
+            </div>
           <br>
           <div v-for="(key,i) in images" :key="key" class="contentImageContainer">
-            <van-image :src="key" fit="contain" lazy-load width="80" class="contentImage">
+            <van-image @click.stop="previewImage(i)" :src="key" fit="contain" lazy-load :width="preview ? '80px': '100%'" class="contentImage">
               <template v-slot:loading>
                 <van-loading type="spinner"/>
               </template>
@@ -47,11 +60,18 @@
 <script>
 import {getFileUrl} from "@/api/file";
 import UserCard from "@/components/UserCard";
+import {ImagePreview} from "vant";
 
 export default {
   name: "PostBox",
   components: {UserCard},
-  props: ["post"],
+  props: {
+    post: {},
+    preview: {
+      type: Boolean,
+      default: false,
+    }
+  },
   data() {
     return {
       avatar: '',
@@ -62,18 +82,22 @@ export default {
   methods: {
 
     openPostDetail() {
-      console.log(this.post.id)
-      this.$router.push("/post/detail/" + this.post.id)
+      if (this.preview) {
+        this.$router.push("/post/detail/" + this.post.id)
+      }
     },
     loadAvatar() {
       let user = this.post.user
-      this.avatar = user.avatar ? getFileUrl(user.avatar) : 'avatar-' + (user.gender === 1 ? '1' : '2') + ".jpg";
+      if (user) {
+        this.avatar = user.avatar ? getFileUrl(user.avatar) : 'avatar-' + (user.gender === 1 ? '1' : '2') + ".jpg";
+      }
     },
     loadImage() {
       let file = [];
       let n = this.post.images.length;
-      this.lastImagesSize = n < 4 ? 0 : n - 3;
-      for (let i = 0; i < 4 && i < n; i++) {
+      let limit = this.preview ? 4 : n;
+      this.lastImagesSize = n < limit ? 0 : n - limit;
+      for (let i = 0; i < limit && i < n; i++) {
         file.push(getFileUrl(this.post.images[i]))
       }
       this.images = file;
@@ -91,6 +115,15 @@ export default {
       }
       return new Date(time).toLocaleString()
     },
+    previewImage(i){
+      ImagePreview({
+        images: this.images,
+        showIndex: true,
+        closeable: true,
+        startPosition: i,
+        loop: false
+      })
+    }
   },
   updated() {
     this.loadAvatar()
@@ -115,7 +148,7 @@ export default {
   font: 12px/1.5 Tahoma, Helvetica, Arial, '宋体', sans-serif;
 }
 
-.contentText {
+.contentEmpty {
 
 }
 

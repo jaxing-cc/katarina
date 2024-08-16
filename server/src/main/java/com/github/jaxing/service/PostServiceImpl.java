@@ -52,6 +52,7 @@ public class PostServiceImpl implements PostService {
         Promise<PostVO> promise = Promise.promise();
         mongoClient.findOne(CollectionEnum.post.name(), JsonObject.of("_id", id), JsonObject.of()).onFailure(promise::fail).onSuccess(json -> {
             PostVO postVO = new PostVO(json);
+            postVO.setId(id);
             userService.findById(postVO.getUid()).onFailure(promise::fail).onSuccess(user -> {
                 postVO.setUser(user);
                 promise.complete(postVO);

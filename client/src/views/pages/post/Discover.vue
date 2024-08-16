@@ -5,7 +5,7 @@
         :finished="finished"
         finished-text="没有更多了"
         @load="onLoad">
-      <PostBox v-for="(post,i) in posts" :post="post" :key="i" @click="openPostDetail(post.id)"/>
+      <PostBox v-for="(post,i) in posts" :preview="true" :post="post" :key="i"/>
     </van-list>
   </div>
 </template>

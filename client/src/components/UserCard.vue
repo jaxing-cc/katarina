@@ -22,10 +22,10 @@
     <van-col span="5" class="marginTop">
       <van-badge v-if="unread && unread !== 0" :content="unread"/>
       <div v-if="follow === 2 && this.userId !== user._id">
-        <van-button v-if="followed()"  size="mini" color="#D7DBDD" @click.stop="associate(0)">
+        <van-button v-if="followed()" size="mini" color="#D7DBDD" @click.stop="associate(0)">
           已关注
         </van-button>
-        <van-button v-if="!followed()"  size="mini" color="#d47982" @click.stop="associate(1)">
+        <van-button v-if="!followed()" size="mini" color="#d47982" @click.stop="associate(1)">
           关注
         </van-button>
       </div>
@@ -88,8 +88,10 @@ export default {
       this.$emit("click", this.user)
     },
     loadAvatar() {
-      this.avatar = this.user.avatar ?
-          getFileUrl(this.user.avatar) : 'avatar-' + (this.user.gender === 1 ? '1' : '2') + ".jpg";
+      if (this.user) {
+        this.avatar = this.user.avatar ?
+            getFileUrl(this.user.avatar) : 'avatar-' + (this.user.gender === 1 ? '1' : '2') + ".jpg";
+      }
     },
     loadBadge() {
       this.color = this.user.online ? "#1989fa" : "red";
@@ -103,7 +105,7 @@ export default {
           followList().then(res => {
             if (res.success) {
               store.commit('setFollowList', res.data);
-              Toast(action === 1 ? '关注成功':'取关成功')
+              Toast(action === 1 ? '关注成功' : '取关成功')
             }
           })
         } else {

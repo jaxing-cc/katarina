@@ -27,7 +27,7 @@ import {
     RadioGroup, Radio,
     Uploader,
     PullRefresh,
-    Popover, Sticky, Lazyload, Loading
+    Popover, Sticky, Lazyload, Loading, ImagePreview
 } from 'vant';
 Vue.use(Button);
 Vue.use(Col);
@@ -63,3 +63,4 @@ Vue.use(Popover);
 Vue.use(Sticky)
 Vue.use(Lazyload);
 Vue.use(Loading);
+Vue.use(ImagePreview)
