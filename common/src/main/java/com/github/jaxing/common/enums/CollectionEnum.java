@@ -47,5 +47,12 @@ public enum CollectionEnum {
      *
      * @see com.github.jaxing.common.domain.Post
      */
-    post
+    post,
+
+
+    /**
+     * 点赞记录
+     * @see com.github.jaxing.common.domain.ThumbupRecord
+     */
+    thumbup_record
 }

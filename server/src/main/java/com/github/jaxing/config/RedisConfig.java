@@ -27,8 +27,17 @@ public class RedisConfig {
     }
 
     public static class Key {
+
+        public static class Str {
+            public static final String LIKE_COUNT = "user:likeCount:%s:%s";
+        }
+
         public static class Set {
             public static final String FOLLOW_LIST = "followList:%s";
+        }
+
+        public static class ZSet{
+            public static final String LIKE_ZSET = "user:likeList:%s:%s";
         }
     }
 }

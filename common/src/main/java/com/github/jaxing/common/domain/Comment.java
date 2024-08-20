@@ -11,9 +11,9 @@ public class Comment {
     private String id;
 
     /**
-     * 父评论id
+     * 回复评论id
      */
-    private String parentId;
+    private String replyId;
 
     /**
      * 评论内容
