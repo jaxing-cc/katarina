@@ -46,18 +46,14 @@ public class ThumbupServiceImpl implements ThumbupService {
                     JsonObject.of("targetId", targetId),
                     JsonObject.of("business", business)
             ));
-            mongoClient.removeDocument(CollectionEnum.thumbup_record.name(), query).onFailure(promise::fail).onSuccess(res -> {
+            mongoClient.removeDocument(CollectionEnum.thumbup_record.name(), query).onFailure(promise::fail).onSuccess(res1 -> {
                 // 减少次数，删除列表数据
-                redis.decr(countKey).onFailure(t -> log.error(t.getMessage()));
-                redis.zrem(Arrays.asList(key, targetId)).onFailure(t -> log.error(t.getMessage()));
-                promise.complete();
+                CompositeFuture.all(redis.decr(countKey), redis.zrem(Arrays.asList(key, targetId)))
+                        .onSuccess(res2 -> promise.complete()).onFailure(t -> log.error(t.getMessage()));
             });
         } else {
             CompositeFuture.all(redis.incr(countKey), redis.zadd(Arrays.asList(key, likeRecord.getCreateTime().toString(), targetId)))
-                    .onSuccess(res -> {
-                        promise.complete();
-                    }).onFailure(t -> log.error(t.getMessage()));
-
+                    .onSuccess(res -> promise.complete()).onFailure(t -> log.error(t.getMessage()));
         }
         return promise.future();
     }
