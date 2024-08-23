@@ -4,7 +4,6 @@ import com.github.jaxing.common.dto.post.PostSaveDTO;
 import com.github.jaxing.common.dto.post.PostUpdateDTO;
 import com.github.jaxing.common.dto.post.PostVO;
 import io.vertx.core.Future;
-import io.vertx.core.json.JsonObject;
 
 import java.util.List;
 
@@ -24,10 +23,11 @@ public interface PostService {
     /**
      * 搜索
      *
+     * @param uid
      * @param value 字符串
      * @param page  页码
      */
-    Future<List<PostVO>> search(String value, Integer page);
+    Future<List<PostVO>> search(String uid, String value, Integer page);
 
     /**
      * 保存

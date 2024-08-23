@@ -6,4 +6,6 @@ public class Constant {
     public static final String UNAUTHORIZED_RESP_HEADER = "unauthorized";
 
     public static final int DEFAULT_PAGE_SIZE = 20;
+
+    public static final int DEFAULT_ZSET_CACHE_SIZE = 500;
 }

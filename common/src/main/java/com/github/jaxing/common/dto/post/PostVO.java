@@ -58,6 +58,16 @@ public class PostVO {
      */
     private UserInfo user;
 
+    /**
+     * 点赞数
+     */
+    private Integer thumbupCount;
+
+    /**
+     * 是否点赞过
+     */
+    private boolean thumbuped;
+
     public PostVO(JsonObject jsonObject) {
         this.id = jsonObject.getString("id");
         this.title = jsonObject.getString("title");

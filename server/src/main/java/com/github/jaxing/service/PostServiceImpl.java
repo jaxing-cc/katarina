@@ -2,28 +2,25 @@ package com.github.jaxing.service;
 
 
 import com.github.jaxing.common.domain.Post;
-import com.github.jaxing.common.domain.UserInfo;
 import com.github.jaxing.common.dto.post.PostSaveDTO;
 import com.github.jaxing.common.dto.post.PostUpdateDTO;
 import com.github.jaxing.common.dto.post.PostVO;
+import com.github.jaxing.common.enums.BusinessObjectEnum;
 import com.github.jaxing.common.enums.CollectionEnum;
+import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
-import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.mongo.MongoClient;
-import io.vertx.ext.mongo.UpdateOptions;
-import org.bson.types.ObjectId;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.util.ObjectUtils;
 import org.springframework.util.StringUtils;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.github.jaxing.common.Constant.DEFAULT_PAGE_SIZE;
 
@@ -40,6 +37,9 @@ public class PostServiceImpl implements PostService {
 
     @Resource
     private UserService userService;
+
+    @Resource
+    private ThumbupService thumbupService;
 
     /**
      * 查询动态详情
@@ -62,7 +62,7 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public Future<List<PostVO>> search(String value, Integer page) {
+    public Future<List<PostVO>> search(String uid, String value, Integer page) {
         if (page == null) {
             page = 1;
         }
@@ -101,7 +101,18 @@ public class PostServiceImpl implements PostService {
         );
         List<PostVO> list = new ArrayList<>();
         mongoClient.aggregate(CollectionEnum.post.name(), pipeline).endHandler(v -> {
-            promise.complete(list);
+            Set<String> postIds = list.stream().map(PostVO::getId).collect(Collectors.toSet());
+            String business = BusinessObjectEnum.POST.getCode();
+            CompositeFuture.all(thumbupService.info(postIds, business), thumbupService.liked(postIds, business, uid))
+                    .onFailure(t -> promise.complete(list)).onSuccess(cf -> {
+                        Map<String, Integer> map = cf.resultAt(0);
+                        Set<String> set = cf.resultAt(1);
+                        for (PostVO postVO : list) {
+                            postVO.setThumbupCount(map.get(postVO.getId()));
+                            postVO.setThumbuped(set.contains(postVO.getId()));
+                        }
+                        promise.complete(list);
+                    });
         }).handler(jsonObject -> list.add(new PostVO(jsonObject)));
         return promise.future();
     }

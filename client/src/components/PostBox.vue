@@ -23,15 +23,17 @@
       <van-col :span="2"/>
       <van-col :span="20">
         <div class="contentWrapper">
-          <div v-if="post.title" :style="preview ? 'font-weight: bolder' : 'font-weight: bolder;font-size: 15px;margin-bottom: 10px;'">
-              {{ post.title }}
-            </div>
+          <div v-if="post.title"
+               :style="preview ? 'font-weight: bolder' : 'font-weight: bolder;font-size: 15px;margin-bottom: 10px;'">
+            {{ post.title }}
+          </div>
           <div v-if="!post.title || !preview" :class="preview ? 'contentText van-multi-ellipsis--l3' : 'contentEmpty'">
-              {{ post.content }}
-            </div>
+            {{ post.content }}
+          </div>
           <br>
           <div v-for="(key,i) in images" :key="key" class="contentImageContainer">
-            <van-image @click.stop="previewImage(i)" :src="key" fit="contain" lazy-load :width="preview ? '80px': '100%'" class="contentImage">
+            <van-image @click.stop="previewImage(i)" :src="key" fit="contain" lazy-load
+                       :width="preview ? '80px': '100%'" class="contentImage">
               <template v-slot:loading>
                 <van-loading type="spinner"/>
               </template>
@@ -51,7 +53,7 @@
                 :column-num="3">
         <van-grid-item/>
         <van-grid-item icon="comment-o" text="120"/>
-        <van-grid-item icon="star-o" text="12"/>
+        <van-grid-item @click="thumbup" :icon="post.thumbup ? 'star': 'star-o'" :text="post.thumbupCount + ''"/>
       </van-grid>
     </van-row>
   </van-row>
@@ -61,6 +63,7 @@
 import {getFileUrl} from "@/api/file";
 import UserCard from "@/components/UserCard";
 import {ImagePreview} from "vant";
+import {thumbup} from "@/api/thumbup";
 
 export default {
   name: "PostBox",
@@ -115,7 +118,7 @@ export default {
       }
       return new Date(time).toLocaleString()
     },
-    previewImage(i){
+    previewImage(i) {
       ImagePreview({
         images: this.images,
         showIndex: true,
@@ -123,6 +126,16 @@ export default {
         startPosition: i,
         loop: false
       })
+    },
+    thumbup() {
+      let cancel = !this.post.thumbup;
+      thumbup({
+        targetId: this.post.id,
+        type: 'post',
+        cancel: cancel
+      }).then(res => {
+
+      });
     }
   },
   updated() {

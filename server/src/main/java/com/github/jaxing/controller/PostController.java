@@ -32,16 +32,15 @@ public class PostController extends HttpRegister {
         /**
          * 查询
          */
-        router.get("/api/post").handler(context -> postService.search(
+        router.get("/api/post").handler(context -> postService.search(context.user().principal().getString("uid"),
                 context.request().getParam("keyword"),
-                Integer.parseInt(context.request().getParam("page"))
-        ).onFailure(t -> context.json(R.fail(t))).onSuccess(list -> context.json(R.ok(list))));
+                Integer.parseInt(context.request().getParam("page"))).onFailure(t -> context.json(R.fail(t))).onSuccess(list -> context.json(R.ok(list))));
 
         /**
          * 查询
          */
         router.get("/api/post/:id").handler(context -> postService.findById(context.pathParam("id"))
-        .onFailure(t -> context.json(R.fail(t))).onSuccess(list -> context.json(R.ok(list))));
+                .onFailure(t -> context.json(R.fail(t))).onSuccess(list -> context.json(R.ok(list))));
 
         /**
          * 创建
