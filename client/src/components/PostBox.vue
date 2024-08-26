@@ -53,7 +53,7 @@
                 :column-num="3">
         <van-grid-item/>
         <van-grid-item icon="comment-o" text="120"/>
-        <van-grid-item @click="thumbup" :icon="post.thumbup ? 'star': 'star-o'" :text="post.thumbupCount + ''"/>
+        <van-grid-item @click="thumbup" :icon="thumbuped ? 'like': 'like-o'" :text="thumbupCount + ''"/>
       </van-grid>
     </van-row>
   </van-row>
@@ -62,7 +62,7 @@
 <script>
 import {getFileUrl} from "@/api/file";
 import UserCard from "@/components/UserCard";
-import {ImagePreview} from "vant";
+import {ImagePreview, Toast} from "vant";
 import {thumbup} from "@/api/thumbup";
 
 export default {
@@ -80,6 +80,8 @@ export default {
       avatar: '',
       images: [],
       lastImagesSize: 0,
+      thumbuped: false,
+      thumbupCount: 0
     }
   },
   methods: {
@@ -128,23 +130,33 @@ export default {
       })
     },
     thumbup() {
-      let cancel = !this.post.thumbup;
       thumbup({
         targetId: this.post.id,
-        type: 'post',
-        cancel: cancel
+        type: 'post'
       }).then(res => {
-
+        if (res.success) {
+          this.thumbuped = !this.thumbuped
+          console.log(this.post)
+          if (res.data) {
+            this.thumbupCount++;
+            Toast('点赞成功')
+          } else {
+            this.thumbupCount--;
+            Toast('已取消')
+          }
+        } else {
+          Toast('网络异常')
+        }
       });
     }
   },
   updated() {
-    this.loadAvatar()
-    this.loadImage()
   },
   created() {
     this.loadAvatar()
     this.loadImage()
+    this.thumbuped = this.post.thumbuped
+    this.thumbupCount = this.post.thumbupCount;
   }
 
 }

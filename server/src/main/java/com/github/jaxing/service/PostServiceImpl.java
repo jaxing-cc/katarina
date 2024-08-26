@@ -2,6 +2,7 @@ package com.github.jaxing.service;
 
 
 import com.github.jaxing.common.domain.Post;
+import com.github.jaxing.common.domain.UserInfo;
 import com.github.jaxing.common.dto.post.PostSaveDTO;
 import com.github.jaxing.common.dto.post.PostUpdateDTO;
 import com.github.jaxing.common.dto.post.PostVO;
@@ -45,16 +46,28 @@ public class PostServiceImpl implements PostService {
      * 查询动态详情
      *
      * @param id
+     * @param uid
      * @return 动态
      */
     @Override
-    public Future<PostVO> findById(String id) {
+    public Future<PostVO> findById(String id, String uid) {
         Promise<PostVO> promise = Promise.promise();
         mongoClient.findOne(CollectionEnum.post.name(), JsonObject.of("_id", id), JsonObject.of()).onFailure(promise::fail).onSuccess(json -> {
             PostVO postVO = new PostVO(json);
             postVO.setId(id);
-            userService.findById(postVO.getUid()).onFailure(promise::fail).onSuccess(user -> {
-                postVO.setUser(user);
+            Set<String> postIds = new HashSet<>(Collections.singletonList(id));
+            String code = BusinessObjectEnum.POST.getCode();
+            CompositeFuture.all(
+                    thumbupService.info(postIds, code),
+                    thumbupService.liked(postIds, code, uid),
+                    userService.findById(postVO.getUid())
+            ).onFailure(promise::fail).onSuccess(cf -> {
+                Map<String, Integer> map = cf.resultAt(0);
+                Set<String> set = cf.resultAt(1);
+                UserInfo userInfo = cf.resultAt(2);
+                postVO.setThumbupCount(map.get(postVO.getId()));
+                postVO.setThumbuped(set.contains(postVO.getId()));
+                postVO.setUser(userInfo);
                 promise.complete(postVO);
             });
         });
@@ -100,19 +113,20 @@ public class PostServiceImpl implements PostService {
                 JsonObject.of("$skip", (page - 1) * DEFAULT_PAGE_SIZE)
         );
         List<PostVO> list = new ArrayList<>();
-        mongoClient.aggregate(CollectionEnum.post.name(), pipeline).endHandler(v -> {
+        mongoClient.aggregate(CollectionEnum.post.name(), pipeline).exceptionHandler(promise::fail).endHandler(v -> {
             Set<String> postIds = list.stream().map(PostVO::getId).collect(Collectors.toSet());
             String business = BusinessObjectEnum.POST.getCode();
             CompositeFuture.all(thumbupService.info(postIds, business), thumbupService.liked(postIds, business, uid))
                     .onFailure(t -> promise.complete(list)).onSuccess(cf -> {
-                        Map<String, Integer> map = cf.resultAt(0);
-                        Set<String> set = cf.resultAt(1);
-                        for (PostVO postVO : list) {
-                            postVO.setThumbupCount(map.get(postVO.getId()));
-                            postVO.setThumbuped(set.contains(postVO.getId()));
-                        }
-                        promise.complete(list);
-                    });
+                Map<String, Integer> map = cf.resultAt(0);
+                Set<String> set = cf.resultAt(1);
+                for (PostVO postVO : list) {
+                    postVO.setThumbupCount(map.get(postVO.getId()));
+                    postVO.setThumbuped(set.contains(postVO.getId()));
+                }
+                promise.complete(list);
+            });
+
         }).handler(jsonObject -> list.add(new PostVO(jsonObject)));
         return promise.future();
     }

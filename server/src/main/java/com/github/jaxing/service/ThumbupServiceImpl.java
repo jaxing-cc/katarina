@@ -32,47 +32,46 @@ public class ThumbupServiceImpl implements ThumbupService {
     private RedisAPI redis;
 
     @Override
-    public Future<Void> like(String uid, String targetId, String business, boolean cancel) {
-        Promise<Void> promise = Promise.promise();
+    public Future<Boolean> like(String uid, String targetId, String business) {
+        Promise<Boolean> promise = Promise.promise();
         ThumbupRecord likeRecord = new ThumbupRecord();
         likeRecord.setUid(uid);
         likeRecord.setTargetId(targetId);
         likeRecord.setTargetType(business);
         likeRecord.setCreateTime(new Date().getTime());
         String key = String.format(RedisConfig.Key.ZSet.LIKE_ZSET, uid, business);
-        if (cancel) {
-            //减少db
-            JsonObject query = JsonObject.of("$and", JsonArray.of(
-                    JsonObject.of("uid", uid),
-                    JsonObject.of("targetId", targetId),
-                    JsonObject.of("targetType", business)
-            ));
-            mongoClient.removeDocument(CollectionEnum.thumbup_record.name(), query).onFailure(promise::fail).onSuccess(res1 -> {
-                // 减少次数，删除列表数据
-                redis.zrem(Arrays.asList(key, targetId)).onSuccess(res2 -> promise.complete()).onFailure(t -> log.error(t.getMessage()));
-            });
-        } else {
-            // 是否已经点赞过
-            liked(Arrays.asList(targetId), business, uid).onFailure(promise::fail).onSuccess(ids -> {
-                if (ids.contains(targetId)) {
-                    promise.fail("已经点赞过了!");
-                } else {
-                    ThumbupRecord thumbupRecord = new ThumbupRecord();
-                    thumbupRecord.setUid(uid);
-                    thumbupRecord.setTargetType(business);
-                    thumbupRecord.setTargetId(targetId);
-                    thumbupRecord.setCreateTime(new Date().getTime());
-                    JsonObject document = JsonObject.mapFrom(thumbupRecord);
-                    document.remove("_id");
-                    mongoClient.save(CollectionEnum.thumbup_record.name(), document).onFailure(promise::fail).onSuccess(res1 -> {
-                        // 查询数据
-                        cacheToRedis(uid, business, Collections.singletonList(thumbupRecord)).onSuccess(res2 -> promise.complete())
-                                .onFailure(t -> log.error(t.getMessage()));
-                    });
+        // 是否已经点赞过
+        liked(Arrays.asList(targetId), business, uid).onFailure(promise::fail).onSuccess(ids -> {
+            if (ids.contains(targetId)) {
+                //减少db
+                JsonObject query = JsonObject.of("$and", JsonArray.of(
+                        JsonObject.of("uid", uid),
+                        JsonObject.of("targetId", targetId),
+                        JsonObject.of("targetType", business)
+                ));
+                mongoClient.removeDocument(CollectionEnum.thumbup_record.name(), query)
+                        .onFailure(promise::fail)
+                        // 减少次数，删除列表数据
+                        .onSuccess(res1 -> redis.zrem(Arrays.asList(key, targetId))
+                                .onSuccess(res2 -> promise.complete(false))
+                                .onFailure(promise::fail));
+            } else {
+                ThumbupRecord thumbupRecord = new ThumbupRecord();
+                thumbupRecord.setUid(uid);
+                thumbupRecord.setTargetType(business);
+                thumbupRecord.setTargetId(targetId);
+                thumbupRecord.setCreateTime(new Date().getTime());
+                JsonObject document = JsonObject.mapFrom(thumbupRecord);
+                document.remove("_id");
 
-                }
-            });
-        }
+                mongoClient.save(CollectionEnum.thumbup_record.name(), document).onFailure(promise::fail).onSuccess(res1 -> {
+                    // 查询数据
+                    cacheToRedis(uid, business, Collections.singletonList(thumbupRecord))
+                            .onSuccess(res2 -> promise.complete(true))
+                            .onFailure(promise::fail);
+                });
+            }
+        });
         return promise.future();
     }
 
@@ -130,9 +129,12 @@ public class ThumbupServiceImpl implements ThumbupService {
             strings.add((record.getCreateTime() * -1) + "");
             strings.add(record.getTargetId());
         }
-        redis.zadd(strings).onFailure(promise::fail).onSuccess(res -> {
-            redis.zremrangebyrank(key, DEFAULT_ZSET_CACHE_SIZE + "", "-1").onSuccess(res2 -> promise.complete()).onFailure(promise::fail);
-        });
+        redis.zadd(strings)
+                .onFailure(promise::fail)
+                .onSuccess(res -> redis.zremrangebyrank(key, DEFAULT_ZSET_CACHE_SIZE + "", "-1")
+                        .onSuccess(res2 -> promise.complete())
+                        .onFailure(promise::fail)
+                );
         return promise.future();
     }
 

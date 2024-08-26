@@ -1,9 +1,11 @@
 <template>
   <div>
-
     <van-nav-bar title="详情" left-text="返回"
                  left-arrow @click-left="back"/>
     <post-box v-if="post" :post="post" :preview="false"></post-box>
+    <Component>
+
+    </Component>
   </div>
 </template>
 

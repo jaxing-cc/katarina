@@ -14,6 +14,7 @@ import org.springframework.stereotype.Controller;
 import javax.annotation.Resource;
 
 import static io.vertx.json.schema.common.dsl.Schemas.objectSchema;
+import static io.vertx.json.schema.common.dsl.Schemas.stringSchema;
 
 @Controller
 @Slf4j
@@ -29,15 +30,16 @@ public class ThumbupController extends HttpRegister {
     @Override
     public void start(Router router, Vertx vertx) {
 
-        router.post("/auth/thumbup").handler(validationUtils.validationJson(objectSchema()
+        router.post("/api/thumbup").handler(validationUtils.validationJson(objectSchema()
                 .property("targetId", validationUtils.get("oid"))
-                .property("cancel", validationUtils.get("boolean"))
+                .property("type", stringSchema())
         )).handler(context -> {
             JsonObject body = context.body().asJsonObject();
-            thumbupService.like(context.user().principal().getString("uid"), body.getString("targetId"),
-                            body.getString("type"), body.getBoolean("cancel"))
-                    .onFailure(t -> context.json(R.fail(t)))
-                    .onSuccess(t -> context.json(R.ok()));
+            thumbupService.like(
+                    context.user().principal().getString("uid"),
+                    body.getString("targetId"),
+                    body.getString("type")
+            ).onFailure(t -> context.json(R.fail(t))).onSuccess(t -> context.json(R.ok(t)));
         });
     }
 }

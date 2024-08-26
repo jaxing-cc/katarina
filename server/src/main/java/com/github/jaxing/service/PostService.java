@@ -18,7 +18,7 @@ public interface PostService {
      *
      * @return 动态
      */
-    Future<PostVO> findById(String id);
+    Future<PostVO> findById(String id, String uid);
 
     /**
      * 搜索

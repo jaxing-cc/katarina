@@ -2,6 +2,7 @@ package com.github.jaxing.config;
 
 import com.github.jaxing.common.utils.VertxHolder;
 import com.github.jaxing.utils.ConfigUtils;
+import com.mongodb.MongoClientSettings;
 import io.vertx.core.Vertx;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.mongo.MongoClient;
@@ -25,6 +26,8 @@ public class MongoDBConfig {
         config.put("username", ConfigUtils.get("mongodb.username"));
         config.put("password", ConfigUtils.get("mongodb.password"));
         config.put("useObjectId", true);
+        // 创建 MongoClientOptions
+        MongoClientSettings settings = MongoClientSettings.builder().build();
         return MongoClient.create(vertx, config);
     }
 }

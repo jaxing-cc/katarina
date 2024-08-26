@@ -11,7 +11,7 @@ public interface ThumbupService {
     /**
      * 点赞/取消
      */
-    Future<Void>  like(String uid, String targetId, String business, boolean cancel);
+    Future<Boolean> like(String uid, String targetId, String business);
 
     /**
      * 查询已点赞的对象id
