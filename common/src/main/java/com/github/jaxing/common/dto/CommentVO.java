@@ -13,6 +13,8 @@ public class CommentVO extends Comment {
 
     private UserInfo user;
 
+    private int childSize;
+
     public CommentVO(JsonObject jsonObject) {
         this.setId(jsonObject.getString("id"));
         this.setUid(jsonObject.getString("uid"));

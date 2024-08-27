@@ -6,6 +6,7 @@ import com.github.jaxing.common.dto.CommentVO;
 import com.github.jaxing.common.enums.BusinessObjectEnum;
 import com.github.jaxing.common.enums.CollectionEnum;
 import com.github.jaxing.common.enums.YesOrNoEnum;
+import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
 import io.vertx.core.json.Json;
@@ -16,9 +17,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
 import javax.annotation.Resource;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.github.jaxing.common.Constant.BASE_ID;
 import static com.github.jaxing.common.Constant.DEFAULT_PAGE_SIZE;
@@ -92,7 +92,37 @@ public class CommentServiceImpl implements CommentService {
         List<CommentVO> result = new ArrayList<>();
         mongoClient.aggregate(CollectionEnum.comment.name(), pipeline)
                 .handler(o -> result.add(new CommentVO(o))).exceptionHandler(promise::fail)
-                .endHandler(o -> promise.complete(result));
+                .endHandler(o -> queryChildSize(result.stream().map(CommentVO::getId).collect(Collectors.toSet())).onFailure(promise::fail).onSuccess(res -> {
+                    for (CommentVO commentVO : result) {
+                        commentVO.setChildSize(res.get(commentVO.getId()));
+                    }
+                    promise.complete(result);
+                }));
+        return promise.future();
+    }
+
+    /**
+     * 查询评论id对应子评论数量
+     */
+    @Override
+    public Future<Map<String, Integer>> queryChildSize(Collection<String> commentIds) {
+        Promise<Map<String, Integer>> promise = Promise.promise();
+        ;
+        Map<String, Integer> map = new HashMap<>();
+        JsonArray pipeline = JsonArray.of(
+                JsonObject.of("$match", JsonObject.of("replyId", JsonObject.of("$in", commentIds))),
+                JsonObject.of("$group", JsonObject.of("_id", "$replyId", "count", JsonObject.of("$sum", 1)))
+        );
+        mongoClient.aggregate(CollectionEnum.comment.name(), pipeline).exceptionHandler(promise::fail)
+                .handler(j -> map.put(j.getString("_id"), j.getInteger("count")))
+                .endHandler(res -> {
+                    for (String commentId : commentIds) {
+                        if (!map.containsKey(commentId)) {
+                            map.put(commentId, 0);
+                        }
+                    }
+                    promise.complete(map);
+                });
         return promise.future();
     }
 }
