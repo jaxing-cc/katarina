@@ -2,6 +2,7 @@ package com.github.jaxing;
 
 import com.github.jaxing.common.enums.BusinessObjectEnum;
 import com.github.jaxing.job.DdzJob;
+import com.github.jaxing.service.CommentService;
 import com.github.jaxing.service.PostService;
 import com.github.jaxing.service.ThumbupService;
 import com.github.jaxing.utils.ConfigUtils;
@@ -37,7 +38,7 @@ public class ServerVerticle extends AbstractVerticle implements ApplicationConte
     private DdzJob ddzJob;
 
     @Resource
-    private ThumbupService thumbupService;
+    private CommentService commentService;
 
     @Override
     public void start(Promise<Void> startPromise) {

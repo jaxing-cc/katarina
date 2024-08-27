@@ -2,7 +2,7 @@
   <van-row class="chatListWrapper">
     <van-row class="chatListHeader" v-if="!searchStatus">
       <van-col :span="1"/>
-      <user-card :user="loginUser"/>
+      <user-card :user="loginUser" :uname-size="16"/>
     </van-row>
     <search-user @click="selectSearchedUser" @focus="searchStatus = true" @cancel="searchFocusCancel"/>
 

@@ -64,6 +64,7 @@ import {getFileUrl} from "@/api/file";
 import UserCard from "@/components/UserCard";
 import {ImagePreview, Toast} from "vant";
 import {thumbup} from "@/api/thumbup";
+import {convertDate} from "@/utils/util";
 
 export default {
   name: "PostBox",
@@ -108,17 +109,7 @@ export default {
       this.images = file;
     },
     convertDate(time) {
-      const timeDifference = new Date().getTime() - time;
-      const hoursDifference = Math.floor(timeDifference / (1000 * 60 * 60));
-      if (hoursDifference < 24) {
-        if (hoursDifference === 0) {
-          return "刚刚"
-        }
-        return hoursDifference + "小时前"
-      } else if (hoursDifference < 240) {
-        return Math.floor(hoursDifference / 24) + "天前"
-      }
-      return new Date(time).toLocaleString()
+      return convertDate(time)
     },
     previewImage(i) {
       ImagePreview({
@@ -170,7 +161,7 @@ export default {
 }
 
 .contentWrapper {
-  font: 12px/1.5 Tahoma, Helvetica, Arial, '宋体', sans-serif;
+  font: 13px/1.5 Tahoma, Helvetica, Arial, '宋体', sans-serif;
 }
 
 .contentEmpty {

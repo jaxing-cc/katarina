@@ -2,20 +2,27 @@
   <van-row type="flex" @click="click" class="wrapper">
 
     <van-col span="4" class="marginTop">
-      <van-badge dot :color="color">
+      <van-badge dot :color="color" v-if="online">
         <van-image error-icon="smile-o" class="userImg" :width="imgSize" :height="imgSize"
                    round position="left" :src="avatar"/>
       </van-badge>
+      <div v-if="!online">
+        <van-image error-icon="smile-o" class="userImg" :width="imgSize" :height="imgSize"
+                   round position="left" :src="avatar"/>
+      </div>
     </van-col>
 
     <van-col v-if="!showText" offset="1" span="14" class="marginTop">
-      <van-row type="flex" class="usernameFont">
+      <van-row type="flex" class="usernameFont" :style="'font-size: '+ unameSize + 'px'">
         {{ user.name }}
       </van-row>
     </van-col>
 
     <van-col v-if="showText" offset="1" span="14" class="marginTop">
-      <van-row type="flex" style="font-weight: bolder; font-size: 13px" class="van-ellipsis">{{ user.name }}</van-row>
+      <van-row type="flex"
+               :style="'font-weight: bolder; font-size: '+ unameSize + 'px'" class="van-ellipsis">
+        {{ user.name }}
+      </van-row>
       <van-row type="flex" style="font-size: 9px;" class="van-ellipsis">{{ showText }}</van-row>
     </van-col>
 
@@ -71,6 +78,14 @@ export default {
     imgSize: {
       type: Number,
       default: 40
+    },
+    unameSize: {
+      type: Number,
+      default: 13
+    },
+    online: {
+      type: Boolean,
+      default: true
     },
     // 0不展示 1展示 2展示并可点击
     follow: {

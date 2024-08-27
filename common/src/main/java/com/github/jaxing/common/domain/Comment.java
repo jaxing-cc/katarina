@@ -1,13 +1,19 @@
 package com.github.jaxing.common.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import lombok.Data;
+
 /**
  * 评论
  */
+@Data
 public class Comment {
 
     /**
      * 评论id
      */
+    @JsonProperty("_id")
     private String id;
 
     /**
@@ -28,7 +34,7 @@ public class Comment {
     /**
      * 评论目标类型
      */
-    private Integer targetType;
+    private String targetType;
 
     /**
      * 评论人id
@@ -38,10 +44,11 @@ public class Comment {
     /**
      * 删除评论，默认false
      */
-    private boolean deleted;
+    private Boolean deleted;
 
     /**
      * 创建时间
      */
     private Long createTime;
+
 }

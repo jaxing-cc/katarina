@@ -49,6 +49,11 @@ public enum CollectionEnum {
      */
     post,
 
+    /**
+     * 点赞记录
+     * @see com.github.jaxing.common.domain.Comment
+     */
+    comment,
 
     /**
      * 点赞记录

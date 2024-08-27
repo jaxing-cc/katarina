@@ -3,9 +3,7 @@
     <van-nav-bar title="详情" left-text="返回"
                  left-arrow @click-left="back"/>
     <post-box v-if="post" :post="post" :preview="false"></post-box>
-    <Component>
-
-    </Component>
+    <Comment :type="'post'" :id="id"/>
   </div>
 </template>
 
@@ -14,10 +12,11 @@ import {findById} from "@/api/post";
 import {Toast} from "vant";
 import PostBox from "@/components/PostBox";
 import UserCard from "@/components/UserCard";
+import Comment from "@/components/Comment";
 
 export default {
   name: "PostDetail",
-  components: {UserCard, PostBox},
+  components: {Comment, UserCard, PostBox},
   data() {
     return {
       id: '',

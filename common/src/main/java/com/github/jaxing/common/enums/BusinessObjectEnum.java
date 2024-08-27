@@ -3,6 +3,8 @@ package com.github.jaxing.common.enums;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
+import java.util.Arrays;
+
 @Getter
 @AllArgsConstructor
 public enum BusinessObjectEnum {
@@ -15,5 +17,8 @@ public enum BusinessObjectEnum {
 
     private final String desc;
 
+    public static BusinessObjectEnum get(String code){
+        return Arrays.stream(values()).filter(v -> v.getCode().equals(code)).findFirst().orElse(null);
+    }
 
 }
