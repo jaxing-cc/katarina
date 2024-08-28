@@ -92,7 +92,8 @@ public class CommentServiceImpl implements CommentService {
         List<CommentVO> result = new ArrayList<>();
         mongoClient.aggregate(CollectionEnum.comment.name(), pipeline)
                 .handler(o -> result.add(new CommentVO(o))).exceptionHandler(promise::fail)
-                .endHandler(o -> queryChildSize(result.stream().map(CommentVO::getId).collect(Collectors.toSet())).onFailure(promise::fail).onSuccess(res -> {
+                .endHandler(o -> queryChildSize(result.stream().map(CommentVO::getId).collect(Collectors.toSet()))
+                        .onFailure(promise::fail).onSuccess(res -> {
                     for (CommentVO commentVO : result) {
                         commentVO.setChildSize(res.get(commentVO.getId()));
                     }

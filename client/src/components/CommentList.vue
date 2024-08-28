@@ -1,7 +1,7 @@
 <template>
   <div>
     <div v-if="!commentList || commentList.length === 0">
-      暂无评论
+      <van-divider dashed>暂无评论</van-divider>
     </div>
 
     <!--回复状态时显示-->
@@ -20,9 +20,8 @@
         </van-col>
         <van-col span="1"/>
       </van-row>
+      <hr>
     </div>
-
-    <van-divider dashed v-if="headComment" content-position="left">回复</van-divider>
 
     <!--评论主体-->
     <div v-for="(c, i) in commentList" :key="c.id" class="van-hairline--surround">
@@ -52,6 +51,7 @@
         close-icon="close"
         @close="closeChildComment"
         position="bottom" :style="{ height: '95%' }">
+      <van-divider>回复</van-divider>
       <comment-list v-if="replyComment" :head-comment="replyComment" :id="id" :type="type" :replyId="replyComment._id"></comment-list>
     </van-popup>
   </div>
@@ -61,6 +61,7 @@
 import {convertDate} from "@/utils/util";
 import {queryComment} from "@/api/comment";
 import UserCard from "@/components/UserCard";
+import {Toast} from "vant";
 
 export default {
   name: "CommentList",
@@ -79,10 +80,11 @@ export default {
     },
     loadComment() {
       let replyId = this.replyId ? this.replyId : "base";
-      console.log(replyId, this.replyId)
       queryComment(1, replyId, this.id, this.type).then(res => {
         if (res.success) {
           this.commentList = res.data
+        }else{
+          Toast('网络异常')
         }
       })
     },

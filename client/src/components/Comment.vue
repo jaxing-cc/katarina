@@ -16,7 +16,7 @@
               placeholder="评论两句吧"
               show-word-limit>
             <template #button>
-              <van-button size="small" color="#3E7FCC" icon="success"></van-button>
+              <van-button size="small" color="#3E7FCC" @click="saveComment" plain>评论</van-button>
             </template>
           </van-field>
         </van-sticky>
@@ -24,14 +24,9 @@
       <van-col :span="1"/>
     </van-row>
 
-    <van-divider>
-      评论
-    </van-divider>
-
     <van-row>
       <van-col :span="1"/>
       <van-col :span="22">
-
         <comment-list :id="id" :type="type"/>
       </van-col>
       <van-col :span="1"/>
@@ -41,6 +36,8 @@
 
 <script>
 import CommentList from "@/components/CommentList";
+import {saveComment} from "@/api/comment";
+import {Dialog, Toast} from "vant";
 
 export default {
   name: "Comment",
@@ -50,11 +47,39 @@ export default {
     return {
       commentList: [],
       comment: {
-        content: ''
+        content: '',
+        replyId: 'base'
       }
     }
   },
   methods: {
+    saveComment() {
+      Dialog.confirm({
+        message: '确认发布评论吗?',
+      }).then(() => {
+        if (!this.comment.content) {
+          Toast('评论内容不能为空')
+          return
+        }
+        saveComment({
+          replyId: this.comment.replyId,
+          content: this.comment.content,
+          targetId: this.id,
+          type: this.type,
+        }).then(res => {
+          if (res.success) {
+            Toast('保存成功')
+          } else {
+            Toast('保存失败')
+          }
+          this.comment.content = '';
+        })
+      }).catch(() => {
+
+      });
+
+
+    }
   },
   created() {
   }
