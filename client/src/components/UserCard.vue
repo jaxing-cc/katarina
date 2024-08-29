@@ -1,5 +1,5 @@
 <template>
-  <van-row type="flex" @click="click" class="wrapper">
+  <van-row type="flex" @click="click" :class="hover ? 'wrapper' : 'wrapper-not-hover'">
 
     <van-col span="4" class="marginTop">
       <van-badge dot :color="color" v-if="online">
@@ -92,9 +92,15 @@ export default {
       type: Number,
       default: 0
     },
+    //未读消息展示
     unread: {
       type: Number,
       default: 0
+    },
+    //点击反馈
+    hover: {
+      type: Boolean,
+      default: true
     }
   },
 
@@ -144,6 +150,10 @@ export default {
 
 .userImg {
   margin-left: 10px;
+}
+
+.wrapper-not-hover {
+  height: 55px;
 }
 
 .wrapper {
