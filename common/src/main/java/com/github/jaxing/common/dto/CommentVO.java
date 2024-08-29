@@ -15,6 +15,8 @@ public class CommentVO extends Comment {
 
     private int childSize;
 
+    private int likeSize;
+
     public CommentVO(JsonObject jsonObject) {
         this.setId(jsonObject.getString("id"));
         this.setUid(jsonObject.getString("uid"));

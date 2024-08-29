@@ -69,6 +69,9 @@ public class PostVO {
     private boolean thumbuped;
 
     public PostVO(JsonObject jsonObject) {
+        if (jsonObject == null){
+            return;
+        }
         this.id = jsonObject.getString("id");
         this.title = jsonObject.getString("title");
         this.content = jsonObject.getString("content");
