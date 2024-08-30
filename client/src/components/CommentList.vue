@@ -14,7 +14,7 @@
               <van-grid direction="horizontal" :border="false" clickable icon-size="15" :column-num="3">
                 <van-grid-item/>
                 <van-grid-item icon="comment-o" @click="reply(headComment)"></van-grid-item>
-                <van-grid-item :text="'12'" icon="star-o"/>
+                <van-grid-item :text="'' + headComment.thumbupCount" :icon=" headComment.liked ? 'like' : 'like-o'" @click="thumbup(headComment)"/>
               </van-grid>
             </van-col>
             <van-col span="1"/>
@@ -43,7 +43,7 @@
                 <van-grid direction="horizontal" :border="false" clickable icon-size="15" :column-num="3">
                   <van-grid-item/>
                   <van-grid-item icon="comment-o" @click="reply(c)"></van-grid-item>
-                  <van-grid-item :text="'12'" icon="star-o"/>
+                  <van-grid-item :text="'' + c.thumbupCount" :icon=" c.liked ? 'like' : 'like-o'" @click="thumbup(c)"/>
                 </van-grid>
               </van-col>
               <van-col span="1"/>
@@ -95,6 +95,7 @@ import {convertDate} from "@/utils/util";
 import {queryComment, saveComment} from "@/api/comment";
 import UserCard from "@/components/UserCard";
 import {Dialog, Toast} from "vant";
+import {thumbup} from "@/api/thumbup";
 
 export default {
   name: "CommentList",
@@ -191,6 +192,29 @@ export default {
       })
 
     },
+    /**
+     * 点赞
+     */
+    thumbup(comment) {
+      thumbup({
+        targetId: comment._id,
+        type: 'comment'
+      }).then(res => {
+        if (res.success) {
+          comment.liked = !comment.liked
+          if (res.data) {
+            comment.thumbupCount++;
+            Toast('点赞成功')
+          } else {
+            comment.thumbupCount--;
+            Toast('已取消')
+          }
+        } else {
+          Toast('网络异常')
+        }
+      });
+    }
+
 
   },
   created() {
@@ -215,7 +239,7 @@ export default {
 
 .replyText {
   display: flex;
-  align-items: center;    /* 垂直居中 */
+  align-items: center; /* 垂直居中 */
   justify-content: space-between;
   font-size: 12px;
   background-color: #f7f8f6;

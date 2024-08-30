@@ -42,6 +42,9 @@ public class PostServiceImpl implements PostService {
     @Resource
     private ThumbupService thumbupService;
 
+    @Resource
+    private CommentService commentService;
+
     /**
      * 查询动态详情
      *
@@ -60,14 +63,17 @@ public class PostServiceImpl implements PostService {
             CompositeFuture.all(
                     thumbupService.info(postIds, code),
                     thumbupService.liked(postIds, code, uid),
-                    userService.findById(postVO.getUid())
+                    userService.findById(postVO.getUid()),
+                    commentService.queryCommentSize(postIds, BusinessObjectEnum.POST.getCode())
             ).onFailure(promise::fail).onSuccess(cf -> {
                 Map<String, Integer> map = cf.resultAt(0);
                 Set<String> set = cf.resultAt(1);
                 UserInfo userInfo = cf.resultAt(2);
+                Map<String, Integer> commentSizeMap = cf.resultAt(3);
                 postVO.setThumbupCount(map.get(postVO.getId()));
                 postVO.setThumbuped(set.contains(postVO.getId()));
                 postVO.setUser(userInfo);
+                postVO.setCommentCount(commentSizeMap.getOrDefault(postVO.getId(), 0));
                 promise.complete(postVO);
             });
         });
@@ -116,13 +122,19 @@ public class PostServiceImpl implements PostService {
         mongoClient.aggregate(CollectionEnum.post.name(), pipeline).exceptionHandler(promise::fail).endHandler(v -> {
             Set<String> postIds = list.stream().map(PostVO::getId).collect(Collectors.toSet());
             String business = BusinessObjectEnum.POST.getCode();
-            CompositeFuture.all(thumbupService.info(postIds, business), thumbupService.liked(postIds, business, uid))
-                    .onFailure(t -> promise.complete(list)).onSuccess(cf -> {
+            CompositeFuture.all(
+                    thumbupService.info(postIds, business),
+                    thumbupService.liked(postIds, business, uid),
+                    commentService.queryCommentSize(postIds, business)
+            ).onFailure(t -> promise.complete(list)).onSuccess(cf -> {
                 Map<String, Integer> map = cf.resultAt(0);
                 Set<String> set = cf.resultAt(1);
+                Map<String, Integer> commentSizeMap = cf.resultAt(2);
                 for (PostVO postVO : list) {
-                    postVO.setThumbupCount(map.get(postVO.getId()));
+                    String id = postVO.getId();
+                    postVO.setThumbupCount(map.getOrDefault(id, null));
                     postVO.setThumbuped(set.contains(postVO.getId()));
+                    postVO.setCommentCount(commentSizeMap.getOrDefault(id, null));
                 }
                 promise.complete(list);
             });

@@ -59,6 +59,11 @@ public class PostVO {
     private UserInfo user;
 
     /**
+     * 评论数
+     */
+    private Integer commentCount;
+
+    /**
      * 点赞数
      */
     private Integer thumbupCount;

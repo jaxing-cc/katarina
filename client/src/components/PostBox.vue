@@ -52,7 +52,7 @@
                 :border="false" clickable icon-size="15"
                 :column-num="3">
         <van-grid-item/>
-        <van-grid-item icon="comment-o" text="120"/>
+        <van-grid-item icon="comment-o" :text="commentCount + ''"/>
         <van-grid-item @click="thumbup" :icon="thumbuped ? 'like': 'like-o'" :text="thumbupCount + ''"/>
       </van-grid>
     </van-row>
@@ -82,7 +82,8 @@ export default {
       images: [],
       lastImagesSize: 0,
       thumbuped: false,
-      thumbupCount: 0
+      thumbupCount: 0,
+      commentCount: 0
     }
   },
   methods: {
@@ -147,7 +148,8 @@ export default {
     this.loadAvatar()
     this.loadImage()
     this.thumbuped = this.post.thumbuped
-    this.thumbupCount = this.post.thumbupCount;
+    this.thumbupCount = this.post.thumbupCount
+    this.commentCount = this.post.commentCount
   }
 
 }

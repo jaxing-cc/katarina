@@ -1,15 +1,12 @@
 package com.github.jaxing.service;
 
-import com.github.jaxing.common.Constant;
 import com.github.jaxing.common.domain.Comment;
 import com.github.jaxing.common.dto.CommentVO;
 import com.github.jaxing.common.enums.BusinessObjectEnum;
 import com.github.jaxing.common.enums.CollectionEnum;
-import com.github.jaxing.common.enums.YesOrNoEnum;
 import io.vertx.core.CompositeFuture;
 import io.vertx.core.Future;
 import io.vertx.core.Promise;
-import io.vertx.core.json.Json;
 import io.vertx.core.json.JsonArray;
 import io.vertx.core.json.JsonObject;
 import io.vertx.ext.mongo.MongoClient;
@@ -28,6 +25,9 @@ public class CommentServiceImpl implements CommentService {
 
     @Resource
     private MongoClient mongoClient;
+
+    @Resource
+    private ThumbupService thumbupService;
 
     @Override
     public Future<Void> save(String uid, String replyId, String content, String targetId, String type) {
@@ -71,7 +71,6 @@ public class CommentServiceImpl implements CommentService {
                 JsonObject.of("targetId", targetId),
                 JsonObject.of("targetType", type)
         );
-
         JsonArray pipeline = JsonArray.of(
                 JsonObject.of("$match", JsonObject.of("$and", match)),
                 JsonObject.of("$project", projectField.copy().put("uid", JsonObject.of("$toObjectId", "$uid"))),
@@ -89,16 +88,30 @@ public class CommentServiceImpl implements CommentService {
                 JsonObject.of("$limit", DEFAULT_PAGE_SIZE),
                 JsonObject.of("$skip", (pageNum - 1) * DEFAULT_PAGE_SIZE)
         );
+
         List<CommentVO> result = new ArrayList<>();
         mongoClient.aggregate(CollectionEnum.comment.name(), pipeline)
                 .handler(o -> result.add(new CommentVO(o))).exceptionHandler(promise::fail)
-                .endHandler(o -> queryChildSize(result.stream().map(CommentVO::getId).collect(Collectors.toSet()))
-                        .onFailure(promise::fail).onSuccess(res -> {
-                    for (CommentVO commentVO : result) {
-                        commentVO.setChildSize(res.get(commentVO.getId()));
-                    }
-                    promise.complete(result);
-                }));
+                .endHandler(o -> {
+                            Set<String> targetIds = result.stream().map(CommentVO::getId).collect(Collectors.toSet());
+                            CompositeFuture.all(
+                                    queryChildSize(targetIds),
+                                    thumbupService.liked(targetIds, BusinessObjectEnum.COMMENT.getCode(), uid),
+                                    thumbupService.info(targetIds, BusinessObjectEnum.COMMENT.getCode())
+                            ).onFailure(promise::fail).onSuccess(res -> {
+                                Map<String, Integer> childSizeMap = res.resultAt(0);
+                                Set<String> likedIds = res.resultAt(1);
+                                Map<String, Integer> thumbupMap = res.resultAt(2);
+                                for (CommentVO commentVO : result) {
+                                    String id = commentVO.getId();
+                                    commentVO.setChildSize(childSizeMap.getOrDefault(id, 0));
+                                    commentVO.setLiked(likedIds.contains(id));
+                                    commentVO.setThumbupCount(thumbupMap.getOrDefault(id, 0));
+                                }
+                                promise.complete(result);
+                            });
+                        }
+                );
         return promise.future();
     }
 
@@ -108,7 +121,6 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public Future<Map<String, Integer>> queryChildSize(Collection<String> commentIds) {
         Promise<Map<String, Integer>> promise = Promise.promise();
-        ;
         Map<String, Integer> map = new HashMap<>();
         JsonArray pipeline = JsonArray.of(
                 JsonObject.of("$match", JsonObject.of("replyId", JsonObject.of("$in", commentIds))),
@@ -120,6 +132,33 @@ public class CommentServiceImpl implements CommentService {
                     for (String commentId : commentIds) {
                         if (!map.containsKey(commentId)) {
                             map.put(commentId, 0);
+                        }
+                    }
+                    promise.complete(map);
+                });
+        return promise.future();
+    }
+
+    /**
+     * 查询评论id对应子评论数量
+     */
+    @Override
+    public Future<Map<String, Integer>> queryCommentSize(Collection<String> targetIds, String business) {
+        Promise<Map<String, Integer>> promise = Promise.promise();
+        Map<String, Integer> map = new HashMap<>();
+        JsonArray pipeline = JsonArray.of(
+                JsonObject.of("$match", JsonObject.of("$and", JsonArray.of(
+                        JsonObject.of("targetId", JsonObject.of("$in", targetIds)),
+                        JsonObject.of("targetType", business)
+                ))),
+                JsonObject.of("$group", JsonObject.of("_id", "$targetId", "count", JsonObject.of("$sum", 1)))
+        );
+        mongoClient.aggregate(CollectionEnum.comment.name(), pipeline).exceptionHandler(promise::fail)
+                .handler(j -> map.put(j.getString("_id"), j.getInteger("count")))
+                .endHandler(res -> {
+                    for (String targetId : targetIds) {
+                        if (!map.containsKey(targetId)) {
+                            map.put(targetId, 0);
                         }
                     }
                     promise.complete(map);

@@ -22,4 +22,9 @@ public interface CommentService {
      * 查询评论id对应子评论数量
      */
     Future<Map<String, Integer>> queryChildSize(Collection<String> commentId);
+
+    /**
+     * 查询评论id对应子评论数量
+     */
+    Future<Map<String, Integer>> queryCommentSize(Collection<String> targetIds, String business);
 }
