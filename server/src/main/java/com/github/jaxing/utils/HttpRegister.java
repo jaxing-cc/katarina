@@ -32,9 +32,9 @@ public abstract class HttpRegister {
         protected void start(Router r,Vertx vertx) {
             r.errorHandler(400, ctx -> ctx.json(R.resp(false, "服务器拒绝请求", null)));
             r.route("/*").order(0)
-                    .handler(CorsHandler.create("*")
-//                                    .addOrigin("http://localhost")
-//                                    .addOrigin("http://101.42.249.167")
+                    .handler(CorsHandler.create()
+                                    .addOrigin("http://localhost")
+                                    .addOrigin("http://101.42.249.167")
                                     .allowedMethods(new HashSet<>(Arrays.asList(
                                             HttpMethod.GET,
                                             HttpMethod.POST,

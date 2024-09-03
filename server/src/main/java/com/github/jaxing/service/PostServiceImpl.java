@@ -81,7 +81,28 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public Future<List<PostVO>> search(String uid, String value, Integer page) {
+    public Future<List<PostVO>> search(String uid, String value, Boolean follow, Integer page) {
+        JsonObject match = JsonObject.of("state", 1);
+        if (!ObjectUtils.isEmpty(value)) {
+            match.put("content", JsonObject.of("$regex", value));
+        }
+        if (Boolean.TRUE.equals(follow)) {
+            Promise<List<PostVO>> promise = Promise.promise();
+            userService.followList(uid).onFailure(promise::fail).onSuccess(res -> {
+                if (!ObjectUtils.isEmpty(res)) {
+                    JsonArray array = new JsonArray();
+                    res.forEach(array::add);
+                    match.put("uid", JsonObject.of("$in", array));
+                }
+                search(uid, match, page).onFailure(promise::fail).onSuccess(promise::complete);
+            });
+            return promise.future();
+        } else {
+            return search(uid, match, page);
+        }
+    }
+
+    private Future<List<PostVO>> search(String uid, JsonObject match, Integer page) {
         if (page == null) {
             page = 1;
         }
@@ -96,10 +117,6 @@ public class PostServiceImpl implements PostService {
                 "createTime", 1,
                 "updateTime", 1
         );
-        JsonObject match = JsonObject.of("state", 1);
-        if (!ObjectUtils.isEmpty(value)) {
-            match.put("content", JsonObject.of("$regex", value));
-        }
         JsonArray pipeline = JsonArray.of(
                 JsonObject.of("$match", match),
                 JsonObject.of("$project", projectField.copy().put("uid", JsonObject.of("$toObjectId", "$uid"))),
@@ -112,7 +129,6 @@ public class PostServiceImpl implements PostService {
                 JsonObject.of("$project", projectField.copy()
                         .put("id", JsonObject.of("$toString", "$_id"))
                         .put("uid", JsonObject.of("$toString", "$uid"))
-//                        .put("content", JsonObject.of("$substrCP", JsonArray.of("$content", 0, 100)))
                         .put("user", JsonObject.of("$arrayElemAt", JsonArray.of("$user", 0)))),
                 JsonObject.of("$sort", JsonObject.of("createTime", -1)),
                 JsonObject.of("$limit", DEFAULT_PAGE_SIZE),

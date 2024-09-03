@@ -19,7 +19,7 @@ export function save(data) {
 /**
  * 搜索
  */
-export function search(value, page) {
+export function search(value, follow ,page) {
     let url = "/api/post?page=";
     if (!page) {
         page = 1;
@@ -28,5 +28,6 @@ export function search(value, page) {
     if (value) {
         url += "&keyword=" + value;
     }
+    url += "&follow=" + follow;
     return request.get(url)
 }

@@ -22,12 +22,12 @@ public interface PostService {
 
     /**
      * 搜索
-     *
-     * @param uid
+     *  @param uid
      * @param value 字符串
+     * @param follow
      * @param page  页码
      */
-    Future<List<PostVO>> search(String uid, String value, Integer page);
+    Future<List<PostVO>> search(String uid, String value, Boolean follow, Integer page);
 
     /**
      * 保存

@@ -2,8 +2,8 @@
     <div class="wrapper">
       <van-cell-group title="账号设置" inset>
         <van-cell title="个人信息" is-link to="info"/>
-        <van-cell title="我关注的" is-link/>
-        <van-cell title="关注我的" is-link/>
+        <van-cell title="我的关注" is-link/>
+        <van-cell title="回复我的" is-link/>
         <van-cell title="退出账号" is-link @click="exit"/>
       </van-cell-group>
       <van-cell-group title="其他" inset>
