@@ -32,7 +32,6 @@ public class DdzJob implements Handler<Long> {
 
     @Override
     public void handle(Long event) {
-        log.info("cur:{}", Client.CLIENT_POOL.size());
         Map<String, Client> clientPool = Client.CLIENT_POOL;
         Map<String, DdzContext> roomMap = DdzContext.ROOM_MAP;
         Player.PLAYER_MAP.forEach((k, v) -> {
@@ -46,7 +45,6 @@ public class DdzJob implements Handler<Long> {
             if (context != null){
                 String text = MessageTypeEnum.DDZ_MESSAGE.message(context.toJson()).toString();
                 client.sendText(text);
-                log.info(text);
             }
         });
     }

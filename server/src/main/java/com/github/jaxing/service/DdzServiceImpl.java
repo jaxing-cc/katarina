@@ -1,8 +1,10 @@
 package com.github.jaxing.service;
 
 import com.github.jaxing.common.enums.game.poker.GameStatus;
+import com.github.jaxing.common.enums.game.poker.PokerGame;
+import com.github.jaxing.common.enums.game.poker.PokerGroupType;
 import com.github.jaxing.common.game.Player;
-import com.github.jaxing.common.game.poker.PokerFactory;
+import com.github.jaxing.common.game.poker.*;
 import com.github.jaxing.common.game.poker.ddz.DdzContext;
 import com.github.jaxing.common.utils.CommonUtils;
 import com.github.jaxing.dto.vo.DdzRoomVO;
@@ -29,6 +31,8 @@ public class DdzServiceImpl implements DdzService {
 
     @Resource
     private UserService userService;
+
+    private PokerGameRule gameRule = PokerGame.DOU_DI_ZHU.getPokerGameRule();
 
     @Override
     public Future<List<DdzRoomVO>> roomList(String name) {
@@ -98,7 +102,6 @@ public class DdzServiceImpl implements DdzService {
                     if (context.getGameStatus().equals(GameStatus.WAIT)) {
                         context.removePlayer(player);
                     } else {
-                        //TODO 其他状态退出处理
                         context.removePlayer(player);
                         context.setGameStatus(GameStatus.WAIT);
                         context.setMaster(null);
@@ -161,14 +164,12 @@ public class DdzServiceImpl implements DdzService {
             }
             Integer playerIndex = c.getPlayerMap().get(uid);
             Integer currentIndex = c.getCurrent();
-            int lastIndex = (currentIndex + 2) % 3;
             if (!playerIndex.equals(currentIndex)) {
                 promise.fail("不是你的回合");
                 return;
             }
             Integer[] callList = c.getCallList();
             //叫地主逻辑
-            Integer last = callList[lastIndex];
             Integer max = getMax(callList)[0];
             // 数值小于上一个就return
             if (max != null && v != 0 && v <= max) {
@@ -201,7 +202,7 @@ public class DdzServiceImpl implements DdzService {
                 callList[currentIndex] = v;
                 if (v == 0) {
                     c.start(getMax(callList)[1]);
-                }else{
+                } else {
                     c.start(currentIndex);
                 }
             }
@@ -229,12 +230,89 @@ public class DdzServiceImpl implements DdzService {
      *
      */
     @Override
-    public void pop(String uid, List<Byte> ids) {
-        // Player player = getPlayerByUid(uid);
-        // DdzContext context = getContextByRoomId(player.getRoomId());
-        // if (!context.getGameStatus().equals(GameStatus.UNDERWAY)) {
-        //     throw new ServiceException("当前不能做此操作");
-        // }
+    public Future<Void> pop(String uid, List<Byte> ids) {
+        Promise<Void> promise = Promise.promise();
+        getPlayerByUid(uid).onFailure(promise::fail).onSuccess(player -> getContextByRoomId(player.getRoomId()).onFailure(promise::fail).onSuccess(c -> {
+            String exp = PokerFactory.getExpByIds(ids);
+            ComparablePokerGroup targetGroup = ComparablePokerGroup.get(exp, PokerGame.DOU_DI_ZHU);
+            if (targetGroup == null) {
+                promise.fail("错误出牌");
+                return;
+            }
+            Integer playerIndex = c.getPlayerMap().get(uid);
+            Integer currentIndex = c.getCurrent();
+            if (!playerIndex.equals(currentIndex)) {
+                promise.fail("不是你的回合");
+                return;
+            }
+            List<Byte> lastPush = c.getLastPush();
+            Integer lastPushIndex = c.getLastPushIndex();
+            PokerGroup pokerGroup = c.getPokerGroups()[playerIndex];
+            if (ObjectUtils.isEmpty(lastPush)) {
+                if (ObjectUtils.isEmpty(ids)) {
+                    promise.fail("此轮必须出牌");
+                    return;
+                }
+                pop(pokerGroup, targetGroup, c, ids, currentIndex, promise);
+            } else {
+                String lastPushExp = PokerFactory.getExpByIds(lastPush);
+                ComparablePokerGroup lastPushExpGroup = ComparablePokerGroup.get(lastPushExp, PokerGame.DOU_DI_ZHU);
+                if (targetGroup.getType().equals(PokerGroupType.PASS)) {
+                    if (currentIndex.equals(lastPushIndex)) {
+                        promise.fail("此轮必须出牌");
+                        return;
+                    }
+                    c.goNext();
+                    promise.complete();
+                } else if (currentIndex.equals(lastPushIndex) || gameRule.compareTo(targetGroup, lastPushExpGroup)) {
+                    pop(pokerGroup, targetGroup, c, ids, currentIndex, promise);
+                } else {
+                    promise.fail("无法出牌");
+                }
+            }
+        }));
+        return promise.future();
+    }
+
+    /**
+     * 重开
+     */
+    @Override
+    public Future<Void> restart(String uid) {
+        Promise<Void> promise = Promise.promise();
+        getPlayerByUid(uid).onFailure(promise::fail).onSuccess(player -> getContextByRoomId(player.getRoomId()).onFailure(promise::fail).onSuccess(c -> {
+            c.setGameStatus(GameStatus.WAIT);
+            c.setMaster(null);
+            c.setCurrent(null);
+            c.setCallList(new Integer[]{null, null, null});
+            c.setLastPush(null);
+            c.setLastPushIndex(null);
+            for (Player cPlayer : c.getPlayers()) {
+                if (cPlayer != null){
+                    cPlayer.setReady(false);
+                }
+            }
+            promise.complete();
+        }));
+        return promise.future();
+    }
+
+    private void pop(PokerGroup pokerGroup,
+                     ComparablePokerGroup targetGroup,
+                     DdzContext c, List<Byte> ids, Integer currentIndex,
+                     Promise<Void> promise) {
+        if (pokerGroup.pop(targetGroup) == null) {
+            promise.fail("无法出牌");
+        } else {
+            if (pokerGroup.getSize() == 0) {
+                c.setGameStatus(GameStatus.FINISH);
+            } else {
+                c.goNext();
+            }
+            c.setLastPush(ids);
+            c.setLastPushIndex(currentIndex);
+            promise.complete();
+        }
     }
 
     /**

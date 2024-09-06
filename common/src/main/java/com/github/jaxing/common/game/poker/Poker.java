@@ -14,6 +14,8 @@ public class Poker {
 
     private final PokerType type;
 
+    private final String tag;
+
     @Override
     public String toString() {
         return id + ":" + type + "@" + value;

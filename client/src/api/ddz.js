@@ -45,3 +45,17 @@ export function readyRequest() {
 export function callMaster(v) {
     return request.post("/api/game/ddz/call/" + v);
 }
+
+/**
+ * 出牌
+ */
+export function pop(data) {
+    return request.post("/api/game/ddz/pop", data);
+}
+
+/**
+ * 出牌
+ */
+export function restart() {
+    return request.post("/api/game/ddz/restart");
+}

@@ -54,6 +54,10 @@ public interface DdzService {
     /**
      * 出
      */
-    void pop(String uid, List<Byte> ids);
+    Future<Void> pop(String uid, List<Byte> ids);
 
+    /**
+     * 重开
+     */
+    Future<Void> restart(String uid);
 }

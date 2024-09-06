@@ -83,7 +83,12 @@ public class DdzContext implements Serializable {
     /**
      * 上次出牌
      */
-    private Poker[] lastPush;
+    private List<Byte> lastPush;
+
+    /**
+     * 上次出牌人
+     */
+    private volatile Integer lastPushIndex;
 
     /**
      * 叫牌数据表
@@ -170,6 +175,7 @@ public class DdzContext implements Serializable {
         entries.put("current", this.current);
         entries.put("callList", this.callList);
         entries.put("lastPush", this.lastPush);
+        entries.put("lastPushIndex", this.lastPushIndex);
         if (ObjectUtils.isEmpty(this.pokerGroups)){
             entries.put("pokerGroups", Collections.EMPTY_LIST);
         }else{

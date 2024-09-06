@@ -100,7 +100,7 @@ public class DdzGameRule implements PokerGameRule {
 
     @Override
     public PokerGroupType checkInput(String s) {
-        if ("p".equals(s)) {
+        if ("p".equals(s) || "".equals(s)) {
             return PokerGroupType.PASS;
         }
         if (!Pattern.matches("[0-9|aAjJqQkKsS]{1,17}", s)) {

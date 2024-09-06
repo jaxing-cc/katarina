@@ -17,9 +17,10 @@
                 {{ player(lid).name }}
               </van-col>
             </van-row>
-            <div class="markFont" v-if="myTurn(lid)">
+            <van-tag mark type="primary" v-if="info.master === info.playerMap[lid]">地主</van-tag>
+            <span class="markFont" v-if="myTurn(lid)">
               出牌中...
-            </div>
+            </span>
             <!--准备阶段-->
             <van-row style="font-size: 13px" v-if="info.gameStatus === 'WAIT'">
               <van-icon name="success" color="#1989fa" v-if="player(lid).ready">已准备</van-icon>
@@ -46,9 +47,10 @@
                 {{ player(rid).name }}
               </van-col>
             </van-row>
-            <div class="markFont" v-if="myTurn(rid)">
+            <van-tag mark type="primary" v-if="info.master === info.playerMap[rid]">地主</van-tag>
+            <span class="markFont" v-if="myTurn(rid)">
               出牌中...
-            </div>
+            </span>
             <!--准备阶段-->
             <van-row style="font-size: 13px" v-if="info.gameStatus === 'WAIT'">
               <van-icon name="success" color="#1989fa" v-if="player(rid).ready">已准备</van-icon>
@@ -70,13 +72,26 @@
           游戏阶段: {{ convertGameState(info.gameStatus) }}
         </div>
         <div v-if="info.gameStatus === 'UNDERWAY'">
+          <span v-if="info.lastPushIndex">
+            {{'出牌人<' + info.players[info.lastPushIndex].name + '>' }}
+          </span>
           <div v-for="p in info.lastPush" :key="p" class="poker_unselected">
-            {{ convertPokerValue(p) }}
+            {{  convertPokerValue(p) }}
           </div>
         </div>
         <div v-if="info.gameStatus === 'CALL'">
           <div v-for="p in info.pokerGroups[3]" :key="p" class="poker_unselected">
             {{ convertPokerValue(p) }}
+          </div>
+        </div>
+        <div v-if="info.gameStatus === 'FINISH'">
+          <div v-if="mid === info.ownerId">
+            <van-button round type="warning" size="normal" @click="reset" block>
+              开始新游戏
+            </van-button>
+          </div>
+          <div v-if="mid !== info.ownerId">
+            游戏已结束，等待房主开始新游戏
           </div>
         </div>
       </div>
@@ -93,6 +108,7 @@
           {{ player(mid).name }}
         </van-col>
         <van-col span="10" class="markFont">
+          <van-tag mark type="primary" v-if="info.master === info.playerMap[mid]">地主</van-tag>
           <span v-if="myTurn(mid)"> 你的回合</span>
           <span v-if="info.gameStatus === 'CALL' && !myTurn(mid)">
             {{ getCallValue(mid) }}
@@ -140,12 +156,31 @@
 
 
       </van-row>
+      <!--进行阶段-->
+      <van-row style="font-size: 13px;margin: 5px" v-if="info.gameStatus === 'UNDERWAY' && myTurn(mid)">
+        <van-col span="8">
+          <van-button round type="default" size="normal" @click="pop(false)" block>
+            出牌
+          </van-button>
+        </van-col>
+        <van-col span="8">
+          <van-button round type="default" size="normal" @click="pop(true)" block>
+            不出
+          </van-button>
+        </van-col>
+        <van-col span="8">
+          <van-button round type="default" size="normal" @click="resetPoker" block>
+            重置
+          </van-button>
+        </van-col>
+      </van-row>
+
     </van-row>
   </div>
 </template>
 
 <script>
-import {callMaster, exitRoom, readyRequest} from "@/api/ddz";
+import {callMaster, exitRoom, pop, readyRequest, restart} from "@/api/ddz";
 import {decodeToken} from "@/utils/token";
 import {getAvatarUrlOrDefault} from "@/api/file";
 import {Toast} from "vant";
@@ -167,7 +202,7 @@ export default {
         "size": 3,
         "master": null,
         "current": 1,
-        "callList": [null,null,null],
+        "callList": [null, null, null],
         "lastPush": null,
         "pokerGroups": [
           [1, 6, 8, 10, 14, 13, 17, 21, 24, 27, 29, 30, 34, 43, 44, 50, 53],
@@ -234,8 +269,8 @@ export default {
       if (state === 'UNDERWAY') {
         return '进行中'
       }
-      if (state === 'UNDERWAY') {
-        return '结束'
+      if (state === 'FINISH') {
+        return '游戏结束'
       }
     },
 
@@ -269,13 +304,13 @@ export default {
      */
     getCallValue(id) {
       let index = this.info.playerMap[id];
-      if (this.info.callList){
-        if (this.info.callList[index] === null){
+      if (this.info.callList) {
+        if (this.info.callList[index] === null) {
           return ''
-        }else if (this.info.callList[index] === 0){
+        } else if (this.info.callList[index] === 0) {
           return '不叫'
-        }else{
-          return  '叫地主:' + this.info.callList[index] + '分';
+        } else {
+          return '叫地主:' + this.info.callList[index] + '分';
         }
       }
       return ''
@@ -313,9 +348,9 @@ export default {
      * 是否是我的回合
      */
     myTurn(id) {
-      if (this.info){
+      if (this.info) {
         return this.info.current != null && this.info.playerMap[id] === this.info.current
-      }else{
+      } else {
         return false
       }
     },
@@ -333,6 +368,43 @@ export default {
       })
     },
 
+    /**
+     * 出牌
+     */
+    pop(pass) {
+      let pokers = []
+      for (const item of this.selected) {
+        pokers.push(item)
+      }
+      if (pokers.length === 0 && !pass){
+        Toast('请选择牌组')
+        return
+      }
+      let data = {
+        ids: pass ? [] : pokers
+      }
+      pop(data).then(res => {
+        if (!res.success) {
+          Toast(res.msg)
+        } else {
+          this.resetPoker()
+        }
+      })
+    },
+
+    /**
+     * 重置
+     */
+    resetPoker() {
+      this.selected = new Set();
+    },
+    reset() {
+      restart().then(res => {
+        if (!res.success) {
+          Toast(res.msg)
+        }
+      })
+    },
     /**
      * 服务器消息处理
      * @param data

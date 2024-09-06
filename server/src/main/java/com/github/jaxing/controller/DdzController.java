@@ -1,6 +1,7 @@
 package com.github.jaxing.controller;
 
 import com.github.jaxing.common.domain.R;
+import com.github.jaxing.common.dto.PokerPopDTO;
 import com.github.jaxing.service.DdzService;
 import com.github.jaxing.utils.CommonUtils;
 import com.github.jaxing.utils.HttpRegister;
@@ -71,11 +72,29 @@ public class DdzController extends HttpRegister {
         );
 
         /**
-         * 准备
+         * 叫牌
          */
         router.post("/api/game/ddz/call/:value").handler(context ->
                 ddzService.callMaster(CommonUtils.getUid(context),
                         Integer.valueOf(context.pathParam("value")))
+                        .onFailure(t -> context.json(R.fail(t)))
+                        .onSuccess(v -> context.json(R.ok()))
+        );
+
+        /**
+         * 叫牌
+         */
+        router.post("/api/game/ddz/pop").handler(context ->
+                ddzService.pop(CommonUtils.getUid(context),
+                        context.body().asJsonObject().mapTo(PokerPopDTO.class).getIds()
+                ).onFailure(t -> context.json(R.fail(t))).onSuccess(v -> context.json(R.ok()))
+        );
+
+        /**
+         * 叫牌
+         */
+        router.post("/api/game/ddz/restart").handler(context ->
+                ddzService.restart(CommonUtils.getUid(context))
                         .onFailure(t -> context.json(R.fail(t)))
                         .onSuccess(v -> context.json(R.ok()))
         );

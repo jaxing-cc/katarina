@@ -2,9 +2,11 @@ package com.github.jaxing.common.game.poker;
 
 
 import com.github.jaxing.common.enums.game.poker.PokerType;
+import sun.reflect.SignatureIterator;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 扑克牌工厂
@@ -20,19 +22,31 @@ public class PokerFactory {
         byte index = 0;
         byte val = 1;
         while (index < MAX_POKER_SIZE - 2) {
-            POKER_MAP[index] = new Poker(index, val, PokerType.SPADE);
+            String tag;
+            if (val <= 9){
+                tag = String.valueOf(val);
+            }else if (val == 10){
+                tag = "0";
+            }else if (val == 11){
+                tag = "j";
+            }else if (val == 12){
+                tag = "q";
+            }else {
+                tag = "k";
+            }
+            POKER_MAP[index] = new Poker(index, val, PokerType.SPADE, tag);
             index++;
-            POKER_MAP[index] = new Poker(index, val, PokerType.HEARTS);
+            POKER_MAP[index] = new Poker(index, val, PokerType.HEARTS, tag);
             index++;
-            POKER_MAP[index] = new Poker(index, val, PokerType.CLUBS);
+            POKER_MAP[index] = new Poker(index, val, PokerType.CLUBS, tag);
             index++;
-            POKER_MAP[index] = new Poker(index, val, PokerType.DIAMONDS);
+            POKER_MAP[index] = new Poker(index, val, PokerType.DIAMONDS, tag);
             index++;
             val++;
         }
-        POKER_MAP[index] = new Poker(index, (byte) 14, PokerType.JOKER);
+        POKER_MAP[index] = new Poker(index, (byte) 14, PokerType.JOKER, "s");
         index++;
-        POKER_MAP[index] = new Poker(index, (byte) 15, PokerType.SUPER_JOKER);
+        POKER_MAP[index] = new Poker(index, (byte) 15, PokerType.SUPER_JOKER, "S");
     }
 
     public static Poker get(byte id) {
@@ -225,5 +239,15 @@ public class PokerFactory {
         return count;
     }
 
+    /**
+     * id获取表达式
+     */
+    public static String getExpByIds(List<Byte> ids){
+        StringBuffer sb = new StringBuffer();
+        for (Byte id : ids) {
+            sb.append(PokerFactory.get(id).getTag());
+        }
+        return sb.toString();
+    }
 }
 
