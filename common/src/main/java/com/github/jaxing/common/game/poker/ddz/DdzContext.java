@@ -132,6 +132,10 @@ public class DdzContext implements Serializable {
         this.size.incrementAndGet();
     }
 
+    /**
+     * 删除玩家
+     * @param player
+     */
     public void removePlayer(Player player) {
         String uid = player.getId();
         Integer index = playerMap.get(uid);
@@ -143,6 +147,13 @@ public class DdzContext implements Serializable {
         Player.PLAYER_MAP.remove(uid);
         if (this.size.decrementAndGet() == 0) {
             ROOM_MAP.remove(this.id);
+        }else if (this.ownerId.equals(player.getId())){
+            for (Player p : players) {
+                if (p != null){
+                    this.ownerId = p.getId();
+                    break;
+                }
+            }
         }
     }
 
@@ -172,7 +183,20 @@ public class DdzContext implements Serializable {
         return entries;
     }
 
-    public void start(Integer master) {
+    /**
+     * 切换出牌人
+     */
+    public void goNext(){
+        this.current = (this.current + 1) % 3;
+    }
 
+    // 开始游戏
+    public void start(Integer master) {
+        this.master = master;
+        this.current = master;
+        this.gameStatus = GameStatus.UNDERWAY;
+        //获取明牌
+        this.pokerGroups[master].put(this.pokerGroups[3]);
+        this.pokerGroups[master].sort();
     }
 }

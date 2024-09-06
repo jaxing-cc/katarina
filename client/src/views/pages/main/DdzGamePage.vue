@@ -17,7 +17,7 @@
                 {{ player(lid).name }}
               </van-col>
             </van-row>
-            <div class="markFont" v-if="info.current != null && info.playerMap[lid] === info.current">
+            <div class="markFont" v-if="myTurn(lid)">
               出牌中...
             </div>
             <!--准备阶段-->
@@ -26,6 +26,9 @@
               <van-icon name="cross" color="darkseagreen" v-if="!player(lid).ready">未准备</van-icon>
             </van-row>
             <!--CALL阶段-->
+            <div class="markFont" v-if="info.gameStatus === 'CALL' && !myTurn(lid)">
+              {{ getCallValue(lid) }}
+            </div>
           </div>
           <div v-if="!lid">
             等待加入...
@@ -43,7 +46,7 @@
                 {{ player(rid).name }}
               </van-col>
             </van-row>
-            <div class="markFont" v-if="info.current != null && info.playerMap[rid] === info.current">
+            <div class="markFont" v-if="myTurn(rid)">
               出牌中...
             </div>
             <!--准备阶段-->
@@ -52,7 +55,9 @@
               <van-icon name="cross" color="darkseagreen" v-if="!player(rid).ready">未准备</van-icon>
             </van-row>
             <!--CALL阶段-->
-
+            <div class="markFont" v-if="info.gameStatus === 'CALL' && !myTurn(rid)">
+              {{ getCallValue(rid) }}
+            </div>
           </div>
           <div v-if="!rid">
             等待加入...
@@ -87,8 +92,11 @@
         <van-col span="10" class="usernameFont">
           {{ player(mid).name }}
         </van-col>
-        <van-col span="10" class="markFont" v-if="info.current != null && info.playerMap[mid] === info.current">
-          你的回合
+        <van-col span="10" class="markFont">
+          <span v-if="myTurn(mid)"> 你的回合</span>
+          <span v-if="info.gameStatus === 'CALL' && !myTurn(mid)">
+            {{ getCallValue(mid) }}
+          </span>
         </van-col>
       </van-row>
       <!--用户牌组-->
@@ -107,12 +115,37 @@
           取消准备
         </van-button>
       </van-row>
+      <!--叫地主阶段-->
+      <van-row style="font-size: 13px;margin: 5px" v-if="info.gameStatus === 'CALL' && myTurn(mid)">
+        <van-col span="6">
+          <van-button round type="default" size="normal" @click="call(0)" block>
+            不叫
+          </van-button>
+        </van-col>
+        <van-col span="6">
+          <van-button round type="default" size="normal" @click="call(1)" block>
+            1分
+          </van-button>
+        </van-col>
+        <van-col span="6">
+          <van-button round type="default" size="normal" @click="call(2)" block>
+            2分
+          </van-button>
+        </van-col>
+        <van-col span="6">
+          <van-button round type="default" size="normal" @click="call(3)" block>
+            3分
+          </van-button>
+        </van-col>
+
+
+      </van-row>
     </van-row>
   </div>
 </template>
 
 <script>
-import {exitRoom, readyRequest} from "@/api/ddz";
+import {callMaster, exitRoom, readyRequest} from "@/api/ddz";
 import {decodeToken} from "@/utils/token";
 import {getAvatarUrlOrDefault} from "@/api/file";
 import {Toast} from "vant";
@@ -125,39 +158,16 @@ export default {
   data() {
     return {
       info: {
-        "id": "13aa99",
-        "name": "a",
-        "ownerId": "64d204c182879a330e56f6f1",
-        "players": [{
-          "id": "64d204c182879a330e56f6f1",
-          "name": "测试2",
-          "avatar": "66138b4ccb66d83ebfab8e67",
-          "gender": 1,
-          "ready": false,
-          "roomId": "13aa99"
-        },
-          {
-            "id": "64d204a282879a330e56f6f0",
-            "name": "测试1",
-            "avatar": "66138aabcb66d83ebfab8e65",
-            "gender": 1,
-            "ready": false,
-            "roomId": "13aa99"
-          },
-          {
-            "id": "64d204a282879a330e56f6f2",
-            "name": "测试3",
-            "avatar": null,
-            "gender": 1,
-            "ready": false,
-            "roomId": "13aa99"
-          }],
-        "playerMap": {"64d204c182879a330e56f6f1": 0, "64d204a282879a330e56f6f0": 1, "64d204a282879a330e56f6f2": 2},
+        "id": null,
+        "name": null,
+        "ownerId": null,
+        "players": [],
+        "playerMap": {},
         "gameStatus": "CALL",
         "size": 3,
         "master": null,
         "current": 1,
-        "callList": null,
+        "callList": [null,null,null],
         "lastPush": null,
         "pokerGroups": [
           [1, 6, 8, 10, 14, 13, 17, 21, 24, 27, 29, 30, 34, 43, 44, 50, 53],
@@ -218,7 +228,7 @@ export default {
       if (state === 'WAIT') {
         return '准备中'
       }
-      if (state === 'WAIT') {
+      if (state === 'CALL') {
         return '叫地主'
       }
       if (state === 'UNDERWAY') {
@@ -255,6 +265,23 @@ export default {
       return this.info.players[index] ? this.info.players[index] : {}
     },
     /**
+     * id获取叫地主信息
+     */
+    getCallValue(id) {
+      let index = this.info.playerMap[id];
+      if (this.info.callList){
+        if (this.info.callList[index] === null){
+          return ''
+        }else if (this.info.callList[index] === 0){
+          return '不叫'
+        }else{
+          return  '叫地主:' + this.info.callList[index] + '分';
+        }
+      }
+      return ''
+    },
+
+    /**
      * 选择出牌
      */
     selectPoker(id) {
@@ -281,6 +308,31 @@ export default {
       this.lid = players[(index + 1) % 3] ? players[(index + 1) % 3].id : null
       this.rid = players[(index + 2) % 3] ? players[(index + 2) % 3].id : null
     },
+
+    /**
+     * 是否是我的回合
+     */
+    myTurn(id) {
+      if (this.info){
+        return this.info.current != null && this.info.playerMap[id] === this.info.current
+      }else{
+        return false
+      }
+    },
+
+    /**
+     * 叫地主
+     */
+    call(v) {
+      callMaster(v).then(res => {
+        if (res.success) {
+          Toast(v > 0 ? '叫地主!' : '不叫')
+        } else {
+          Toast(res.msg)
+        }
+      })
+    },
+
     /**
      * 服务器消息处理
      * @param data
@@ -293,7 +345,7 @@ export default {
   created() {
     this.loginInfo = decodeToken();
     this.mid = this.loginInfo.uid
-    // this.$socket.connect()
+    this.$socket.connect()
     window.addEventListener("msg@1002", this.chatMsgHandler)
     this.setPlayerId()
   },

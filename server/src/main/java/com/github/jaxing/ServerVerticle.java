@@ -37,14 +37,11 @@ public class ServerVerticle extends AbstractVerticle implements ApplicationConte
     @Resource
     private DdzJob ddzJob;
 
-    @Resource
-    private CommentService commentService;
-
     @Override
     public void start(Promise<Void> startPromise) {
         HttpServer server = vertx.createHttpServer(new HttpServerOptions().setRegisterWebSocketWriteHandlers(true));
         Router router = Router.router(vertx);
-//        vertx.setPeriodic(1000 , ddzJob);
+        vertx.setPeriodic(1000 , ddzJob);
         HttpRegister.registerHttp(applicationContext, router, vertx);
         server.requestHandler(router).listen(ConfigUtils.getAsInteger("server.port")).onComplete(httpServerAsyncResult -> {
             if (httpServerAsyncResult.succeeded()) {

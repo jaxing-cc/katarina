@@ -38,3 +38,10 @@ export function exitRoom() {
 export function readyRequest() {
     return request.post("/api/game/ddz/ready");
 }
+
+/**
+ * 叫地主
+ */
+export function callMaster(v) {
+    return request.post("/api/game/ddz/call/" + v);
+}

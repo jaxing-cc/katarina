@@ -13,8 +13,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.ObjectUtils;
 
 import javax.annotation.Resource;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 /**
@@ -95,10 +97,15 @@ public class DdzServiceImpl implements DdzService {
                 player -> getContextByRoomId(player.getRoomId()).onFailure(promise::fail).onSuccess(context -> {
                     if (context.getGameStatus().equals(GameStatus.WAIT)) {
                         context.removePlayer(player);
-                        promise.complete();
                     } else {
                         //TODO 其他状态退出处理
+                        context.removePlayer(player);
+                        context.setGameStatus(GameStatus.WAIT);
+                        context.setMaster(null);
+                        context.setCurrent(null);
+                        context.setCallList(new Integer[]{null, null, null});
                     }
+                    promise.complete();
                 })
         );
         return promise.future();
@@ -155,43 +162,67 @@ public class DdzServiceImpl implements DdzService {
             Integer playerIndex = c.getPlayerMap().get(uid);
             Integer currentIndex = c.getCurrent();
             int lastIndex = (currentIndex + 2) % 3;
-            int nextIndex = (currentIndex + 1) % 3;
             if (!playerIndex.equals(currentIndex)) {
                 promise.fail("不是你的回合");
                 return;
             }
             Integer[] callList = c.getCallList();
-            if (c.getMaster().equals(playerIndex)) {
-                if (v.equals(3)) {
-                    c.start(playerIndex);
-                } else if (callList[playerIndex] == null) {
-                    callList[playerIndex] = v;
-                } else if (callList[lastIndex] > v) {
-                    promise.fail("数值错误");
-                    return;
-                } else {
-                    callList[playerIndex] = v;
-                    c.start(playerIndex);
-                }
-            } else {
-                if (v <= callList[lastIndex]) {
-                    promise.fail("数值错误");
-                    return;
-                } else {
-                    callList[playerIndex] = v;
-                    if (v == 3) {
-                        c.start(playerIndex);
-                    }
-                    if (c.getMaster().equals(nextIndex)) {
-                        if (callList[nextIndex] == 0){
-                            c.start(playerIndex);
+            //叫地主逻辑
+            Integer last = callList[lastIndex];
+            Integer max = getMax(callList)[0];
+            // 数值小于上一个就return
+            if (max != null && v != 0 && v <= max) {
+                promise.fail("不能小于等于上家分数");
+                return;
+            }
+            // 3直接开始
+            if (v.equals(3)) {
+                callList[currentIndex] = v;
+                c.start(currentIndex);
+            } else if (callList[currentIndex] == null) {
+                callList[currentIndex] = v;
+                if (Arrays.stream(callList).allMatch(Objects::nonNull)) {
+                    if (Arrays.stream(callList).allMatch(num -> num.equals(0))) {
+                        // 全不叫给地主
+                        c.start(c.getMaster());
+                    } else {
+                        // 顶到3给最大的
+                        Integer[] maxInfo = getMax(callList);
+                        if (maxInfo[0] == 3) {
+                            c.start(maxInfo[1]);
+                        } else {
+                            c.goNext();
                         }
                     }
+                } else {
+                    c.goNext();
+                }
+            } else {
+                callList[currentIndex] = v;
+                if (v == 0) {
+                    c.start(getMax(callList)[1]);
+                }else{
+                    c.start(currentIndex);
                 }
             }
             promise.complete();
         }));
         return promise.future();
+    }
+
+    private Integer[] getMax(Integer[] callList) {
+        Integer max = null;
+        Integer index = null;
+        for (int i = 0; i < callList.length; i++) {
+            if (max == null && callList[i] != null) {
+                max = callList[i];
+                index = i;
+            } else if (callList[i] != null && callList[i] > max) {
+                max = callList[i];
+                index = i;
+            }
+        }
+        return new Integer[]{max, index};
     }
 
     /**
